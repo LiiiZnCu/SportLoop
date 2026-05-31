@@ -1,0 +1,3860 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+  <meta name="theme-color" content="#9f1239">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-title" content="SportLoop">
+  <link rel="manifest" href="manifest.webmanifest">
+  <link rel="apple-touch-icon" href="assets/app-icon.png">
+  <title>SportLoop</title>
+  <style>
+    /* ==================== 1. 用户的 STYLES.CSS 原样导入 ==================== */
+    :root {
+      --brand: #9f1239;
+      --brand-deep: #6f0b27;
+      --brand-soft: #fff1f4;
+      --ink: #121016;
+      --muted: #6f6870;
+      --subtle: #9c949b;
+      --line: #eadde1;
+      --bg: #fbf8f8;
+      --card: rgba(255, 255, 255, 0.88);
+      --ok: #167444;
+      --ok-bg: #e7f6ee;
+      --warn: #b45d08;
+      --warn-bg: #fff2df;
+      --bad: #a10f2b;
+      --bad-bg: #ffe6ec;
+      --shadow: 0 14px 38px rgba(92, 12, 34, 0.13);
+      --shadow-soft: 0 8px 22px rgba(92, 12, 34, 0.08);
+      --radius-sm: 10px;
+      --radius-md: 18px;
+      --radius-lg: 28px;
+      --tab-h: 82px;
+      font-family: -apple-system, BlinkMacSystemFont, "SF Pro Text", "PingFang SC", "Microsoft YaHei", Arial, sans-serif;
+    }
+
+    * {
+      box-sizing: border-box;
+    }
+
+    html {
+      background: var(--bg);
+    }
+
+    body {
+      margin: 0;
+      min-height: 100vh;
+      color: var(--ink);
+      background:
+        radial-gradient(circle at 20% 8%, rgba(159, 18, 57, 0.12), transparent 28%),
+        linear-gradient(135deg, #ffffff 0%, #fff7f8 46%, #f5f1ef 100%);
+    }
+
+    button,
+    input,
+    select,
+    textarea {
+      font: inherit;
+    }
+
+    button {
+      border: 0;
+      cursor: pointer;
+    }
+
+    button:disabled {
+      opacity: 0.45;
+      cursor: not-allowed;
+    }
+
+    button:focus-visible,
+    input:focus-visible,
+    select:focus-visible,
+    textarea:focus-visible {
+      outline: 3px solid rgba(159, 18, 57, 0.25);
+      outline-offset: 2px;
+    }
+
+    svg {
+      width: 24px;
+      height: 24px;
+    }
+
+    .stage {
+      min-height: 100dvh;
+      display: grid;
+      grid-template-columns: 1fr;
+      align-items: start;
+      justify-content: center;
+      padding: 0;
+    }
+
+    .phone-shell {
+      display: flex;
+      justify-content: center;
+      transform: none;
+    }
+
+    .phone-frame {
+      width: 100%;
+      height: 100dvh;
+      padding: 0;
+      border-radius: 0;
+      background: transparent;
+      box-shadow: none;
+    }
+
+    .phone-screen {
+      position: relative;
+      width: 100%;
+      height: 100%;
+      overflow: hidden;
+      border-radius: 0;
+      background:
+        linear-gradient(180deg, rgba(255, 255, 255, 0.94), rgba(251, 248, 248, 0.96)),
+        linear-gradient(135deg, rgba(159, 18, 57, 0.08), transparent 34%);
+    }
+
+    .app {
+      position: absolute;
+      inset: 0;
+      padding-top: calc(18px + env(safe-area-inset-top));
+    }
+
+    .screen {
+      position: relative;
+      height: 100%;
+      display: flex;
+      flex-direction: column;
+    }
+
+    .scroll {
+      flex: 1;
+      overflow-y: auto;
+      padding: 0 22px calc(var(--tab-h) + 54px + env(safe-area-inset-bottom));
+      scrollbar-width: none;
+      -webkit-overflow-scrolling: touch;
+    }
+
+    .scroll::-webkit-scrollbar {
+      display: none;
+    }
+
+    .topbar,
+    .home-top {
+      min-height: 58px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
+      padding: 0 22px 12px;
+    }
+
+    .page-title {
+      font-size: 19px;
+      font-weight: 800;
+    }
+
+    .brand {
+      display: flex;
+      align-items: center;
+      gap: 9px;
+      font-weight: 800;
+    }
+
+    .brand img {
+      width: 32px;
+      height: 32px;
+      border-radius: 50%;
+    }
+
+    .icon-button,
+    .avatar {
+      width: 46px;
+      height: 46px;
+      display: grid;
+      place-items: center;
+      flex: 0 0 46px;
+      color: var(--ink);
+      border: 1px solid rgba(234, 221, 225, 0.9);
+      border-radius: 17px;
+      background: rgba(255, 255, 255, 0.78);
+      box-shadow: var(--shadow-soft);
+      transition: transform 180ms ease, background 180ms ease;
+    }
+
+    /* [IMAGE-12] 用户头像占位（CSS 渐变；可改为 background-image: url('头像.png')） */
+    .avatar {
+      border-radius: 50%;
+      background:
+        radial-gradient(circle at 50% 34%, #c9bbc1 0 20%, transparent 21%),
+        radial-gradient(circle at 50% 82%, #c9bbc1 0 34%, transparent 35%),
+        #fff7f8;
+    }
+
+    .avatar.big {
+      width: 64px;
+      height: 64px;
+    }
+
+    .icon-button:active,
+    .equipment-card:active,
+    .list-card:active,
+    .primary-button:active,
+    .secondary-button:active,
+    .chip:active,
+    .tab-button:active,
+    .text-button:active {
+      transform: scale(0.97);
+    }
+
+    .toast {
+      position: absolute;
+      z-index: 90;
+      top: 72px;
+      left: 50%;
+      max-width: calc(100% - 44px);
+      transform: translateX(-50%);
+      padding: 10px 14px;
+      color: #ffffff;
+      border-radius: 999px;
+      background: rgba(18, 16, 22, 0.88);
+      box-shadow: var(--shadow);
+      font-size: 13px;
+    }
+
+    .hero-card {
+      position: relative;
+      min-height: 282px;
+      overflow: hidden;
+      display: grid;
+      grid-template-columns: 48% 52%;
+      padding: 0;
+      border-radius: 32px;
+      color: #ffffff;
+      border: 1px solid rgba(159, 18, 57, 0.18);
+      background: #fffafa;
+      box-shadow: 0 22px 48px rgba(111, 11, 39, 0.24);
+    }
+
+    .hero-card::before {
+      content: "";
+      position: absolute;
+      inset: 0 auto 0 0;
+      z-index: 0;
+      width: 52%;
+      background:
+        radial-gradient(circle at 16% 10%, rgba(255, 255, 255, 0.2), transparent 26%),
+        linear-gradient(145deg, #6f0b27 0%, #9f1239 62%, #b9163f 100%);
+    }
+
+    .hero-card::after {
+      content: "";
+      position: absolute;
+      inset: 0 0 0 46%;
+      z-index: 1;
+      pointer-events: none;
+      background: linear-gradient(90deg, rgba(111, 11, 39, 0.24), rgba(255, 250, 250, 0.1) 24%, rgba(255, 250, 250, 0));
+    }
+
+    .hero-copy {
+      position: relative;
+      z-index: 2;
+      max-width: none;
+      padding: 24px 18px 22px 20px;
+      text-shadow: 0 2px 12px rgba(60, 0, 18, 0.18);
+    }
+
+    .eyebrow {
+      margin: 0 0 8px;
+      font-size: 12px;
+      font-weight: 800;
+      color: currentColor;
+      opacity: 0.72;
+    }
+
+    .hero-card h1,
+    .admin-hero h1,
+    .detail-title h1,
+    .result-card h1,
+    .camera-panel h1,
+    .profile-head h1 {
+      margin: 0;
+      font-size: 32px;
+      line-height: 1.12;
+      letter-spacing: 0;
+    }
+
+    .hero-card p:not(.eyebrow),
+    .admin-hero p,
+    .body-text,
+    .camera-panel p,
+    .detail-title p,
+    .profile-head p {
+      margin: 10px 0 0;
+      line-height: 1.65;
+      color: inherit;
+      opacity: 0.78;
+    }
+
+    .kpi-grid {
+      display: grid;
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+      gap: 10px;
+      margin: 14px 0;
+    }
+
+    .kpi {
+      min-height: 92px;
+      padding: 14px 12px;
+      border: 1px solid var(--line);
+      border-radius: var(--radius-md);
+      background: var(--card);
+      box-shadow: var(--shadow-soft);
+    }
+
+    .kpi span,
+    .kpi small,
+    .metric span,
+    .list-card small,
+    .equipment-card small,
+    .machine-item small,
+    .timeline-item span,
+    .message-item small,
+    .order-card p {
+      color: var(--muted);
+    }
+
+    .kpi strong {
+      display: block;
+      margin-top: 8px;
+      font-size: 28px;
+      font-family: "DIN Alternate", "SF Pro Display", Arial, sans-serif;
+    }
+
+    .kpi small {
+      margin-left: 2px;
+      font-size: 13px;
+    }
+
+    .action-panel,
+    .active-loan,
+    .detail-card,
+    .borrow-card,
+    .machine-card,
+    .camera-panel,
+    .result-card,
+    .form-card,
+    .profile-card,
+    .admin-hero,
+    .order-card {
+      border: 1px solid var(--line);
+      border-radius: var(--radius-lg);
+      background: var(--card);
+      box-shadow: var(--shadow-soft);
+    }
+
+    .action-panel {
+      display: grid;
+      gap: 16px;
+      padding: 18px;
+    }
+
+    .action-panel h2,
+    .section-head h2,
+    .active-loan h2,
+    .borrow-card h2 {
+      margin: 0;
+      font-size: 20px;
+    }
+
+    .action-panel p,
+    .active-loan p,
+    .borrow-card p,
+    .empty {
+      margin: 8px 0 0;
+      color: var(--muted);
+      line-height: 1.6;
+    }
+
+    .active-loan {
+      display: grid;
+      grid-template-columns: 98px 1fr;
+      gap: 14px;
+      align-items: center;
+      padding: 16px;
+    }
+
+    /* [IMAGE-CSS-loan-thumb] [IMAGE-CSS-order-img] 借用卡片 / 工单单图尺寸 */
+    .loan-thumb,
+    .order-img {
+      width: 92px;
+      height: 78px;
+      object-fit: contain;
+    }
+
+    .section-head,
+    .list-meta {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 14px;
+      margin: 20px 0 12px;
+    }
+
+    .text-button {
+      min-height: 44px;
+      display: inline-flex;
+      align-items: center;
+      gap: 4px;
+      color: var(--brand);
+      background: transparent;
+      font-weight: 800;
+    }
+
+    .equipment-grid {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 12px;
+    }
+
+    .equipment-card {
+      min-height: 178px;
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+      padding: 13px;
+      text-align: left;
+      border: 1px solid var(--line);
+      border-radius: var(--radius-md);
+      background: var(--card);
+      box-shadow: var(--shadow-soft);
+    }
+
+    /* [IMAGE-CSS-item-img] 器材图：首页热门网格尺寸 */
+    .item-img {
+      width: 100%;
+      height: 100px;
+      object-fit: contain;
+    }
+
+    .equipment-card strong,
+    .list-card strong,
+    .message-item strong,
+    .order-card strong,
+    .machine-item strong {
+      display: block;
+      font-size: 15px;
+      line-height: 1.25;
+    }
+
+    .equipment-card small,
+    .list-card small,
+    .machine-item small {
+      display: block;
+      margin-top: 5px;
+      font-size: 12px;
+    }
+
+    .tag {
+      display: inline-flex;
+      align-items: center;
+      width: fit-content;
+      min-height: 24px;
+      margin-top: 8px;
+      padding: 3px 8px;
+      border-radius: 7px;
+      font-size: 12px;
+      font-weight: 800;
+    }
+
+    .tag.ok {
+      color: var(--ok);
+      background: var(--ok-bg);
+    }
+
+    .tag.warn {
+      color: var(--warn);
+      background: var(--warn-bg);
+    }
+
+    .tag.bad {
+      color: var(--bad);
+      background: var(--bad-bg);
+    }
+
+    .flow {
+      display: grid;
+      grid-template-columns: repeat(5, 1fr);
+      gap: 7px;
+      padding: 14px;
+      border: 1px solid var(--line);
+      border-radius: var(--radius-lg);
+      background: var(--card);
+      box-shadow: var(--shadow-soft);
+    }
+
+    .flow div {
+      text-align: center;
+      font-size: 11px;
+      line-height: 1.35;
+    }
+
+    .flow i {
+      width: 42px;
+      height: 42px;
+      display: grid;
+      place-items: center;
+      margin: 0 auto 6px;
+      color: var(--brand);
+      border-radius: 50%;
+      background: var(--brand-soft);
+    }
+
+    .flow b {
+      display: grid;
+      place-items: center;
+      width: 18px;
+      height: 18px;
+      margin: -10px auto 5px;
+      color: #ffffff;
+      border-radius: 50%;
+      background: var(--brand);
+      font-size: 10px;
+    }
+
+    .search-row {
+      padding: 0 22px 14px;
+    }
+
+    .search-box {
+      position: relative;
+      display: block;
+    }
+
+    .search-box svg {
+      position: absolute;
+      left: 15px;
+      top: 50%;
+      transform: translateY(-50%);
+      color: var(--muted);
+    }
+
+    .search-box input {
+      width: 100%;
+      height: 54px;
+      padding: 0 16px 0 48px;
+      border: 1px solid var(--line);
+      border-radius: 18px;
+      color: var(--ink);
+      background: var(--card);
+      box-shadow: var(--shadow-soft);
+    }
+
+    .chips {
+      display: flex;
+      gap: 10px;
+      overflow-x: auto;
+      padding-bottom: 4px;
+      scrollbar-width: none;
+    }
+
+    .chips::-webkit-scrollbar {
+      display: none;
+    }
+
+    .chip {
+      min-height: 44px;
+      flex: 0 0 auto;
+      padding: 0 17px;
+      color: var(--ink);
+      border: 1px solid var(--line);
+      border-radius: 999px;
+      background: rgba(255, 255, 255, 0.75);
+      box-shadow: var(--shadow-soft);
+    }
+
+    .chip.active {
+      color: #ffffff;
+      border-color: transparent;
+      background: linear-gradient(145deg, var(--brand), var(--brand-deep));
+    }
+
+    .list-stack,
+    .timeline,
+    .message-list,
+    .admin-list {
+      display: grid;
+      gap: 10px;
+    }
+
+    .list-card {
+      width: 100%;
+      min-height: 116px;
+      display: grid;
+      grid-template-columns: 112px minmax(0, 1fr) auto;
+      align-items: center;
+      gap: 12px;
+      padding: 12px;
+      overflow: hidden;
+      text-align: left;
+      color: var(--ink);
+      border: 1px solid var(--line);
+      border-radius: var(--radius-md);
+      background: var(--card);
+      box-shadow: var(--shadow-soft);
+    }
+
+    .list-card.static {
+      cursor: default;
+    }
+
+    .list-media {
+      position: relative;
+      width: 112px;
+      height: 86px;
+      display: grid;
+      place-items: center;
+      flex: 0 0 112px;
+      overflow: hidden;
+      border-radius: 14px;
+      background: #ffffff;
+    }
+
+    /* [IMAGE-CSS-list-img] 器材图：列表/管理员档案缩略图尺寸 */
+    .list-img {
+      display: block;
+      width: 92px;
+      height: 72px;
+      object-fit: contain;
+      object-position: center;
+      margin: auto;
+    }
+
+    .detail-card,
+    .result-card {
+      padding: 18px;
+    }
+
+    /* [IMAGE-CSS-detail-img] 器材图：详情页/借用确认/检测结果大图尺寸 */
+    .detail-img {
+      width: 100%;
+      height: 228px;
+      object-fit: contain;
+      border-radius: 22px;
+      background: linear-gradient(145deg, rgba(159, 18, 57, 0.08), rgba(255, 255, 255, 0.7));
+    }
+
+    .detail-title {
+      display: flex;
+      align-items: flex-start;
+      justify-content: space-between;
+      gap: 12px;
+      margin-top: 14px;
+    }
+
+    .metric-row {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 10px;
+      margin: 16px 0;
+    }
+
+    .metric {
+      padding: 13px 8px;
+      text-align: center;
+      border: 1px solid var(--line);
+      border-radius: var(--radius-sm);
+      background: rgba(255, 255, 255, 0.65);
+    }
+
+    .metric strong {
+      display: block;
+      margin-bottom: 4px;
+      font-size: 22px;
+      font-family: "DIN Alternate", "SF Pro Display", Arial, sans-serif;
+    }
+
+    .info-list {
+      display: grid;
+      gap: 9px;
+      margin: 16px 0;
+    }
+
+    .info-list div,
+    .timeline-item {
+      padding: 13px;
+      border: 1px solid var(--line);
+      border-radius: var(--radius-md);
+      background: rgba(255, 255, 255, 0.7);
+    }
+
+    .info-list div {
+      display: flex;
+      justify-content: space-between;
+      gap: 12px;
+    }
+
+    .info-list span {
+      color: var(--muted);
+    }
+
+    .duration-picker {
+      display: grid;
+      gap: 10px;
+      margin: 16px 0;
+      padding: 14px;
+      border: 1px solid rgba(159, 18, 57, 0.12);
+      border-radius: 18px;
+      background: rgba(255, 255, 255, 0.74);
+      box-shadow: var(--shadow-soft);
+    }
+
+    .duration-picker-head {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
+    }
+
+    .duration-picker-head strong {
+      font-size: 15px;
+    }
+
+    .duration-picker-head span {
+      color: var(--muted);
+      font-size: 12px;
+      white-space: nowrap;
+    }
+
+    .duration-options {
+      display: grid;
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+      gap: 8px;
+    }
+
+    .duration-option {
+      min-height: 64px;
+      display: grid;
+      align-content: center;
+      gap: 4px;
+      padding: 9px 6px;
+      color: var(--ink);
+      border: 1px solid var(--line);
+      border-radius: 14px;
+      background: #ffffff;
+    }
+
+    .duration-option strong {
+      font-size: 16px;
+      line-height: 1;
+    }
+
+    .duration-option span {
+      color: var(--muted);
+      font-size: 11px;
+    }
+
+    .duration-option.active {
+      color: #ffffff;
+      border-color: transparent;
+      background: linear-gradient(145deg, var(--brand), var(--brand-deep));
+      box-shadow: 0 12px 20px rgba(159, 18, 57, 0.2);
+    }
+
+    .duration-option.active span {
+      color: rgba(255, 255, 255, 0.76);
+    }
+
+    .primary-button,
+    .secondary-button {
+      min-height: 52px;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+      width: 100%;
+      padding: 0 16px;
+      border-radius: 17px;
+      font-weight: 850;
+      transition: transform 180ms ease, opacity 180ms ease;
+    }
+
+    .primary-button {
+      color: #ffffff;
+      background: linear-gradient(145deg, #c91946, #8c102e);
+      box-shadow: 0 16px 28px rgba(159, 18, 57, 0.22);
+    }
+
+    .secondary-button {
+      color: var(--brand);
+      border: 1px solid rgba(159, 18, 57, 0.18);
+      background: rgba(255, 255, 255, 0.8);
+    }
+
+    .button-row {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 10px;
+      margin-top: 14px;
+    }
+
+    .machine-card {
+      padding: 18px;
+    }
+
+    .machine-visual {
+      height: 260px;
+      display: grid;
+      place-items: center;
+      text-align: center;
+      color: #ffffff;
+      border-radius: 24px;
+      background:
+        radial-gradient(circle at 50% 38%, rgba(255, 255, 255, 0.18), transparent 28%),
+        linear-gradient(145deg, #211d20, #090809);
+    }
+
+    .scan-frame {
+      width: 138px;
+      height: 138px;
+      display: grid;
+      place-items: center;
+      margin-bottom: 12px;
+      border: 2px dashed rgba(255, 255, 255, 0.56);
+      border-radius: 32px;
+    }
+
+    .scan-frame svg {
+      width: 48px;
+      height: 48px;
+    }
+
+    .field {
+      display: grid;
+      gap: 8px;
+      margin-top: 15px;
+      font-weight: 800;
+    }
+
+    .field input,
+    .field select,
+    .field textarea {
+      min-height: 46px;
+      width: 100%;
+      padding: 12px;
+      border: 1px solid var(--line);
+      border-radius: 15px;
+      color: var(--ink);
+      background: rgba(255, 255, 255, 0.82);
+    }
+
+    .field textarea {
+      min-height: 112px;
+      resize: none;
+    }
+
+    .machine-item {
+      display: grid;
+      grid-template-columns: 92px 1fr;
+      gap: 12px;
+      align-items: center;
+      margin: 14px 0;
+      padding: 12px;
+      border: 1px solid var(--line);
+      border-radius: var(--radius-md);
+      background: rgba(255, 255, 255, 0.7);
+    }
+
+    .segmented {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 6px;
+      margin: 12px 0;
+      padding: 6px;
+      border: 1px solid var(--line);
+      border-radius: 18px;
+      background: rgba(255, 255, 255, 0.68);
+    }
+
+    .segmented button {
+      min-height: 44px;
+      border-radius: 13px;
+      color: var(--ink);
+      background: transparent;
+      font-weight: 800;
+    }
+
+    .segmented button.active {
+      color: #ffffff;
+      background: var(--brand);
+    }
+
+    .borrow-card {
+      padding: 15px;
+    }
+
+    .borrow-head {
+      display: grid;
+      grid-template-columns: 92px 1fr;
+      gap: 14px;
+      align-items: center;
+    }
+
+    .camera-panel {
+      overflow: hidden;
+      padding: 18px;
+      color: #ffffff;
+      background:
+        linear-gradient(180deg, rgba(0, 0, 0, 0.08), rgba(0, 0, 0, 0.78)),
+        #111111;
+    }
+
+    .camera-box {
+      position: relative;
+      height: 286px;
+      display: grid;
+      place-items: center;
+      margin-bottom: 16px;
+      border: 2px solid rgba(255, 255, 255, 0.18);
+      border-radius: 24px;
+    }
+
+    /* [IMAGE-CSS-camera-img] 器材图：归还检测 / 同步页取景框内尺寸 */
+    .camera-img {
+      width: 260px;
+      height: 210px;
+      object-fit: contain;
+      filter: drop-shadow(0 20px 22px rgba(0, 0, 0, 0.36));
+    }
+
+    .scan-line {
+      position: absolute;
+      left: 14px;
+      right: 14px;
+      top: 50%;
+      height: 2px;
+      background: #ffffff;
+      box-shadow: 0 0 18px rgba(255, 255, 255, 0.78);
+    }
+
+    @keyframes scanSweep {
+      0%, 100% { top: 14%; opacity: 0.4; }
+      50% { top: 82%; opacity: 1; }
+    }
+
+    @keyframes scanPulse {
+      0%, 100% { opacity: 0.45; }
+      50% { opacity: 1; }
+    }
+
+    @keyframes scanSuccessPop {
+      0% { transform: scale(0.88); opacity: 0; }
+      100% { transform: scale(1); opacity: 1; }
+    }
+
+    .scan-screen {
+      position: absolute;
+      inset: 0;
+      z-index: 90;
+      display: flex;
+      flex-direction: column;
+      color: #ffffff;
+      background: #050506;
+    }
+
+    .scan-screen-header {
+      display: grid;
+      grid-template-columns: 46px minmax(0, 1fr) 46px;
+      align-items: center;
+      column-gap: 10px;
+      min-height: 58px;
+      padding: 14px 24px 12px;
+      flex-shrink: 0;
+    }
+
+    .scan-screen-header .page-title {
+      color: #ffffff;
+      text-align: center;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+
+    .scan-screen-header .scan-header-spacer {
+      width: 46px;
+      height: 46px;
+    }
+
+    .scan-screen-header .icon-button {
+      position: relative;
+      z-index: 2;
+      color: #ffffff;
+      border-color: rgba(255, 255, 255, 0.24);
+      background: rgba(255, 255, 255, 0.14);
+    }
+
+    .scan-screen-body {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      padding: 0 24px 48px;
+      text-align: center;
+    }
+
+    .scan-viewfinder {
+      position: relative;
+      width: min(100%, 292px);
+      aspect-ratio: 1;
+      margin-bottom: 22px;
+      border-radius: 22px;
+      overflow: hidden;
+      background:
+        linear-gradient(180deg, rgba(0, 0, 0, 0.12), rgba(0, 0, 0, 0.58)),
+        radial-gradient(circle at 50% 18%, rgba(159, 18, 57, 0.32), transparent 44%),
+        #171416;
+      box-shadow: 0 18px 40px rgba(0, 0, 0, 0.42);
+    }
+
+    .scan-camera-feed {
+      position: absolute;
+      inset: 0;
+      display: grid;
+      place-items: center;
+    }
+
+    .scan-camera-feed .camera-img,
+    .scan-camera-feed img,
+    .scan-camera-feed .equipment-placeholder-emoji {
+      width: 72%;
+      max-height: 58%;
+      object-fit: contain;
+      filter: brightness(0.9) contrast(1.05);
+    }
+
+    .scan-grid {
+      position: absolute;
+      inset: 0;
+      background-image:
+        linear-gradient(rgba(255, 255, 255, 0.05) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(255, 255, 255, 0.05) 1px, transparent 1px);
+      background-size: 22px 22px;
+      pointer-events: none;
+    }
+
+    .scan-corner {
+      position: absolute;
+      width: 34px;
+      height: 34px;
+      border: 3px solid rgba(255, 255, 255, 0.92);
+      pointer-events: none;
+    }
+
+    .scan-corner.tl {
+      top: 16px;
+      left: 16px;
+      border-right: 0;
+      border-bottom: 0;
+      border-top-left-radius: 10px;
+    }
+
+    .scan-corner.tr {
+      top: 16px;
+      right: 16px;
+      border-left: 0;
+      border-bottom: 0;
+      border-top-right-radius: 10px;
+    }
+
+    .scan-corner.bl {
+      bottom: 16px;
+      left: 16px;
+      border-right: 0;
+      border-top: 0;
+      border-bottom-left-radius: 10px;
+    }
+
+    .scan-corner.br {
+      bottom: 16px;
+      right: 16px;
+      border-left: 0;
+      border-top: 0;
+      border-bottom-right-radius: 10px;
+    }
+
+    .scan-line-animated {
+      position: absolute;
+      left: 12%;
+      right: 12%;
+      height: 2px;
+      background: linear-gradient(90deg, transparent, #ffffff, transparent);
+      box-shadow: 0 0 16px rgba(255, 255, 255, 0.85);
+      animation: scanSweep 2s ease-in-out infinite;
+    }
+
+    .scan-barcode-mock {
+      position: absolute;
+      left: 50%;
+      bottom: 22%;
+      width: 58%;
+      height: 42px;
+      transform: translateX(-50%);
+      border-radius: 6px;
+      background:
+        repeating-linear-gradient(90deg, rgba(255, 255, 255, 0.88) 0 3px, transparent 3px 7px);
+      opacity: 0.72;
+      pointer-events: none;
+    }
+
+    .scan-hint {
+      margin: 0;
+      font-size: 14px;
+      color: rgba(255, 255, 255, 0.72);
+      line-height: 1.5;
+    }
+
+    .scan-hint strong {
+      display: block;
+      margin-top: 6px;
+      color: #ffffff;
+      font-size: 18px;
+    }
+
+    .scan-status-text {
+      margin: 14px 0 0;
+      font-size: 13px;
+      color: rgba(255, 255, 255, 0.55);
+    }
+
+    .scan-status-text.is-scanning {
+      animation: scanPulse 1.6s ease-in-out infinite;
+    }
+
+    .scan-success-overlay {
+      position: absolute;
+      inset: 0;
+      z-index: 20;
+      display: grid;
+      place-items: center;
+      background: rgba(8, 10, 12, 0.76);
+      opacity: 0;
+      pointer-events: none;
+      transition: opacity 0.28s ease;
+    }
+
+    .scan-success-overlay.show {
+      opacity: 1;
+      pointer-events: auto;
+    }
+
+    .scan-success-card {
+      width: min(88%, 260px);
+      padding: 28px 22px;
+      border-radius: 24px;
+      text-align: center;
+      background: rgba(255, 255, 255, 0.12);
+      border: 1px solid rgba(255, 255, 255, 0.22);
+      backdrop-filter: blur(12px);
+      animation: scanSuccessPop 0.35s ease;
+    }
+
+    .scan-success-icon {
+      width: 72px;
+      height: 72px;
+      margin: 0 auto 14px;
+      display: grid;
+      place-items: center;
+      border-radius: 50%;
+      color: var(--ok);
+      background: var(--ok-bg);
+    }
+
+    .scan-success-icon svg {
+      width: 36px;
+      height: 36px;
+    }
+
+    .borrow-confirm-hero {
+      text-align: center;
+      margin-bottom: 16px;
+    }
+
+    .borrow-confirm-badge {
+      width: 64px;
+      height: 64px;
+      margin: 0 auto 12px;
+      display: grid;
+      place-items: center;
+      border-radius: 50%;
+      color: var(--ok);
+      background: var(--ok-bg);
+    }
+
+    .borrow-confirm-badge svg {
+      width: 32px;
+      height: 32px;
+    }
+
+    .sync-visual {
+      position: relative;
+      width: min(100%, 220px);
+      height: 220px;
+      margin: 0 auto 22px;
+      display: grid;
+      place-items: center;
+    }
+
+    .sync-ring {
+      position: absolute;
+      inset: 0;
+      border: 2px solid rgba(255, 255, 255, 0.22);
+      border-radius: 50%;
+      animation: syncRing 2.2s ease-out infinite;
+    }
+
+    .sync-ring:nth-child(2) {
+      animation-delay: 0.55s;
+    }
+
+    .sync-ring:nth-child(3) {
+      animation-delay: 1.1s;
+    }
+
+    @keyframes syncRing {
+      0% { transform: scale(0.42); opacity: 0.9; }
+      100% { transform: scale(1.05); opacity: 0; }
+    }
+
+    .sync-core {
+      width: 88px;
+      height: 88px;
+      display: grid;
+      place-items: center;
+      border-radius: 50%;
+      color: #ffffff;
+      background: rgba(159, 18, 57, 0.88);
+      box-shadow: 0 12px 28px rgba(159, 18, 57, 0.45);
+    }
+
+    .sync-core svg {
+      width: 40px;
+      height: 40px;
+    }
+
+    .machine-hint {
+      margin: 0 0 14px;
+      padding: 12px 14px;
+      border-radius: 14px;
+      color: var(--muted);
+      font-size: 13px;
+      line-height: 1.55;
+      background: var(--brand-soft);
+      border: 1px solid rgba(159, 18, 57, 0.14);
+    }
+
+    .upload-real {
+      min-height: 52px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+      margin-top: 14px;
+      border: 1px dashed rgba(255, 255, 255, 0.42);
+      border-radius: 17px;
+      color: inherit;
+      background: rgba(255, 255, 255, 0.12);
+      font-weight: 800;
+    }
+
+    .form-card .upload-real {
+      color: var(--brand);
+      border-color: rgba(159, 18, 57, 0.28);
+      background: var(--brand-soft);
+    }
+
+    .upload-real input {
+      display: none;
+    }
+
+    .photo-name {
+      margin-top: 9px;
+      color: rgba(255, 255, 255, 0.7);
+      font-size: 13px;
+      text-align: center;
+    }
+
+    .form-card {
+      padding: 17px;
+    }
+
+    .message-item {
+      display: grid;
+      grid-template-columns: 46px 1fr;
+      gap: 12px;
+      padding: 14px;
+      border: 1px solid var(--line);
+      border-radius: var(--radius-md);
+      background: var(--card);
+    }
+
+    .message-item i {
+      width: 46px;
+      height: 46px;
+      display: grid;
+      place-items: center;
+      color: var(--brand);
+      border-radius: 16px;
+      background: var(--brand-soft);
+    }
+
+    .message-item p {
+      margin: 5px 0;
+      color: var(--muted);
+      line-height: 1.5;
+    }
+
+    .admin-hero {
+      padding: 20px;
+      color: #ffffff;
+      background: linear-gradient(145deg, #211d20, #6f0b27);
+    }
+
+    .order-card {
+      display: grid;
+      grid-template-columns: 78px 1fr;
+      gap: 12px;
+      padding: 13px;
+    }
+
+    .admin-actions {
+      grid-column: 1 / -1;
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 8px;
+    }
+
+    .admin-actions .primary-button,
+    .admin-actions .secondary-button {
+      min-height: 44px;
+      border-radius: 14px;
+      font-size: 12px;
+    }
+
+    .profile-card {
+      display: grid;
+      gap: 11px;
+      padding: 18px;
+    }
+
+    .profile-head {
+      display: grid;
+      grid-template-columns: 64px 1fr;
+      gap: 14px;
+      align-items: center;
+      margin-bottom: 8px;
+    }
+
+    .profile-card button {
+      min-height: 54px;
+      display: grid;
+      grid-template-columns: 26px 1fr 22px;
+      align-items: center;
+      gap: 10px;
+      padding: 0 14px;
+      text-align: left;
+      color: var(--ink);
+      border: 1px solid var(--line);
+      border-radius: 16px;
+      background: rgba(255, 255, 255, 0.76);
+    }
+
+    .profile-screen {
+      background:
+        radial-gradient(circle at 82% 12%, rgba(159, 18, 57, 0.08), transparent 24%),
+        radial-gradient(circle at 15% 38%, rgba(159, 18, 57, 0.06), transparent 30%),
+        linear-gradient(180deg, #fffefe 0%, #fff9fa 54%, #fffdfd 100%);
+    }
+
+    .profile-topbar {
+      min-height: 62px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 18px;
+      padding: 0 26px 12px;
+    }
+
+    .profile-topbar h1 {
+      margin: 0;
+      font-size: 30px;
+      line-height: 1;
+      font-weight: 900;
+      letter-spacing: 0;
+    }
+
+    .profile-gear {
+      width: 46px;
+      height: 46px;
+      display: grid;
+      place-items: center;
+      color: var(--ink);
+      background: transparent;
+    }
+
+    .profile-gear svg {
+      width: 30px;
+      height: 30px;
+    }
+
+    .profile-scroll {
+      padding: 0 22px calc(var(--tab-h) + 54px + env(safe-area-inset-bottom));
+    }
+
+    .profile-identity {
+      position: relative;
+      display: grid;
+      grid-template-columns: 86px minmax(0, 1fr) 24px;
+      align-items: center;
+      gap: 18px;
+      padding: 12px 2px 18px;
+    }
+
+    .profile-main-avatar {
+      width: 86px;
+      height: 86px;
+      box-shadow: 0 10px 26px rgba(92, 12, 34, 0.09);
+    }
+
+    .profile-name-line {
+      display: flex;
+      align-items: center;
+      gap: 9px;
+      min-width: 0;
+    }
+
+    .profile-name-line h2 {
+      margin: 0;
+      font-size: 30px;
+      line-height: 1.1;
+      font-weight: 900;
+      letter-spacing: 0;
+    }
+
+    .profile-name-line .profile-edit {
+      color: var(--brand);
+      border-bottom: 2px solid currentColor;
+    }
+
+    .profile-name-line .profile-edit svg {
+      width: 20px;
+      height: 20px;
+    }
+
+    .profile-meta {
+      margin: 8px 0 0;
+      color: var(--muted);
+      font-size: 13px;
+      line-height: 1.5;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+
+    .profile-identity-more {
+      color: var(--muted);
+    }
+
+    .profile-file {
+      position: relative;
+      aspect-ratio: 1400 / 1024;
+      width: 100%;
+      margin: 12px 0 20px;
+      overflow: visible;
+    }
+
+    .profile-folder-img {
+      position: absolute;
+      z-index: 0;
+      inset: 0;
+      width: 100%;
+      height: 100%;
+      object-fit: contain;
+      object-position: center;
+      pointer-events: none;
+      user-select: none;
+    }
+
+    .profile-file-card {
+      position: absolute;
+      z-index: 1;
+      top: 16.2%;
+      right: 7.2%;
+      bottom: 7.2%;
+      left: 7.2%;
+      display: grid;
+      grid-template-rows: auto minmax(0, 1fr);
+      align-content: start;
+      padding: 0;
+      border: 0;
+      border-radius: 0;
+      background: transparent;
+      box-shadow: none;
+    }
+
+    .profile-file-card::after {
+      content: none;
+    }
+
+    .profile-file-title {
+      position: relative;
+      z-index: 1;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      margin-bottom: clamp(14px, 4vw, 18px);
+      padding-left: 2px;
+    }
+
+    .profile-file-title h2 {
+      margin: 0;
+      font-size: clamp(15px, 4.1vw, 20px);
+      line-height: 1;
+      font-weight: 900;
+    }
+
+    .profile-round-link {
+      width: clamp(18px, 5.4vw, 23px);
+      height: clamp(18px, 5.4vw, 23px);
+      display: grid;
+      place-items: center;
+      color: #ffffff;
+      border-radius: 50%;
+      background: var(--brand);
+    }
+
+    .profile-round-link svg {
+      width: 14px;
+      height: 14px;
+    }
+
+    .profile-file-panel {
+      position: relative;
+      z-index: 1;
+      min-height: 0;
+      display: grid;
+      grid-template-rows: minmax(0, 1fr) auto;
+      border: 0;
+      border-radius: 0;
+      background: transparent;
+      overflow: hidden;
+    }
+
+    .profile-file-metrics {
+      display: grid;
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+      min-height: 0;
+      align-items: stretch;
+    }
+
+    .profile-file-metric {
+      position: relative;
+      min-height: 0;
+      display: grid;
+      align-content: center;
+      padding: clamp(6px, 2.2vw, 14px) clamp(4px, 2vw, 10px);
+      border-right: 1px solid rgba(159, 18, 57, 0.18);
+    }
+
+    .profile-file-metric:last-child {
+      border-right: 0;
+    }
+
+    .profile-file-metric span {
+      display: flex;
+      align-items: center;
+      gap: clamp(3px, 1.2vw, 6px);
+      color: var(--ink);
+      font-size: clamp(8px, 2.6vw, 12px);
+      font-weight: 700;
+      white-space: nowrap;
+    }
+
+    .profile-file-metric span svg {
+      width: clamp(13px, 4vw, 18px);
+      height: clamp(13px, 4vw, 18px);
+      color: var(--brand);
+    }
+
+    .profile-file-metric strong {
+      display: block;
+      margin-top: clamp(8px, 2.8vw, 14px);
+      font-size: clamp(17px, 5.2vw, 26px);
+      line-height: 1;
+      font-weight: 900;
+      white-space: nowrap;
+    }
+
+    .profile-file-metric strong em {
+      color: var(--brand);
+      font-style: normal;
+    }
+
+    .profile-file-actions {
+      display: grid;
+      grid-template-columns: repeat(4, minmax(0, 1fr));
+      align-items: center;
+      margin: 0 2px;
+      border: 0;
+      background: transparent;
+      overflow: visible;
+    }
+
+    .profile-file-actions button {
+      min-height: clamp(28px, 9.4vw, 40px);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 3px;
+      color: var(--ink);
+      background: transparent;
+      border-right: 0;
+      font-size: clamp(8px, 2.7vw, 11px);
+      font-weight: 800;
+      white-space: nowrap;
+    }
+
+    .profile-file-actions button:last-child {
+      border-right: 0;
+    }
+
+    .profile-file-actions .profile-return-button {
+      min-height: 29px;
+      margin: 4px 3px;
+      color: #ffffff;
+      border-radius: 999px;
+      background: var(--brand);
+      border-right: 0;
+    }
+
+    .profile-file-actions svg {
+      width: clamp(13px, 4vw, 16px);
+      height: clamp(13px, 4vw, 16px);
+      color: var(--brand);
+    }
+
+    .profile-file-actions .profile-return-button svg {
+      width: 15px;
+      height: 15px;
+      color: currentColor;
+    }
+
+    .profile-stats-card {
+      display: grid;
+      grid-template-columns: minmax(74px, 0.75fr) 1px minmax(0, 1.55fr);
+      align-items: center;
+      gap: 12px;
+      margin-bottom: 16px;
+      padding: 18px;
+      border-radius: 24px;
+      background: rgba(255, 255, 255, 0.92);
+      box-shadow: var(--shadow-soft);
+    }
+
+    .profile-divider {
+      width: 1px;
+      height: 86px;
+      background: var(--line);
+    }
+
+    .profile-stat-label {
+      margin: 0;
+      font-size: 16px;
+      font-weight: 800;
+      white-space: nowrap;
+    }
+
+    .profile-stat-value {
+      margin: 14px 0 0;
+      font-size: 34px;
+      line-height: 1;
+      font-weight: 900;
+    }
+
+    .profile-stat-value small {
+      font-size: 15px;
+      font-weight: 700;
+    }
+
+    .profile-stat-note {
+      margin: 10px 0 0;
+      color: var(--muted);
+      font-size: 13px;
+    }
+
+    .profile-stat-note b {
+      color: var(--brand);
+    }
+
+    .profile-rate {
+      display: grid;
+      grid-template-columns: minmax(82px, 0.85fr) minmax(72px, 1fr);
+      align-items: end;
+      gap: 6px;
+    }
+
+    .profile-rate-chart {
+      width: 100%;
+      height: 64px;
+    }
+
+    .profile-shortcuts {
+      display: grid;
+      grid-template-columns: repeat(4, minmax(0, 1fr));
+      gap: 10px;
+      margin-bottom: 18px;
+    }
+
+    .profile-shortcut {
+      min-height: 92px;
+      display: grid;
+      align-content: center;
+      gap: 7px;
+      padding: 10px;
+      text-align: left;
+      color: var(--ink);
+      border-radius: 20px;
+      background: rgba(255, 255, 255, 0.92);
+      box-shadow: var(--shadow-soft);
+    }
+
+    .profile-shortcut i {
+      width: 34px;
+      height: 34px;
+      display: grid;
+      place-items: center;
+      color: var(--brand);
+      border-radius: 12px;
+      background: var(--brand-soft);
+      font-style: normal;
+    }
+
+    .profile-shortcut i svg {
+      width: 20px;
+      height: 20px;
+    }
+
+    .profile-shortcut strong {
+      font-size: 13px;
+      line-height: 1.15;
+    }
+
+    .profile-shortcut span {
+      color: var(--muted);
+      font-size: 10px;
+      line-height: 1.25;
+    }
+
+    .profile-settings {
+      margin-bottom: 10px;
+      padding: 10px 18px;
+      border-radius: 26px;
+      background: rgba(255, 255, 255, 0.94);
+      box-shadow: var(--shadow-soft);
+    }
+
+    .profile-setting-row {
+      width: 100%;
+      min-height: 61px;
+      display: grid;
+      grid-template-columns: 30px minmax(0, 1fr) auto 20px;
+      align-items: center;
+      gap: 11px;
+      padding: 0;
+      color: var(--ink);
+      background: transparent;
+      border-bottom: 1px solid rgba(234, 221, 225, 0.85);
+      text-align: left;
+    }
+
+    .profile-setting-row:last-child {
+      border-bottom: 0;
+    }
+
+    .profile-setting-row svg {
+      width: 24px;
+      height: 24px;
+    }
+
+    .profile-setting-row strong {
+      font-size: 15px;
+    }
+
+    .profile-setting-row span {
+      color: var(--muted);
+      font-size: 12px;
+      white-space: nowrap;
+    }
+
+    .profile-setting-row .chev {
+      color: var(--muted);
+      width: 18px;
+      height: 18px;
+    }
+
+    .empty {
+      padding: 18px;
+      border: 1px solid var(--line);
+      border-radius: var(--radius-md);
+      background: rgba(255, 255, 255, 0.72);
+    }
+
+    .tabbar {
+      position: absolute;
+      z-index: 60;
+      left: 18px;
+      right: 18px;
+      bottom: calc(14px + env(safe-area-inset-bottom));
+      height: var(--tab-h);
+      display: grid;
+      grid-template-columns: repeat(5, 1fr);
+      align-items: center;
+      padding: 7px;
+      border: 1px solid rgba(234, 221, 225, 0.86);
+      border-radius: 32px;
+      background: rgba(255, 255, 255, 0.9);
+      box-shadow: 0 16px 36px rgba(36, 24, 28, 0.13);
+      backdrop-filter: blur(18px);
+    }
+
+    .tab-button {
+      min-height: 64px;
+      display: grid;
+      place-items: center;
+      gap: 2px;
+      color: var(--muted);
+      border-radius: 24px;
+      background: transparent;
+      transition: transform 180ms ease, color 180ms ease, background 180ms ease;
+    }
+
+    .tab-button.active {
+      color: var(--brand);
+      background: var(--brand-soft);
+      font-weight: 850;
+    }
+
+    .tab-button span {
+      font-size: 11px;
+    }
+
+    .brand-lockup {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      margin-bottom: 18px;
+      font-size: 24px;
+      font-weight: 800;
+    }
+
+    /* [IMAGE-10] 首页顶栏 App 图标 | [IMAGE-11] 右侧说明区 Logo */
+    .logo-mark {
+      width: 26px;
+      height: 26px;
+      border-radius: 50%;
+      background: var(--brand);
+      object-fit: cover;
+      flex-shrink: 0;
+    }
+
+    .brand .app-icon {
+      width: 28px;
+      height: 28px;
+      border-radius: 8px;
+    }
+
+    .note-grid {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 12px;
+    }
+
+    .note-grid button {
+      min-height: 52px;
+      border: 1px solid var(--line);
+      border-radius: 16px;
+      color: var(--ink);
+      background: var(--card);
+    }
+
+    /* 电脑大屏说明面板结构 */
+    .prototype-notes {
+      display: none;
+    }
+
+    .login-center {
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      align-items: center;
+      text-align: center;
+    }
+
+    .login-hero {
+      display: grid;
+      place-items: center;
+      gap: 14px;
+      margin-bottom: 36px;
+    }
+
+    .login-icon {
+      width: 80px;
+      height: 80px;
+      border-radius: 22px;
+      box-shadow: 0 14px 32px rgba(159, 18, 57, 0.18);
+    }
+
+    .login-hero h1 {
+      margin: 0;
+      font-size: 32px;
+      font-weight: 800;
+    }
+
+    .login-hero p {
+      margin: 0;
+      color: var(--muted);
+      font-size: 15px;
+    }
+
+    .login-btn {
+      max-width: 280px;
+    }
+
+    .role-grid {
+      display: grid;
+      gap: 16px;
+      margin-top: 24px;
+    }
+
+    .role-card {
+      min-height: 148px;
+      display: grid;
+      place-items: center;
+      gap: 6px;
+      padding: 26px 20px;
+      text-align: center;
+      color: var(--ink);
+      border: 2px solid var(--line);
+      border-radius: var(--radius-lg);
+      background: var(--card);
+      box-shadow: var(--shadow-soft);
+      transition: transform 180ms ease, border-color 180ms ease;
+    }
+
+    .role-card:active {
+      transform: scale(0.97);
+      border-color: var(--brand);
+    }
+
+    .role-icon {
+      width: 48px;
+      height: 48px;
+      display: grid;
+      place-items: center;
+      border-radius: 50%;
+      color: var(--brand);
+      background: var(--brand-soft);
+    }
+
+    .role-icon svg {
+      width: 26px;
+      height: 26px;
+    }
+
+    .role-card h2 {
+      margin: 0;
+      font-size: 20px;
+    }
+
+    .role-card p {
+      margin: 0;
+      color: var(--muted);
+      font-size: 13px;
+      line-height: 1.5;
+    }
+
+    .login-form {
+      margin-top: 24px;
+    }
+
+    .login-avatar {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 8px;
+      margin-bottom: 24px;
+    }
+
+    .role-badge {
+      width: 64px;
+      height: 64px;
+      display: grid;
+      place-items: center;
+      border-radius: 50%;
+      color: var(--brand);
+      background: var(--brand-soft);
+    }
+
+    .role-badge svg {
+      width: 32px;
+      height: 32px;
+    }
+
+    .login-avatar span {
+      font-size: 15px;
+      font-weight: 800;
+      color: var(--muted);
+    }
+
+    .login-hint {
+      margin: 8px 0 0;
+      text-align: center;
+      color: var(--subtle);
+      font-size: 12px;
+    }
+
+    .locked-equip {
+      min-height: 50px;
+      display: flex;
+      align-items: center;
+      padding: 12px;
+      border: 1px solid var(--line);
+      border-radius: 15px;
+      color: var(--ink);
+      background: var(--brand-soft);
+      font-weight: 800;
+    }
+
+    .login-form .primary-button {
+      margin-top: 20px;
+    }
+
+    .confirm-overlay {
+      position: absolute;
+      inset: 0;
+      z-index: 200;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      background: rgba(0, 0, 0, 0.45);
+      backdrop-filter: blur(4px);
+      -webkit-backdrop-filter: blur(4px);
+    }
+
+    .confirm-dialog {
+      width: 280px;
+      padding: 24px 20px 18px;
+      border-radius: 22px;
+      text-align: center;
+      background: #ffffff;
+      box-shadow: 0 24px 52px rgba(0, 0, 0, 0.22);
+    }
+
+    .confirm-dialog p {
+      margin: 0 0 20px;
+      font-size: 15px;
+      font-weight: 700;
+      color: var(--ink);
+      line-height: 1.5;
+    }
+
+    .confirm-dialog .confirm-actions {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 10px;
+    }
+
+    .confirm-dialog .btn-cancel {
+      min-height: 44px;
+      border: 1px solid var(--line);
+      border-radius: 14px;
+      color: var(--muted);
+      background: rgba(255, 255, 255, 0.8);
+      font-weight: 800;
+    }
+
+    .confirm-dialog .btn-danger {
+      min-height: 44px;
+      border: 0;
+      border-radius: 14px;
+      color: #ffffff;
+      background: var(--bad);
+      font-weight: 800;
+    }
+
+    @media (min-width: 1024px) {
+      .stage {
+        min-height: 100vh;
+        grid-template-columns: 430px minmax(320px, 500px);
+        gap: 60px;
+        align-items: center;
+        padding: 16px;
+      }
+
+      .phone-shell {
+        transform: scale(0.82);
+        transform-origin: top center;
+      }
+
+      .phone-frame {
+        width: 430px;
+        height: 914px;
+        padding: 14px;
+        border-radius: 64px;
+        background: linear-gradient(145deg, #161315, #050505 46%, #393436 58%, #080808);
+        box-shadow:
+          inset 0 0 0 2px rgba(255, 255, 255, 0.13),
+          inset 0 0 0 7px #000000,
+          0 32px 90px rgba(44, 18, 24, 0.28);
+      }
+
+      .phone-screen {
+        border-radius: 52px;
+      }
+
+      .prototype-notes {
+        display: block;
+      }
+
+      .prototype-notes h1 {
+        margin: 0;
+        font-size: 44px;
+        line-height: 1.12;
+      }
+
+      .prototype-notes p {
+        color: var(--muted);
+        font-size: 17px;
+        line-height: 1.7;
+      }
+    }
+
+    @media (max-width: 360px) {
+      .equipment-grid,
+      .kpi-grid,
+      .metric-row,
+      .button-row,
+      .admin-actions {
+        grid-template-columns: 1fr;
+      }
+
+      .active-loan,
+      .borrow-head,
+      .machine-item,
+      .order-card {
+        grid-template-columns: 1fr;
+      }
+    }
+
+    @media (prefers-reduced-motion: reduce) {
+      *,
+      *::before,
+      *::after {
+        scroll-behavior: auto !important;
+        transition-duration: 0.01ms !important;
+        animation-duration: 0.01ms !important;
+      }
+    }
+
+    /* 针对表情符号做占位处理 */
+    .equipment-placeholder-emoji {
+      font-size: 32px;
+      display: inline-block;
+      vertical-align: middle;
+      line-height: 1;
+    }
+
+    /* ==================== 2. ⚡ 新首页样式 — 背景图片 Hero ==================== */
+    .new-hero-container {
+      background:
+        linear-gradient(rgba(0, 0, 0, 0.10), rgba(0, 0, 0, 0.10)),
+        url(assets/hero.png) center/cover no-repeat;
+      padding: 22px 18px;
+      border-radius: 28px;
+      border: 1px solid rgba(255, 255, 255, 0.15);
+      box-shadow: var(--shadow);
+      position: relative;
+      overflow: hidden;
+      margin-bottom: 16px;
+      min-height: 290px;
+      display: flex;
+      flex-direction: column;
+      justify-content: flex-end;
+    }
+
+    .new-hero-left {
+      position: relative;
+      z-index: 2;
+      display: flex;
+      flex-direction: column;
+    }
+
+    .new-hero-title {
+      font-size: 26px;
+      font-weight: 900;
+      color: #1a1a1a;
+      margin: 0;
+      line-height: 1.25;
+      letter-spacing: -0.5px;
+    }
+
+    .new-hero-subtitle {
+      font-size: 13px;
+      color: #4a4a4a;
+      margin-top: 6px;
+      margin-bottom: 16px;
+      font-weight: 500;
+    }
+
+    /* 垂直堆叠的三张统计卡片 */
+    .new-stats-stack {
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+    }
+
+    .new-stat-card {
+      display: flex;
+      align-items: center;
+      width: fit-content;
+      min-width: 160px;
+      padding: 10px 18px 10px 14px;
+      background: #ffffff;
+      border: 1.5px solid rgba(234, 221, 225, 0.4);
+      border-radius: 16px;
+      box-shadow: 0 4px 12px rgba(92, 12, 34, 0.02);
+      transition: transform 0.18s;
+    }
+
+    .new-stat-card:active {
+      transform: scale(0.98);
+    }
+
+    .new-stat-icon-wrapper {
+      width: 38px;
+      height: 38px;
+      border-radius: 12px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 18px;
+      margin-right: 12px;
+    }
+
+    .new-stat-icon-wrapper svg {
+      width: 18px;
+      height: 18px;
+    }
+
+    .red-theme,
+    .blue-theme,
+    .purple-theme {
+      background-color: var(--brand-soft);
+      color: var(--brand);
+    }
+
+    .new-stat-text {
+      display: flex;
+      flex-direction: column;
+    }
+
+    .new-stat-label {
+      font-size: 11px;
+      color: #8c8c8c;
+      margin-bottom: 2px;
+      font-weight: bold;
+    }
+
+    .new-stat-val {
+      font-size: 15px;
+      font-weight: 800;
+      color: #262626;
+    }
+
+    .new-stat-val small {
+      font-size: 11px;
+      font-weight: normal;
+      color: #8c8c8c;
+    }
+
+    /* 首页专属轻量级反馈卡片样式 */
+    .home-feedback-card {
+      background: linear-gradient(135deg, var(--brand-soft) 0%, #ffffff 100%);
+      border: 1px dashed var(--brand);
+      border-radius: var(--radius-lg);
+      padding: 14px 18px;
+      box-shadow: var(--shadow-soft);
+      transition: all 0.2s;
+    }
+
+    .home-feedback-card:active {
+      transform: scale(0.98);
+      border-color: var(--brand-deep);
+    }
+
+    .feedback-card-content {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 12px;
+    }
+
+    .feedback-card-text {
+      flex: 1;
+    }
+
+    .feedback-card-text h3 {
+      margin: 0;
+      font-size: 14px;
+      font-weight: 800;
+      color: var(--brand-deep);
+    }
+
+    .feedback-card-text p {
+      margin: 4px 0 0;
+      font-size: 11px;
+      color: var(--muted);
+      line-height: 1.4;
+    }
+
+    .feedback-arrow {
+      color: var(--brand);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+  </style>
+</head>
+<body>
+
+  <!-- ==================== 2. 双栏容器布局 ==================== -->
+  <div class="stage">
+    
+    <!-- 左侧：高保真手机壳仿真器 -->
+    <div class="phone-shell">
+      <div class="phone-frame">
+        <div class="phone-screen">
+          
+          <!-- 挂载渲染的原生 DOM 容器 -->
+          <div class="app" id="app"></div>
+
+        </div>
+      </div>
+    </div>
+
+    <!-- 右侧：电脑端的交互说明区 -->
+    <div class="prototype-notes">
+      <div class="brand-lockup">
+        <!-- [IMAGE-11] 右侧说明区 Logo：替换为 <img src="你的logo.png" alt="SportLoop" style="width:26px;height:26px"> -->
+        <div class="logo-mark" style="width: 26px; height: 26px; border-radius: 50%; background: var(--brand);"></div>
+        <span>SportLoop Pro</span>
+      </div>
+      <h1>体育设备共享管家</h1>
+      <p>
+        此环境已将你编写的原生 JavaScript 交互内核与高级 CSS 面板无缝缝合。
+        完美支持无滚动条滑动机制、多状态标签（ok, warn, bad）、拍照识别流、线下智能柜扫码预约同步等全量逻辑。
+      </p>
+      <div class="note-grid" style="margin-top: 24px;">
+        <button id="btnAdminAccess" style="font-weight: 800;">⚙️ 管理员工作台</button>
+        <button id="btnClearCache" style="font-weight: 800; color: var(--bad)">🧼 清空数据缓存</button>
+      </div>
+    </div>
+
+  </div>
+
+  <!-- ==================== 3. 原生 APP.JS DOM 渲染代码 ==================== -->
+  <script>
+    // 💡 强刷版本键名，绕过老旧的缓存干扰，促使全新首页布局立刻下发
+    const STORAGE_KEY = "sportloop-ios-app-v7";
+
+    // 替换 assets 下同名图片后，把此数字 +1，可避免浏览器继续显示旧图缓存
+    const ASSET_VERSION = "11";
+    const CLASS_PERIOD_MINUTES = 90;
+    const BORROW_PERIOD_OPTIONS = [1, 2, 3];
+
+    const reportIssueTypes = {
+      "乒乓球拍": ["胶皮脱落", "拍柄松动", "表面磨损", "底板开裂"],
+      "羽毛球拍": ["拍柄松动", "拍框变形", "拍线断裂", "握柄磨损"],
+      "羽毛球": ["羽毛缺损", "球体变形", "球头脱落"],
+      "乒乓球": ["球体破裂", "弹力不足", "表面变形"],
+      "篮球": ["气压不足", "表面磨损", "表皮脱落", "球体变形"],
+    };
+
+    function issueOptionsFor(equipmentId) {
+      const item = byId(equipmentId);
+      const types = reportIssueTypes[item.category] || reportIssueTypes["篮球"];
+      return types.map((t) => `<option>${t}</option>`).join("") + `<option>其他</option>`;
+    }
+
+    const APP_ICON_SRC = "assets/app-icon.png";
+    const HERO_EQUIPMENT_SRC = "assets/hero.png";
+    const PROFILE_FOLDER_SRC = "assets/profile-folder-from-upload.png";
+
+    /*
+    ═══════════════════════════════════════════════════════════════════════════
+    [IMAGE 图片替换索引] — 搜索 "IMAGE-" 可跳转到每一处
+    ═══════════════════════════════════════════════════════════════════════════
+    器材图（推荐相对路径 assets/xxx.png，与 index.html 同目录）:
+      IMAGE-01  paddle-red    乒乓球拍（直拍）
+      IMAGE-02  paddle-black  乒乓球拍（横拍）
+      IMAGE-03  racket        羽毛球拍
+      IMAGE-04  shuttle       羽毛球
+      IMAGE-05  pingpong      乒乓球
+      IMAGE-06  basketball    篮球
+
+    器材图展示尺寸（CSS，可改 object-fit / 高度）:
+      IMAGE-CSS-item-img    首页热门器材网格 .item-img
+      IMAGE-CSS-list-img    列表缩略图 .list-img
+      IMAGE-CSS-detail-img  详情/确认/结果大图 .detail-img
+      IMAGE-CSS-loan-thumb  借用卡片缩略图 .loan-thumb
+      IMAGE-CSS-camera-img  检测/同步取景 .camera-img
+      IMAGE-CSS-order-img   管理员工单 .order-img
+
+    路径处理:
+      toImageSrc()   反斜杠→正斜杠；Windows 盘符→file:///；中文分段 URL 编码
+      assetUrl()     静态图加 ?v=ASSET_VERSION，换同名图后改 ASSET_VERSION 防缓存
+      escapeAttr()   写入 HTML 属性时转义
+
+    核心渲染（<img src> 在此生成）:
+      IMAGE-FN  equipmentImage() 函数
+
+    首页 / 品牌图:
+      IMAGE-HERO  assets/hero-equipment.png  首页右侧主图 .hero-equipment-img
+      IMAGE-10   assets/app-icon.png         首页顶栏 App 图标
+      IMAGE-11   右侧说明区 logo .logo-mark（仍为色块，可自行改图）
+      IMAGE-12  顶栏/个人中心头像 .avatar
+
+    用户上传（运行时选择，非静态路径）:
+      IMAGE-13  归还前检测 #photoInput
+      IMAGE-14  报损反馈 #reportPhoto
+
+    兜底:
+      IMAGE-ERR equipmentImage 加载失败时显示 ⚽
+      IMAGE-PH  equipmentImage 无 URL 时 emoji 占位（item.image 填 emoji 如 🏓）
+    ═══════════════════════════════════════════════════════════════════════════
+    */
+
+    const icons = {
+      menu: `<svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M4 7h16M4 12h16M4 17h16" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>`,
+      back: `<svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M15 18l-6-6 6-6" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/></svg>`,
+      search: `<svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><circle cx="11" cy="11" r="7" stroke="currentColor" stroke-width="2"/><path d="M16.5 16.5 21 21" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>`,
+      home: `<svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M3 10.5 12 3l9 7.5V21h-6v-6H9v6H3V10.5z" stroke="currentColor" stroke-width="2" stroke-linejoin="round"/></svg>`,
+      bag: `<svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M6 8h12l-1 13H7L6 8z" stroke="currentColor" stroke-width="2" stroke-linejoin="round"/><path d="M9 8a3 3 0 0 1 6 0" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>`,
+      bell: `<svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M18 9a6 6 0 0 0-12 0c0 7-3 7-3 9h18c0-2-3-2-3-9z" stroke="currentColor" stroke-width="2" stroke-linejoin="round"/><path d="M10 21h4" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>`,
+      user: `<svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><circle cx="12" cy="8" r="4" stroke="currentColor" stroke-width="2"/><path d="M4 21c1.2-4 4-6 8-6s6.8 2 8 6" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>`,
+      scan: `<svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M8 3H5a2 2 0 0 0-2 2v3M16 3h3a2 2 0 0 1 2 2v3M8 21H5a2 2 0 0 1-2-2v-3M16 21h3a2 2 0 0 0 2-2v-3" stroke="currentColor" stroke-width="2" stroke-linecap="round"/><path d="M7 12h10" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>`,
+      camera: `<svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M4 8h4l1.5-2h5L16 8h4v11H4V8z" stroke="currentColor" stroke-width="2" stroke-linejoin="round"/><circle cx="12" cy="13.5" r="3.2" stroke="currentColor" stroke-width="2"/></svg>`,
+      check: `<svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><circle cx="12" cy="12" r="9" stroke="currentColor" stroke-width="2"/><path d="m8 12 2.7 2.7L16.5 9" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>`,
+      alert: `<svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="m12 3 10 18H2L12 3z" stroke="currentColor" stroke-width="2" stroke-linejoin="round"/><path d="M12 9v5M12 17h.01" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"/></svg>`,
+      shield: `<svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M12 3 19 6v5c0 4.4-2.8 8.2-7 10-4.2-1.8-7-5.6-7-10V6l7-3z" stroke="currentColor" stroke-width="2"/><path d="m8.5 12 2.2 2.2 4.8-5" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>`,
+      wrench: `<svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M14.7 6.3a4.5 4.5 0 0 0 5 5L11 20a3 3 0 0 1-4.2-4.2l8.7-8.7a4.5 4.5 0 0 0-.8-.8z" stroke="currentColor" stroke-width="2" stroke-linejoin="round"/></svg>`,
+      chevron: `<svg class="chev" viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="m9 5 7 7-7 7" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"/></svg>`,
+      qr: `<svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M4 4h6v6H4V4zM14 4h6v6h-6V4zM4 14h6v6H4v-6zM14 14h2v2h-2v-2zM18 14h2v6h-4v-2h2v-4zM12 18h2v2h-2v-2z" stroke="currentColor" stroke-linejoin="round" stroke-width="2"/></svg>`,
+      gear: `<svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M12 8.2a3.8 3.8 0 1 0 0 7.6 3.8 3.8 0 0 0 0-7.6Z" stroke="currentColor" stroke-width="2"/><path d="M19.4 13.5c.1-.5.1-1 .1-1.5s0-1-.1-1.5l2-1.5-2-3.5-2.4 1a8 8 0 0 0-2.6-1.5L14 2.5h-4L9.6 5a8 8 0 0 0-2.6 1.5l-2.4-1-2 3.5 2 1.5c-.1.5-.1 1-.1 1.5s0 1 .1 1.5l-2 1.5 2 3.5 2.4-1a8 8 0 0 0 2.6 1.5l.4 2.5h4l.4-2.5a8 8 0 0 0 2.6-1.5l2.4 1 2-3.5-2-1.5Z" stroke="currentColor" stroke-width="2" stroke-linejoin="round"/></svg>`,
+      edit: `<svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M4 20h4l11-11-4-4L4 16v4Z" stroke="currentColor" stroke-width="2" stroke-linejoin="round"/><path d="m14 6 4 4" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>`,
+      clock: `<svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><circle cx="12" cy="12" r="9" stroke="currentColor" stroke-width="2"/><path d="M12 7v5l3 2" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>`,
+      file: `<svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M5 4h14v16H5V4Z" stroke="currentColor" stroke-width="2" stroke-linejoin="round"/><path d="M8 8h8M8 12h8M8 16h5" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>`,
+      refresh: `<svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M20 7v5h-5M4 17v-5h5" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/><path d="M19 12a7 7 0 0 0-12-5M5 12a7 7 0 0 0 12 5" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>`,
+      message: `<svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M4 5h16v12H8l-4 4V5Z" stroke="currentColor" stroke-width="2" stroke-linejoin="round"/><path d="M8 10h8M8 14h5" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>`,
+      idcard: `<svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><rect x="3" y="5" width="18" height="14" rx="2" stroke="currentColor" stroke-width="2"/><circle cx="9" cy="11" r="2" stroke="currentColor" stroke-width="2"/><path d="M6.5 16c.7-1.4 1.5-2 2.5-2s1.8.6 2.5 2M14 10h4M14 14h4" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>`,
+      help: `<svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><circle cx="12" cy="12" r="9" stroke="currentColor" stroke-width="2"/><path d="M9.8 9a2.4 2.4 0 0 1 4.4 1.3c0 1.8-2.2 2-2.2 3.7M12 17h.01" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"/></svg>`,
+      headset: `<svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M4 13a8 8 0 0 1 16 0v4a2 2 0 0 1-2 2h-2v-7h4M4 12h4v7H6a2 2 0 0 1-2-2v-5Z" stroke="currentColor" stroke-width="2" stroke-linejoin="round"/><path d="M14 21h2a4 4 0 0 0 4-4" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>`,
+    };
+
+    const seed = {
+      equipment: [
+        {
+          id: "paddle-red",
+          assetId: "SL-PB-1024",
+          name: "乒乓球拍（直拍）",
+          category: "乒乓球拍",
+          image: "assets/paddle-red.png", /* [IMAGE-01] 乒乓球拍（直拍）相对路径，与 index.html 同目录 */
+          total: 10,
+          available: 6,
+          status: "可借",
+          health: 96,
+          venue: "东区体育馆",
+          desc: "适合课堂训练 and 日常对打，归还前重点检测胶皮、边缘和拍柄。",
+        },
+        {
+          id: "paddle-black",
+          assetId: "SL-PB-0921",
+          name: "乒乓球拍（横拍）",
+          category: "乒乓球拍",
+          image: "assets/paddle-black.png", /* [IMAGE-02] 乒乓球拍（横拍） */
+          total: 8,
+          available: 4,
+          status: "可借",
+          health: 92,
+          venue: "西区球类馆",
+          desc: "常用球拍，借还记录会绑定唯一条形码。",
+        },
+        {
+          id: "racket",
+          assetId: "SL-BD-0318",
+          name: "羽毛球拍",
+          category: "羽毛球拍",
+          image: "assets/racket.png", /* [IMAGE-03] 羽毛球拍 */
+          total: 12,
+          available: 8,
+          status: "可借",
+          health: 94,
+          venue: "综合训练馆",
+          desc: "归还前重点检查拍框、拍线和握柄。",
+        },
+        {
+          id: "shuttle",
+          assetId: "SL-SH-0208",
+          name: "羽毛球",
+          category: "羽毛球",
+          image: "assets/shuttle.png", /* [IMAGE-04] 羽毛球 */
+          total: 30,
+          available: 12,
+          status: "补充中",
+          health: 88,
+          venue: "综合训练馆",
+          desc: "消耗较快，系统会按库存提醒管理员补充。",
+        },
+        {
+          id: "pingpong",
+          assetId: "SL-PP-0616",
+          name: "乒乓球",
+          category: "乒乓球",
+          image: "assets/pingpong.png", /* [IMAGE-05] 乒乓球 */
+          total: 40,
+          available: 20,
+          status: "可借",
+          health: 91,
+          venue: "东区体育馆",
+          desc: "按盒借用，归还时机器扫码归档。",
+        },
+        {
+          id: "basketball",
+          assetId: "SL-BK-0027",
+          name: "篮球",
+          category: "篮球",
+          image: "assets/basketball.png", /* [IMAGE-06] 篮球 */
+          total: 12,
+          available: 5,
+          status: "可借",
+          health: 90,
+          venue: "室外篮球场",
+          desc: "重点检测气压、表面磨损和裂纹。",
+        },
+      ],
+      loans: [],
+      workOrders: [],
+      messages: [
+        { id: "m1", title: "欢迎使用 SportLoop", text: "借出与归还在场馆机器完成，手机负责查看状态、同步记录，以及归还前扫码/拍照检测。", time: "刚刚" },
+      ],
+    };
+
+    const state = {
+      route: "home",
+      previous: "home",
+      query: "",
+      category: "全部",
+      selectedId: "paddle-red",
+      activeLoanId: "",
+      notice: "",
+      scanPhase: "idle",
+      syncContext: "borrow",
+      borrowPeriods: 1,
+      loggedIn: false,
+      loginRole: "",
+    };
+
+    const appEl = document.querySelector("#app");
+
+    function clone(value) {
+      return JSON.parse(JSON.stringify(value));
+    }
+
+    function mergeEquipmentImages(cachedList) {
+      const seedById = Object.fromEntries(seed.equipment.map((item) => [item.id, item]));
+      const merged = (cachedList || []).map((item) => {
+        const base = seedById[item.id];
+        return base ? { ...item, image: base.image, name: base.name, category: base.category, assetId: base.assetId, desc: base.desc } : item;
+      });
+      seed.equipment.forEach((base) => {
+        if (!merged.some((item) => item.id === base.id)) merged.push(clone(base));
+      });
+      return merged;
+    }
+
+    function loadStore() {
+      const raw = localStorage.getItem(STORAGE_KEY);
+      if (!raw) return clone(seed);
+      const parsed = JSON.parse(raw);
+      return {
+        equipment: mergeEquipmentImages(parsed.equipment),
+        loans: parsed.loans || [],
+        workOrders: parsed.workOrders || [],
+        messages: parsed.messages || clone(seed.messages),
+      };
+    }
+
+    function cleanVenue(value = "") {
+      return value.replace(/\s*\d+\s*号机/g, "").replace(/自助机/g, "").trim();
+    }
+
+    let store = loadStore();
+    store.equipment.forEach((item) => {
+      item.venue = cleanVenue(item.venue);
+    });
+    saveStore();
+
+    function saveStore() {
+      localStorage.setItem(STORAGE_KEY, JSON.stringify(store));
+    }
+
+    function icon(name) {
+      return icons[name] || "";
+    }
+
+    function nowText() {
+      return formatDateTime(Date.now());
+    }
+
+    function formatDateTime(ms) {
+      return new Intl.DateTimeFormat("zh-CN", { month: "2-digit", day: "2-digit", hour: "2-digit", minute: "2-digit" }).format(new Date(ms));
+    }
+
+    function formatDueTime(ms) {
+      if (!Number.isFinite(ms)) return "未设置";
+      const due = new Date(ms);
+      const now = new Date();
+      const sameDay = due.getFullYear() === now.getFullYear() && due.getMonth() === now.getMonth() && due.getDate() === now.getDate();
+      return sameDay
+        ? `今日 ${new Intl.DateTimeFormat("zh-CN", { hour: "2-digit", minute: "2-digit" }).format(due)}`
+        : formatDateTime(ms);
+    }
+
+    function selectedBorrowPeriods() {
+      return BORROW_PERIOD_OPTIONS.includes(Number(state.borrowPeriods)) ? Number(state.borrowPeriods) : 1;
+    }
+
+    function borrowDurationLabel(periods = selectedBorrowPeriods()) {
+      const safePeriods = BORROW_PERIOD_OPTIONS.includes(Number(periods)) ? Number(periods) : 1;
+      const hours = (safePeriods * CLASS_PERIOD_MINUTES) / 60;
+      return `${safePeriods} 节课 · ${Number.isInteger(hours) ? hours : hours.toFixed(1)} 小时`;
+    }
+
+    function borrowDurationOptions() {
+      return BORROW_PERIOD_OPTIONS.map((periods) => `
+        <button class="duration-option ${selectedBorrowPeriods() === periods ? "active" : ""}" data-borrow-periods="${periods}" type="button">
+          <strong>${periods} 节课</strong>
+          <span>${borrowDurationLabel(periods).split(" · ")[1]}</span>
+        </button>
+      `).join("");
+    }
+
+    function byId(id) {
+      return store.equipment.find((item) => item.id === id) || store.equipment[0];
+    }
+
+    function loanById(id) {
+      return store.loans.find((loan) => loan.id === id);
+    }
+
+    function activeLoan() {
+      return store.loans.find((loan) => ["使用中", "待归还", "异常待归还"].includes(loan.status)) || null;
+    }
+
+    function pushMessage(title, text) {
+      store.messages.unshift({ id: `m-${Date.now()}`, title, text, time: nowText() });
+    }
+
+    function clearScanTimers() {
+      window.clearTimeout(window.__scanTimer);
+      window.clearTimeout(window.__scanSuccessTimer);
+    }
+
+    function route(to, payload = {}) {
+      if (state.route === "scanBorrow" && to !== "scanBorrow") {
+        clearScanTimers();
+        state.scanPhase = "idle";
+      }
+      state.previous = state.route;
+      state.route = to;
+      if (payload.id) state.selectedId = payload.id;
+      if (payload.loanId) state.activeLoanId = payload.loanId;
+      if (to === "scanBorrow") {
+        state.scanPhase = "scanning";
+        state.syncContext = payload.syncContext || "borrow";
+      }
+      render();
+    }
+
+    function back() {
+      route(state.previous || "home");
+    }
+
+    function statusClass(status) {
+      if (status === "可借" || status === "已归还" || status === "已完成") return "ok";
+      if (status === "补充中" || status === "使用中" || status === "待归还") return "warn";
+      return "bad";
+    }
+
+    function tag(status) {
+      return `<span class="tag ${statusClass(status)}">${status}</span>`;
+    }
+
+    function shell(title, body, options = {}) {
+      const left = options.left === "none"
+        ? `<span></span>`
+        : `<button class="icon-button" data-back aria-label="返回">${icon("back")}</button>`;
+      const right = `<button class="avatar" data-route="profile" aria-label="个人中心"></button>`; /* [IMAGE-12] 顶栏头像 */
+      return `
+        <section class="screen">
+          <header class="topbar">
+            ${left}
+            <div class="page-title">${title}</div>
+            ${right}
+          </header>
+          ${notice()}
+          ${body}
+          ${options.tabs === false ? "" : tabbar()}
+        </section>
+      `;
+    }
+
+    function notice() {
+      if (!state.notice) return "";
+      const html = `<div class="toast" id="noticeToast">${state.notice}</div>`;
+      window.clearTimeout(window.__noticeTimer);
+      window.__noticeTimer = window.setTimeout(() => {
+        state.notice = "";
+        const toast = document.querySelector("#noticeToast");
+        if (toast) toast.remove();
+      }, 1600);
+      return html;
+    }
+
+    function tabbar() {
+      const tabs = [
+        ["home", "首页", "home"],
+        ["list", "器材", "search"],
+        ["borrow", "借用", "bag"],
+        ["messages", "消息", "bell"],
+        ["profile", "我的", "user"],
+      ];
+      return `
+        <nav class="tabbar" aria-label="底部导航">
+          ${tabs.map(([name, label, svg]) => `
+            <button class="tab-button ${state.route === name ? "active" : ""}" data-route="${name}" aria-label="${label}">
+              ${icon(svg)}<span>${label}</span>
+            </button>
+          `).join("")}
+        </nav>
+      `;
+    }
+
+    /** 将路径转为浏览器可用的 src（相对路径 / 正斜杠 / file:// / URL 编码） */
+    function toImageSrc(raw) {
+      if (!raw) return "";
+      const s = String(raw).trim();
+      if (/^(https?:|data:|blob:|file:)/i.test(s)) return s;
+
+      const forward = s.replace(/\\/g, "/");
+      const encodeSeg = (seg) => (/[^\x00-\x7F]/.test(seg) ? encodeURIComponent(seg) : seg);
+
+      if (/^[a-zA-Z]:/.test(forward)) {
+        const m = forward.match(/^([a-zA-Z]):\/?(.*)$/);
+        if (!m) return forward;
+        const segments = m[2].split("/").filter(Boolean).map(encodeSeg);
+        return `file:///${m[1]}:/${segments.join("/")}`;
+      }
+
+      return forward.split("/").map(encodeSeg).join("/");
+    }
+
+    function escapeAttr(value) {
+      return String(value)
+        .replace(/&/g, "&amp;")
+        .replace(/"/g, "&quot;")
+        .replace(/</g, "&lt;");
+    }
+
+    /** 静态资源 URL 加版本参数，绕过浏览器对同名图片的强缓存 */
+    function assetUrl(path) {
+      const src = toImageSrc(path);
+      if (!src || /^(data:|blob:)/i.test(src)) return src;
+      const join = src.includes("?") ? "&" : "?";
+      return `${src}${join}v=${ASSET_VERSION}`;
+    }
+
+    // [IMAGE-FN] 器材图统一渲染：所有页面的器材缩略图/大图均由此函数输出 <img>
+    function equipmentImage(item, className = "item-img") {
+      const src = assetUrl(item.image);
+      const hasImageFile = src && (src.includes(".") || src.startsWith("data:") || src.startsWith("file:"));
+
+      if (hasImageFile) {
+        return `
+          <div class="${className}" style="display:flex; align-items:center; justify-content:center; background:rgba(159,18,57,0.03); border-radius:12px; overflow:hidden; width:100%; height:100%;">
+            <img src="${escapeAttr(src)}" alt="${escapeAttr(item.name)}" style="width:100%; height:100%; object-fit:cover;" onerror="this.onerror=null; this.parentElement.innerHTML='⚽';"><!-- [IMAGE-ERR] 加载失败兜底 -->
+          </div>
+        `;
+      }
+      
+      return `<span class="${className} equipment-placeholder-emoji" style="display:flex; align-items:center; justify-content:center; background:rgba(159,18,57,0.05); border-radius:12px; font-size:48px;">${item.image || '🏀'}</span>`; /* [IMAGE-PH] 无图片 URL 时用 emoji；也可把 image 设为 "🏓" 等 */
+    }
+
+    // ⚡ 完美重组的首页核心渲染方法：保留全部原有生态，只精准重构顶部卡片和加上反馈入口
+    function homePage() {
+      const totalAvailable = store.equipment.reduce((sum, item) => sum + item.available, 0);
+      const openVenues = new Set(store.equipment.filter((item) => item.available > 0).map((item) => cleanVenue(item.venue))).size;
+      const health = Math.round(store.equipment.reduce((sum, item) => sum + item.health, 0) / store.equipment.length);
+      const currentLoan = activeLoan();
+
+      return `
+        <section class="screen home-screen">
+          <header class="home-top">
+            <button class="icon-button" data-route="messages" aria-label="消息通知">${icon("bell")}</button>
+            <div class="brand"><img class="logo-mark app-icon" src="${escapeAttr(assetUrl(APP_ICON_SRC))}" alt="SportLoop" /><!-- [IMAGE-10] --><span>SportLoop</span></div>
+            <button class="icon-button" data-route="list" aria-label="器材列表">${icon("search")}</button>
+          </header>
+          ${notice()}
+          <main class="scroll">
+            
+            <!-- 📷 完美像素级还原参考图样式的头部卡片组 -->
+            <section class="new-hero-container">
+              <div class="new-hero-left">
+                <h1 class="new-hero-title">今天</h1>
+                <h1 class="new-hero-title">想打什么球？</h1>
+                <p class="new-hero-subtitle">先看状态，再去借用</p>
+
+                <div class="new-stats-stack">
+                  <!-- 1. 今日可借 -->
+                  <div class="new-stat-card">
+                    <div class="new-stat-icon-wrapper red-theme">
+                      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect><line x1="16" y1="2" x2="16" y2="6"></line><line x1="8" y1="2" x2="8" y2="6"></line><line x1="3" y1="10" x2="21" y2="10"></line><polyline points="8 14 10 16 14 12"></polyline></svg>
+                    </div>
+                    <div class="new-stat-text">
+                      <span class="new-stat-label">今日可借</span>
+                      <span class="new-stat-val">${totalAvailable} <small>件</small></span>
+                    </div>
+                  </div>
+
+                  <!-- 2. 状态良好 -->
+                  <div class="new-stat-card">
+                    <div class="new-stat-icon-wrapper blue-theme">
+                      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"></path><polyline points="9 11 11 13 15 9"></polyline></svg>
+                    </div>
+                    <div class="new-stat-text">
+                      <span class="new-stat-label">状态良好</span>
+                      <span class="new-stat-val">${health}%</span>
+                    </div>
+                  </div>
+
+                  <!-- 3. 开放场地 -->
+                  <div class="new-stat-card">
+                    <div class="new-stat-icon-wrapper purple-theme">
+                      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="18" height="18" rx="2" ry="2"></rect><line x1="9" y1="3" x2="9" y2="21"></line><line x1="15" y1="3" x2="15" y2="21"></line><line x1="3" y1="9" x2="21" y2="9"></line><line x1="3" y1="15" x2="21" y2="15"></line></svg>
+                    </div>
+                    <div class="new-stat-text">
+                      <span class="new-stat-label">开放场地</span>
+                      <span class="new-stat-val">${openVenues} <small>个</small></span>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </section>
+
+            <!-- 🔧 首页重磅加入：无缝联动报修系统的“反馈入口” -->
+            <section class="home-feedback-card" data-route="report" style="cursor: pointer; margin-bottom: 16px;">
+              <div class="feedback-card-content">
+                <div class="feedback-card-text">
+                  <h3>💬 反馈器材与场馆问题</h3>
+                  <p>球拍磨损、没气、场地受阻？点击一键快速反馈报损</p>
+                </div>
+                <div class="feedback-arrow">${icon("chevron")}</div>
+              </div>
+            </section>
+
+            <div class="section-head"><h2>完整闭环</h2></div>
+            ${flow()}
+
+            <div style="margin-top: 14px;">
+              ${currentLoan ? currentLoanCard(currentLoan) : quickStartCard()}
+            </div>
+
+            <div class="section-head">
+              <h2>热门器材</h2>
+              <button class="text-button" data-route="list">查看全部 ${icon("chevron")}</button>
+            </div>
+            <div class="equipment-grid">
+              ${store.equipment.slice(0, 4).map(equipmentCard).join("")}
+            </div>
+          </main>
+          ${tabbar()}
+        </section>
+      `;
+    }
+
+    function kpi(label, value, unit) {
+      return `<div class="kpi"><span>${label}</span><strong>${value}<small>${unit}</small></strong></div>`;
+    }
+
+    function quickStartCard() {
+      return `
+        <section class="action-panel">
+          <div>
+            <h2>查器材</h2>
+            <p>借还在场馆机器完成，手机同步记录。</p>
+          </div>
+          <button class="primary-button" data-route="list">${icon("search")} 查看器材</button>
+        </section>
+      `;
+    }
+
+    function currentLoanCard(loan) {
+      const item = byId(loan.equipmentId);
+      return `
+        <section class="active-loan">
+          ${equipmentImage(item, "loan-thumb")}<!-- [IMAGE-FN→loan-thumb] 首页·当前借用卡片 -->
+          <div>
+            <p class="eyebrow">当前借用</p>
+            <h2>${item.name}</h2>
+            <p style="font-size: 11px; margin-top: 2px;">${item.assetId} · ${loan.status}</p>
+            <div class="button-row" style="margin-top: 8px;">
+              <button class="secondary-button" style="min-height:36px; border-radius:10px; font-size:12px;" data-report-loan="${loan.id}">${icon("alert")} 报损</button>
+              <button class="primary-button" style="min-height:36px; border-radius:10px; font-size:12px;" data-loan-detect="${loan.id}" data-detect-mode="photo">${icon("camera")} 归还前检测</button>
+            </div>
+          </div>
+        </section>
+      `;
+    }
+
+    function equipmentCard(item) {
+      return `
+        <button class="equipment-card" data-detail="${item.id}" aria-label="查看${item.name}">
+          ${equipmentImage(item, "item-img")}<!-- [IMAGE-FN→item-img] 首页·热门器材网格 -->
+          <span style="width:100%;">
+            <strong style="white-space:nowrap; overflow:hidden; text-overflow:ellipsis;">${item.name}</strong>
+            <small>剩余 ${item.available}/${item.total}</small>
+            ${tag(item.status)}
+          </span>
+        </button>
+      `;
+    }
+
+    function flow() {
+      const steps = [
+        ["手机看状态", "search"],
+        ["机器扫条码", "scan"],
+        ["同步记录", "bag"],
+        ["拍照检测", "camera"],
+        ["管理员维保", "wrench"],
+      ];
+      return `<div class="flow">${steps.map(([label, svg], index) => `<div><i>${icon(svg)}</i><b>${index + 1}</b><span>${label}</span></div>`).join("")}</div>`;
+    }
+
+    function listPage() {
+      const categories = ["全部", ...new Set(store.equipment.map((item) => item.category))];
+      const filtered = store.equipment.filter((item) => {
+        const hitCategory = state.category === "全部" || item.category === state.category;
+        const hitQuery = !state.query || item.name.includes(state.query) || item.assetId.includes(state.query.toUpperCase());
+        return hitCategory && hitQuery;
+      });
+      const body = `
+        <div class="search-row">
+          <label class="search-box">
+            ${icon("search")}
+            <input id="searchInput" value="${escapeAttr(state.query)}" placeholder="搜索器材或编号" aria-label="搜索器材或编号" />
+          </label>
+        </div>
+        <main class="scroll">
+          <div class="chips">
+            ${categories.map((name) => `<button class="chip ${state.category === name ? "active" : ""}" data-category="${name}">${name}</button>`).join("")}
+          </div>
+          <div class="list-meta"><span>${filtered.length} 类器材</span><span>可借优先</span></div>
+          <div class="list-stack">${filtered.map(listItem).join("")}</div>
+        </main>
+      `;
+      return shell("器材列表", body);
+    }
+
+    function listItem(item) {
+      return `
+        <button class="list-card" data-detail="${item.id}">
+          <span class="list-media">${equipmentImage(item, "list-img")}</span><!-- [IMAGE-FN→list-img] 器材列表页 -->
+          <span>
+            <strong>${item.name}</strong>
+            <small>${item.assetId} · ${cleanVenue(item.venue)}</small>
+            <small>剩余 ${item.available}/${item.total} · 良好率 ${item.health}%</small>
+          </span>
+          ${tag(item.status)}
+        </button>
+      `;
+    }
+
+    function detailPage() {
+      const item = byId(state.selectedId);
+      const periods = selectedBorrowPeriods();
+      const durationText = borrowDurationLabel(periods);
+      const body = `
+        <main class="scroll">
+          <section class="detail-card">
+            ${equipmentImage(item, "detail-img")}<!-- [IMAGE-FN→detail-img] 器材详情页主图 -->
+            <div class="detail-title">
+              <div>
+                <h1>${item.name}</h1>
+                <p>${item.assetId}</p>
+              </div>
+              ${tag(item.status)}
+            </div>
+            <p class="body-text">${item.desc}</p>
+            <div class="metric-row">
+              ${metric(item.available, "剩余")}
+              ${metric(item.total, "总量")}
+              ${metric(`${item.health}%`, "良好率")}
+            </div>
+            <div class="info-list">
+              <div><span>可借场馆</span><strong>${cleanVenue(item.venue)}</strong></div>
+              <div><span>借用方式</span><strong>到场机器扫码借出，手机同步记录</strong></div>
+              <div><span>归还要求</span><strong>手机拍照检测后，到场机器扫码归还</strong></div>
+            </div>
+            <div class="duration-picker">
+              <div class="duration-picker-head">
+                <strong>选择借用时长</strong>
+                <span>1 节课 = ${CLASS_PERIOD_MINUTES} 分钟</span>
+              </div>
+              <div class="duration-options">${borrowDurationOptions()}</div>
+              <p class="machine-hint" style="margin:0;">当前选择：${durationText}，同步借出后会按这个时间计算归还截止。</p>
+            </div>
+            <button class="primary-button" data-sync-borrow="${item.id}" ${item.available <= 0 ? "disabled" : ""}>${icon("bag")} 借用</button>
+            <p class="machine-hint" style="margin-top:12px;">请先在场馆机器完成借出扫码，再点击上方按钮同步到手机。</p>
+          </section>
+        </main>
+      `;
+      return shell("器材详情", body);
+    }
+
+    function metric(value, label) {
+      return `<div class="metric"><strong>${value}</strong><span>${label}</span></div>`;
+    }
+
+    function scanBorrowPage() {
+      const isReturn = state.syncContext === "return";
+      const loan = isReturn ? loanById(state.activeLoanId) : null;
+      const item = isReturn ? byId(loan?.equipmentId || state.selectedId) : byId(state.selectedId);
+      const isSuccess = state.scanPhase === "success";
+      return `
+        <section class="screen scan-screen">
+          <header class="scan-screen-header">
+            <button class="icon-button" data-back aria-label="返回">${icon("back")}</button>
+            <div class="page-title">${isReturn ? "同步归还记录" : "同步借用记录"}</div>
+            <span class="scan-header-spacer" aria-hidden="true"></span>
+          </header>
+          <div class="scan-screen-body">
+            ${isSuccess ? `
+              <div class="scan-success-card" style="margin:0 auto 18px;">
+                <div class="scan-success-icon">${icon("check")}</div>
+                <h2 style="margin:0;font-size:22px;">同步成功</h2>
+                <p style="margin:8px 0 0;color:rgba(255,255,255,0.72);font-size:14px;">${item.assetId} 已与手机对齐</p>
+              </div>
+            ` : `
+              <div class="sync-visual">
+                <span class="sync-ring"></span>
+                <span class="sync-ring"></span>
+                <span class="sync-ring"></span>
+                <div class="sync-core">${icon(isReturn ? "check" : "bag")}</div>
+              </div>
+            `}
+            <p class="scan-hint">
+              ${isSuccess ? (isReturn ? "即将更新归还状态" : "即将进入借用确认") : (isReturn ? "正在拉取机器归还记录" : "正在拉取机器借出记录")}
+              <strong>${item.name}</strong>
+            </p>
+            <p class="scan-status-text ${isSuccess ? "" : "is-scanning"}">${isSuccess ? "写入本地记录中…" : "连接场馆设备中…"}</p>
+          </div>
+        </section>
+      `;
+    }
+
+    function borrowConfirmPage() {
+      const loan = loanById(state.activeLoanId);
+      if (!loan) {
+        return shell("借用确认", `<main class="scroll"><div class="empty">未找到借用记录。</div></main>`, { tabs: false });
+      }
+      const item = byId(loan.equipmentId);
+      const body = `
+        <main class="scroll">
+          <section class="result-card">
+            <div class="borrow-confirm-hero">
+              <div class="borrow-confirm-badge">${icon("check")}</div>
+              <h1 style="margin:0;font-size:28px;">借用确认</h1>
+              <p class="body-text" style="text-align:center;margin-top:10px;">已从场馆机器同步借出记录，手机端仅展示状态，不执行借出操作。</p>
+            </div>
+            ${equipmentImage(item, "detail-img")}<!-- [IMAGE-FN→detail-img] 借用确认页 -->
+            <div class="detail-title" style="margin-top:14px;">
+              <div>
+                <h1 style="font-size:24px;">${item.name}</h1>
+                <p>${item.assetId}</p>
+              </div>
+              ${tag("使用中")}
+            </div>
+            <div class="info-list" style="margin-top:14px;">
+              <div><span>借出时间</span><strong>${loan.borrowedAt}</strong></div>
+              <div><span>借用时长</span><strong>${loan.durationLabel || "未设置"}</strong></div>
+              <div><span>归还截止</span><strong>${loan.dueAt || "未设置"}</strong></div>
+              <div><span>可借场馆</span><strong>${cleanVenue(item.venue)}</strong></div>
+              <div><span>归还要求</span><strong>先手机检测，再机器扫码归还</strong></div>
+            </div>
+            <div class="button-row" style="margin-top:18px;">
+              <button class="secondary-button" data-detail="${item.id}">查看器材</button>
+              <button class="primary-button" data-route="borrow">我的借用</button>
+            </div>
+            <button class="primary-button" style="margin-top:10px;width:100%;" data-route="home">返回首页</button>
+          </section>
+        </main>
+      `;
+      return shell("借用确认", body, { tabs: false });
+    }
+
+    function borrowPage() {
+      const active = store.loans.filter((loan) => ["使用中", "待归还", "异常待归还"].includes(loan.status));
+      const history = store.loans.filter((loan) => !["使用中", "待归还", "异常待归还"].includes(loan.status));
+      const body = `
+        <main class="scroll">
+          <div class="section-head"><h2>当前借用</h2></div>
+          ${active.length ? active.map(loanCard).join("") : `<div class="empty">还没有借用记录。请先在场馆机器完成借出，再在器材详情页点击借用。</div>`}
+          <div class="section-head"><h2>历史记录</h2></div>
+          <div class="timeline">${history.length ? history.map(historyRow).join("") : `<div class="empty">暂无历史记录。</div>`}</div>
+        </main>
+      `;
+      return shell("我的借用", body, { left: "none" });
+    }
+
+    function loanCard(loan) {
+      const item = byId(loan.equipmentId);
+      const canReturn = loan.status === "待归还" || loan.status === "异常待归还";
+      return `
+        <section class="borrow-card" style="margin-bottom: 14px;">
+          <div class="borrow-head">
+            ${equipmentImage(item, "loan-thumb")}<!-- [IMAGE-FN→loan-thumb] 我的借用·当前借用卡片 -->
+            <div>
+              <h2>${item.name}</h2>
+              <p style="font-size: 11px; margin-top:2px;">${item.assetId} · ${loan.borrowedAt}</p>
+              <p style="font-size: 11px; margin-top:2px;">${loan.durationLabel || "未设置时长"} · 截止 ${loan.dueAt || "未设置"}</p>
+              ${tag(loan.status)}
+            </div>
+          </div>
+          <div class="button-row" style="margin-top: 14px;">
+            <button class="secondary-button" data-report-loan="${loan.id}">${icon("alert")} 报损</button>
+            ${canReturn
+              ? `<button class="primary-button" data-sync-return="${loan.id}">${icon("bag")} 同步归还状态</button>`
+              : `<button class="primary-button" data-loan-detect="${loan.id}">${icon("camera")} 归还前检测</button>`}
+          </div>
+        </section>
+      `;
+    }
+
+    function historyRow(loan) {
+      const item = byId(loan.equipmentId);
+      const punctualText = loan.returnedOnTime === true ? "准时" : (loan.returnedOnTime === false ? "超时" : "未计入准时率");
+      return `<div class="timeline-item"><strong>${item.name}</strong><span>${loan.status} · ${loan.returnedAt || loan.borrowedAt} · ${punctualText}</span></div>`;
+    }
+
+    function detectPage() {
+      const loan = loanById(state.activeLoanId) || activeLoan();
+      if (!loan) return shell("归还前检测", `<main class="scroll"><div class="empty">没有可检测的借用记录。</div></main>`);
+      const item = byId(loan.equipmentId);
+      const body = `
+        <main class="scroll">
+          <section class="camera-panel">
+            <div class="camera-box">
+              ${equipmentImage(item, "camera-img")}<!-- [IMAGE-FN→camera-img] 归还前检测 -->
+              <span class="scan-line"></span>
+            </div>
+            <h1>归还前检测</h1>
+            <p>拍清关键部位，系统会记录检测结果。最终归还仍需到场机器扫码。</p>
+            <label class="upload-real">
+              ${icon("camera")} 拍照或选择照片
+              <input id="photoInput" type="file" accept="image/*" capture="environment" /><!-- [IMAGE-13] 用户拍摄/选择的归还检测照片（非静态资源） -->
+            </label>
+            <div id="photoName" class="photo-name">未选择照片，可直接模拟识别。</div>
+          </section>
+          <div class="button-row">
+            <button class="secondary-button" data-detect-normal="${loan.id}">${icon("check")} 识别正常</button>
+            <button class="primary-button" data-detect-bad="${loan.id}">${icon("alert")} 发现异常</button>
+          </div>
+        </main>
+      `;
+      return shell("拍照检测", body, { tabs: false });
+    }
+
+    function resultPage() {
+      const loan = loanById(state.activeLoanId);
+      if (!loan) return shell("检测结果", `<main class="scroll"><div class="empty">暂无检测结果。</div></main>`);
+      const item = byId(loan.equipmentId);
+      const abnormal = loan.detectResult === "异常";
+      const body = `
+        <main class="scroll">
+          <section class="result-card">
+            ${equipmentImage(item, "detail-img")}<!-- [IMAGE-FN→detail-img] 检测结果页 -->
+            <div class="detail-title">
+              <div>
+                <h1>${abnormal ? "检测异常" : "检测正常"}</h1>
+                <p>${abnormal ? "疑似胶皮翘边、拍柄松动，已生成异常记录。" : "未发现明显破损，请到场馆机器完成归还扫码。"}</p>
+              </div>
+              ${tag(loan.status)}
+            </div>
+            <div class="metric-row">
+              ${metric(abnormal ? "86%" : "97%", "可信度")}
+              ${metric(abnormal ? "中" : "低", "风险")}
+              ${metric(abnormal ? "2" : "0", "问题点")}
+            </div>
+            <p class="machine-hint">手机端已完成检测。请先在场馆机器扫码归还，再回来同步状态。</p>
+            <button class="primary-button" data-sync-return="${loan.id}">${icon("bag")} 同步归还状态</button>
+          </section>
+        </main>
+      `;
+      return shell("检测结果", body, { tabs: false });
+    }
+
+    function reportPage() {
+      const loan = loanById(state.activeLoanId) || activeLoan();
+      const item = loan ? byId(loan.equipmentId) : byId(state.selectedId);
+      const locked = !!loan;
+      const equipField = locked
+        ? `<div class="field"><span>问题器材</span><div class="locked-equip">${item.name} · ${item.assetId}</div><input type="hidden" id="reportEquipment" value="${item.id}" /></div>`
+        : `<label class="field"><span>问题器材</span><select id="reportEquipment">${store.equipment.map((eq) => `<option value="${eq.id}" ${eq.id === item.id ? "selected" : ""}>${eq.name} · ${eq.assetId}</option>`).join("")}</select></label>`;
+      const body = `
+        <main class="scroll">
+          <form class="form-card" id="reportForm">
+            ${equipField}
+            <label class="field"><span>问题类型</span><select id="reportType">${issueOptionsFor(item.id)}</select></label>
+            <label class="field"><span>问题说明</span><textarea id="reportDesc" placeholder="简单说明发现位置 and 使用场景"></textarea></label>
+            <label class="upload-real">${icon("camera")} 上传照片<input id="reportPhoto" type="file" accept="image/*" capture="environment" /></label><!-- [IMAGE-14] 报损上传照片（非静态资源） -->
+            <button class="primary-button" type="submit">${icon("alert")} 提交报损</button>
+          </form>
+        </main>
+      `;
+      return shell("报损反馈", body);
+    }
+
+    function messagesPage() {
+      const body = `<main class="scroll"><div class="message-list">${store.messages.map((message) => `<article class="message-item"><i>${icon("bell")}</i><div><strong>${message.title}</strong><p>${message.text}</p><small>${message.time}</small></div></article>`).join("")}</div></main>`;
+      return shell("消息", body, { left: "none" });
+    }
+
+    function adminPage() {
+      const pending = store.workOrders.filter((order) => order.status !== "已完成");
+      const body = `
+        <main class="scroll">
+          <section class="admin-hero">
+            <h1>管理员工作台</h1>
+            <p>处理异常、暂停借出、维修完成后恢复可借。</p>
+          </section>
+          <div class="kpi-grid">
+            ${kpi("待处理", pending.length, "单")}
+            ${kpi("维修中", store.equipment.filter((item) => item.status === "维修中").length, "件")}
+            ${kpi("可借总量", store.equipment.reduce((sum, item) => sum + item.available, 0), "件")}
+          </div>
+          <div class="section-head"><h2>报修工单</h2></div>
+          <div class="admin-list">${store.workOrders.length ? store.workOrders.map(orderCard).join("") : `<div class="empty">暂无工单。学生提交异常后会出现在这里。</div>`}</div>
+          <div class="section-head"><h2>器材档案</h2></div>
+          <div class="list-stack">${store.equipment.map(adminEquipmentRow).join("")}</div>
+        </main>
+      `;
+      return shell("管理员端", body);
+    }
+
+    function orderCard(order) {
+      const item = byId(order.equipmentId);
+      return `
+        <article class="order-card" style="margin-bottom: 14px;">
+          ${equipmentImage(item, "order-img")}<!-- [IMAGE-FN→order-img] 管理员工单卡片 -->
+          <div>
+            <strong>${order.title}</strong>
+            <p style="font-size: 11px; margin-top:2px;">${item.assetId} · ${order.source} · ${order.createdAt}</p>
+            ${tag(order.status)}
+          </div>
+          <div class="admin-actions" style="margin-top: 10px;">
+            <button class="secondary-button" data-admin-pause="${order.id}">${icon("shield")} 暂停</button>
+            <button class="secondary-button" data-admin-repair="${order.id}">${icon("wrench")} 维修中</button>
+            <button class="primary-button" data-admin-complete="${order.id}">${icon("check")} 完成</button>
+          </div>
+        </article>
+      `;
+    }
+
+    function adminEquipmentRow(item) {
+      return `<div class="list-card static"><span class="list-media">${equipmentImage(item, "list-img")}</span><!-- [IMAGE-FN→list-img] 管理员·器材档案列表 --><span><strong>${item.name}</strong><small>${item.assetId} · ${cleanVenue(item.venue)}</small><small>剩余 ${item.available}/${item.total}</small></span>${tag(item.status)}</div>`;
+    }
+
+    function profileRateData(loans) {
+      const returnedLoans = loans
+        .filter((loan) => ["已归还", "异常已归还"].includes(loan.status) && typeof loan.returnedOnTime === "boolean")
+        .slice()
+        .reverse();
+      let onTimeCount = 0;
+      return returnedLoans.map((loan, index) => {
+        if (loan.returnedOnTime) onTimeCount += 1;
+        return Math.round((onTimeCount / (index + 1)) * 100);
+      });
+    }
+
+    function profileRateChart(rates) {
+      if (rates.length < 2) {
+        const y = rates.length === 1 ? 58 - (rates[0] / 100) * 44 : 45;
+        return `<svg class="profile-rate-chart" viewBox="0 0 130 74" fill="none" aria-hidden="true">
+          <path d="M8 ${y}H122" stroke="rgba(159,18,57,.14)" stroke-width="11" stroke-linecap="round"/>
+          <path d="M8 ${y}H122" stroke="#9f1239" stroke-width="4" stroke-linecap="round"/>
+        </svg>`;
+      }
+
+      const points = rates.map((rate, index) => {
+        const x = 8 + (index * 114) / (rates.length - 1);
+        const y = 58 - (rate / 100) * 44;
+        return `${Number(x.toFixed(1))},${Number(y.toFixed(1))}`;
+      }).join(" ");
+      const last = points.split(" ").pop().split(",");
+
+      return `<svg class="profile-rate-chart" viewBox="0 0 130 74" fill="none" aria-hidden="true">
+        <polyline points="${points}" stroke="rgba(159,18,57,.14)" stroke-width="11" stroke-linecap="round" stroke-linejoin="round" fill="none"/>
+        <polyline points="${points}" stroke="#9f1239" stroke-width="4" stroke-linecap="round" stroke-linejoin="round" fill="none"/>
+        <circle cx="${last[0]}" cy="${last[1]}" r="5" fill="#9f1239"/>
+      </svg>`;
+    }
+
+    function profilePage() {
+      const active = store.loans.filter((loan) => ["使用中", "待归还", "异常待归还"].includes(loan.status));
+      const returned = store.loans.filter((loan) => ["已归还", "异常已归还"].includes(loan.status) && typeof loan.returnedOnTime === "boolean");
+      const currentCount = active.length;
+      const weekCount = store.loans.length;
+      const ratePoints = profileRateData(store.loans);
+      const latestRate = ratePoints[ratePoints.length - 1];
+      const rateText = ratePoints.length ? String(latestRate) : "--";
+      const nearestDue = active
+        .map((loan) => Number(loan.dueAtMs))
+        .filter(Number.isFinite)
+        .sort((a, b) => a - b)[0];
+      const dueText = Number.isFinite(nearestDue) ? formatDueTime(nearestDue) : (currentCount ? "待归还" : "暂无");
+      const rateChart = profileRateChart(ratePoints);
+      const body = `
+        <main class="scroll profile-scroll">
+          <section class="profile-identity">
+            <div class="avatar profile-main-avatar"></div><!-- 保留原头像样式 -->
+            <div>
+              <div class="profile-name-line">
+                <h2>李同学</h2>
+                <span class="profile-edit" aria-hidden="true">${icon("edit")}</span>
+              </div>
+              <p class="profile-meta">学号 2023123456　|　已认证　|　计算机学院 · 软工2302</p>
+            </div>
+            <span class="profile-identity-more" aria-hidden="true">${icon("chevron")}</span>
+          </section>
+
+          <section class="profile-file">
+            <img class="profile-folder-img" src="${escapeAttr(assetUrl(PROFILE_FOLDER_SRC))}" alt="" aria-hidden="true" />
+            <div class="profile-file-card">
+              <div class="profile-file-title">
+                <h2>我的借用档案</h2>
+                <button class="profile-round-link" data-route="borrow" aria-label="查看借用档案">${icon("chevron")}</button>
+              </div>
+              <div class="profile-file-panel">
+                <div class="profile-file-metrics">
+                  <div class="profile-file-metric">
+                    <span>${icon("shield")} 校园信用</span>
+                    <strong>优秀</strong>
+                  </div>
+                  <div class="profile-file-metric">
+                    <span>${icon("bag")} 当前借用</span>
+                    <strong>${currentCount}<small> 件</small></strong>
+                  </div>
+                  <div class="profile-file-metric">
+                    <span>${icon("clock")} 待归还</span>
+                    <strong><em>${dueText}</em></strong>
+                  </div>
+                </div>
+                <div class="profile-file-actions">
+                  <button data-route="borrow">${icon("file")} 查看详情</button>
+                  <button data-route="borrow">${icon("refresh")} 申请续借</button>
+                  <button data-route="report">${icon("wrench")} 报损</button>
+                  <button class="profile-return-button" data-route="borrow">去归还 ${icon("chevron")}</button>
+                </div>
+              </div>
+            </div>
+          </section>
+
+          <section class="profile-stats-card">
+            <div>
+              <p class="profile-stat-label">本周借用</p>
+              <p class="profile-stat-value">${weekCount}<small> 次</small></p>
+              <p class="profile-stat-note">较上周 <b>↑</b> ${weekCount ? "1次" : "0次"}</p>
+            </div>
+            <span class="profile-divider"></span>
+            <div class="profile-rate">
+              <div>
+                <p class="profile-stat-label">准时归还率</p>
+                <p class="profile-stat-value">${rateText}<small>${returned.length ? "%" : ""}</small></p>
+                <p class="profile-stat-note">${ratePoints.length ? "按归还记录计算" : "暂无记录"}</p>
+              </div>
+              ${rateChart}
+            </div>
+          </section>
+
+          <section class="profile-shortcuts">
+            <button class="profile-shortcut" data-route="borrow"><i>${icon("bag")}</i><strong>我的借用</strong><span>查看当前借用</span></button>
+            <button class="profile-shortcut" data-route="borrow"><i>${icon("clock")}</i><strong>历史记录</strong><span>借用与归还记录</span></button>
+            <button class="profile-shortcut" data-route="report"><i>${icon("wrench")}</i><strong>报修 / 报损</strong><span>器材问题反馈</span></button>
+            <button class="profile-shortcut" data-route="messages"><i>${icon("refresh")}</i><strong>我的申请</strong><span>续借等申请记录</span></button>
+          </section>
+
+          <section class="profile-settings">
+            <button class="profile-setting-row" data-route="borrow">${icon("bell")}<strong>归还提醒</strong><span>开启归还前提醒</span>${icon("chevron")}</button>
+            <button class="profile-setting-row" data-route="messages">${icon("message")}<strong>消息通知</strong><span>系统通知与提醒</span>${icon("chevron")}</button>
+            <button class="profile-setting-row">${icon("idcard")}<strong>校园认证</strong><span>学号与身份管理</span>${icon("chevron")}</button>
+            <button class="profile-setting-row">${icon("shield")}<strong>信用规则</strong><span>了解信用评分规则</span>${icon("chevron")}</button>
+            <button class="profile-setting-row" data-route="report">${icon("help")}<strong>帮助与反馈</strong><span>常见问题与反馈</span>${icon("chevron")}</button>
+            <button class="profile-setting-row" data-route="messages">${icon("headset")}<strong>联系管理员</strong><span>意见建议与咨询</span>${icon("chevron")}</button>
+          </section>
+        </main>
+      `;
+      return `
+        <section class="screen profile-screen">
+          <header class="profile-topbar">
+            <h1>我的</h1>
+            <button class="profile-gear" id="btnSwitchAdmin" aria-label="设置">${icon("gear")}</button>
+          </header>
+          ${notice()}
+          ${body}
+          ${tabbar()}
+        </section>
+      `;
+    }
+
+    function syncBorrowFromMachine(equipmentId, options = {}) {
+      const item = byId(equipmentId);
+      const existing = store.loans.find((loan) => loan.equipmentId === equipmentId && ["使用中", "待归还", "异常待归还"].includes(loan.status));
+      if (existing) {
+        state.notice = "该器材已有进行中的借用，无需重复同步";
+        if (!options.skipNavigate) render();
+        return existing;
+      }
+      if (item.available <= 0 || item.status === "维修中") {
+        state.notice = "场馆暂无可用库存，请确认机器借出是否成功";
+        if (!options.skipNavigate) render();
+        return null;
+      }
+      item.available -= 1;
+      item.status = item.available > 0 ? "可借" : "补充中";
+      const borrowedAtMs = Date.now();
+      const durationPeriods = selectedBorrowPeriods();
+      const durationMinutes = durationPeriods * CLASS_PERIOD_MINUTES;
+      const dueAtMs = borrowedAtMs + durationMinutes * 60 * 1000;
+      const loan = {
+        id: `loan-${Date.now()}`,
+        equipmentId,
+        borrowedAt: formatDateTime(borrowedAtMs),
+        borrowedAtMs,
+        dueAt: formatDueTime(dueAtMs),
+        dueAtMs,
+        durationPeriods,
+        durationMinutes,
+        durationLabel: borrowDurationLabel(durationPeriods),
+        status: "使用中",
+        detectResult: "",
+      };
+      store.loans.unshift(loan);
+      pushMessage("借用记录已同步", `${item.name} ${item.assetId} 已同步，借用时长 ${loan.durationLabel}，归还截止 ${loan.dueAt}。`);
+      saveStore();
+      if (options.skipNavigate) return loan;
+      state.notice = "借用状态已同步";
+      route("borrow", { loanId: loan.id });
+      return loan;
+    }
+
+    function detectLoan(loanId, abnormal) {
+      const loan = loanById(loanId);
+      if (!loan) return;
+      const item = byId(loan.equipmentId);
+      loan.detectResult = abnormal ? "异常" : "正常";
+      loan.status = abnormal ? "异常待归还" : "待归还";
+      if (abnormal) createOrder(item.id, "手机拍照检测异常", "胶皮翘边 / 拍柄松动", loan.id);
+      pushMessage("归还前检测完成", `${item.name} 检测结果：${loan.detectResult}。请到场馆机器扫码归还后再同步。`);
+      saveStore();
+      route("result", { loanId });
+    }
+
+    function syncReturnFromMachine(loanId, options = {}) {
+      const loan = loanById(loanId);
+      if (!loan) return null;
+      const item = byId(loan.equipmentId);
+      if (!loan.detectResult) {
+        state.notice = "请先在手机完成归还前拍照检测";
+        if (!options.skipNavigate) render();
+        return null;
+      }
+      if (!["待归还", "异常待归还"].includes(loan.status)) {
+        state.notice = "当前记录不可同步归还";
+        if (!options.skipNavigate) render();
+        return null;
+      }
+      loan.status = loan.detectResult === "异常" ? "异常已归还" : "已归还";
+      const returnedAtMs = Date.now();
+      loan.returnedAt = formatDateTime(returnedAtMs);
+      loan.returnedAtMs = returnedAtMs;
+      loan.returnedOnTime = Number.isFinite(Number(loan.dueAtMs)) ? returnedAtMs <= Number(loan.dueAtMs) : null;
+      if (loan.detectResult === "正常") {
+        item.available = Math.min(item.total, item.available + 1);
+        item.status = "可借";
+      } else {
+        item.status = "异常待确认";
+      }
+      const punctualText = loan.returnedOnTime === true ? "准时归还" : (loan.returnedOnTime === false ? "超时归还" : "未计入准时率");
+      pushMessage("归还记录已同步", `${item.name} 的归还状态已从场馆机器同步，检测结果：${loan.detectResult}，${punctualText}。`);
+      saveStore();
+      if (options.skipNavigate) return loan;
+      state.notice = "归还状态已同步";
+      route("borrow");
+      return loan;
+    }
+
+    function createOrder(equipmentId, source, title, loanId = "") {
+      const exists = store.workOrders.some((order) => order.loanId === loanId && loanId);
+      if (exists) return;
+      store.workOrders.unshift({
+        id: `wo-${Date.now()}`,
+        equipmentId,
+        loanId,
+        title,
+        source,
+        status: "待处理",
+        createdAt: nowText(),
+        restored: false,
+      });
+    }
+
+    function updateOrder(orderId, status) {
+      const order = store.workOrders.find((item) => item.id === orderId);
+      if (!order) return;
+      const item = byId(order.equipmentId);
+      order.status = status;
+      if (status === "暂停借出") item.status = "异常待确认";
+      if (status === "维修中") item.status = "维修中";
+      if (status === "已完成") {
+        item.status = "可借";
+        if (!order.restored) {
+          item.available = Math.min(item.total, item.available + 1);
+          order.restored = true;
+        }
+        pushMessage("报修已完成", `${item.name} 已维修完成，恢复可借。`);
+      }
+      saveStore();
+      state.notice = `工单已更新为：${status}`;
+      render();
+    }
+
+    function loginPage() {
+      return `
+        <section class="screen">
+          <main class="scroll login-center">
+            <div class="login-hero">
+              <img class="login-icon" src="${escapeAttr(assetUrl(APP_ICON_SRC))}" alt="SportLoop" />
+              <h1>SportLoop</h1>
+              <p>校园体育器材借用与维保</p>
+            </div>
+            <button class="primary-button login-btn" data-route="roleSelect">点击登录</button>
+          </main>
+        </section>
+      `;
+    }
+
+    function roleSelectPage() {
+      return `
+        <section class="screen">
+          <header class="topbar">
+            <button class="icon-button" data-route="login" aria-label="返回">${icon("back")}</button>
+            <div class="page-title">选择身份</div>
+            <span></span>
+          </header>
+          <main class="scroll">
+            <div class="role-grid">
+              <button class="role-card" data-role="student">
+                <div class="role-icon">${icon("user")}</div>
+                <h2>学生端</h2>
+                <p>查看器材状态、借用记录、拍照检测、报损反馈</p>
+              </button>
+              <button class="role-card" data-role="admin">
+                <div class="role-icon">${icon("shield")}</div>
+                <h2>管理员端</h2>
+                <p>处理报修工单、器材维保、库存状态管理</p>
+              </button>
+            </div>
+          </main>
+        </section>
+      `;
+    }
+
+    function credentialsPage() {
+      const isAdmin = state.loginRole === "admin";
+      return `
+        <section class="screen">
+          <header class="topbar">
+            <button class="icon-button" data-route="roleSelect" aria-label="返回">${icon("back")}</button>
+            <div class="page-title">${isAdmin ? "管理员登录" : "学生登录"}</div>
+            <span></span>
+          </header>
+          <main class="scroll">
+            <form class="login-form" id="loginForm">
+              <div class="login-avatar">
+                <div class="role-badge">${icon(isAdmin ? "shield" : "user")}</div>
+                <span>${isAdmin ? "管理员" : "学生"}</span>
+              </div>
+              <label class="field">
+                <span>账号</span>
+                <input id="loginAccount" type="text" placeholder="请输入账号" autocomplete="username" />
+              </label>
+              <label class="field">
+                <span>密码</span>
+                <input id="loginPassword" type="password" placeholder="请输入密码" autocomplete="current-password" />
+              </label>
+              <p class="login-hint">模拟登录，输入任意内容即可进入</p>
+              <button class="primary-button" type="submit">${icon("check")} 登录</button>
+            </form>
+          </main>
+        </section>
+      `;
+    }
+
+    function render() {
+      if (!state.loggedIn) {
+        const loginPages = { login: loginPage, roleSelect: roleSelectPage, credentials: credentialsPage };
+        appEl.innerHTML = (loginPages[state.route] || loginPage)();
+        bindLogin();
+        return;
+      }
+
+      const pages = {
+        home: homePage,
+        list: listPage,
+        detail: detailPage,
+        scanBorrow: scanBorrowPage,
+        borrowConfirm: borrowConfirmPage,
+        borrow: borrowPage,
+        detect: detectPage,
+        result: resultPage,
+        report: reportPage,
+        messages: messagesPage,
+        admin: adminPage,
+        profile: profilePage,
+      };
+      appEl.innerHTML = (pages[state.route] || homePage)();
+      bind();
+    }
+
+    function bindLogin() {
+      document.querySelectorAll("[data-route]").forEach((node) => node.addEventListener("click", () => route(node.dataset.route)));
+
+      document.querySelectorAll("[data-role]").forEach((node) => {
+        node.addEventListener("click", () => {
+          state.loginRole = node.dataset.role;
+          route("credentials");
+        });
+      });
+
+      const loginForm = document.querySelector("#loginForm");
+      if (loginForm) {
+        loginForm.addEventListener("submit", (event) => {
+          event.preventDefault();
+          const account = document.querySelector("#loginAccount").value.trim();
+          const password = document.querySelector("#loginPassword").value.trim();
+          if (!account || !password) {
+            state.notice = "账号和密码不能为空";
+            render();
+            return;
+          }
+          state.loggedIn = true;
+          state.route = state.loginRole === "admin" ? "admin" : "home";
+          state.notice = "欢迎回来，" + (state.loginRole === "admin" ? "管理员" : "同学");
+          render();
+        });
+      }
+    }
+
+    function showConfirm(message, onConfirm, confirmLabel) {
+      const label = confirmLabel || "确认";
+      const overlay = document.createElement("div");
+      overlay.className = "confirm-overlay";
+      overlay.innerHTML = `
+        <div class="confirm-dialog">
+          <p>${message}</p>
+          <div class="confirm-actions">
+            <button class="btn-cancel">取消</button>
+            <button class="btn-danger">${label}</button>
+          </div>
+        </div>
+      `;
+      overlay.querySelector(".btn-cancel").addEventListener("click", () => overlay.remove());
+      overlay.querySelector(".btn-danger").addEventListener("click", () => {
+        overlay.remove();
+        onConfirm();
+      });
+      overlay.addEventListener("click", (e) => {
+        if (e.target === overlay) overlay.remove();
+      });
+      document.querySelector("#app").appendChild(overlay);
+    }
+
+    function bind() {
+      document.querySelectorAll("[data-route]").forEach((node) => node.addEventListener("click", () => route(node.dataset.route)));
+      document.querySelectorAll("[data-back]").forEach((node) => node.addEventListener("click", back));
+      document.querySelectorAll("[data-detail]").forEach((node) => node.addEventListener("click", () => route("detail", { id: node.dataset.detail })));
+      document.querySelectorAll("[data-sync-borrow]").forEach((node) => node.addEventListener("click", () => {
+        if (node.disabled) return;
+        const itemId = node.dataset.syncBorrow || state.selectedId;
+        const item = byId(itemId);
+        showConfirm("确认借用「" + item.name + "」？本次时长为 " + borrowDurationLabel() + "，请确保已在场馆机器完成扫码借出。", () => {
+          route("scanBorrow", { id: itemId, syncContext: "borrow" });
+        });
+      }));
+      document.querySelectorAll("[data-sync-return]").forEach((node) => node.addEventListener("click", () => {
+        route("scanBorrow", { loanId: node.dataset.syncReturn, syncContext: "return" });
+      }));
+      document.querySelectorAll("[data-borrow-periods]").forEach((node) => node.addEventListener("click", () => {
+        state.borrowPeriods = Number(node.dataset.borrowPeriods) || 1;
+        render();
+      }));
+
+      if (state.route === "scanBorrow" && state.scanPhase === "scanning") {
+        clearScanTimers();
+        const isReturn = state.syncContext === "return";
+        window.__scanTimer = window.setTimeout(() => {
+          const result = isReturn
+            ? syncReturnFromMachine(state.activeLoanId, { skipNavigate: true })
+            : syncBorrowFromMachine(state.selectedId, { skipNavigate: true });
+          if (!result) {
+            state.scanPhase = "idle";
+            route(isReturn ? "borrow" : "detail");
+            return;
+          }
+          if (!isReturn) state.activeLoanId = result.id;
+          state.scanPhase = "success";
+          render();
+          window.__scanSuccessTimer = window.setTimeout(() => {
+            state.scanPhase = "idle";
+            if (isReturn) {
+              route("borrow");
+            } else {
+              route("borrowConfirm", { loanId: result.id });
+              state.previous = "home";
+            }
+          }, 1400);
+        }, 2600);
+      }
+
+      document.querySelectorAll("[data-category]").forEach((node) => node.addEventListener("click", () => { state.category = node.dataset.category; render(); }));
+      document.querySelectorAll("[data-loan-detect]").forEach((node) => node.addEventListener("click", () => route("detect", { loanId: node.dataset.loanDetect })));
+      document.querySelectorAll("[data-report-loan]").forEach((node) => node.addEventListener("click", () => route("report", { loanId: node.dataset.reportLoan })));
+      document.querySelectorAll("[data-detect-normal]").forEach((node) => node.addEventListener("click", () => detectLoan(node.dataset.detectNormal, false)));
+      document.querySelectorAll("[data-detect-bad]").forEach((node) => node.addEventListener("click", () => detectLoan(node.dataset.detectBad, true)));
+      document.querySelectorAll("[data-admin-pause]").forEach((node) => node.addEventListener("click", () => updateOrder(node.dataset.adminPause, "暂停借出")));
+      document.querySelectorAll("[data-admin-repair]").forEach((node) => node.addEventListener("click", () => updateOrder(node.dataset.adminRepair, "维修中")));
+      document.querySelectorAll("[data-admin-complete]").forEach((node) => node.addEventListener("click", () => updateOrder(node.dataset.adminComplete, "已完成")));
+
+      // 额外的管理员切换绑定
+      const btnSwitchAdmin = document.querySelector("#btnSwitchAdmin");
+      if (btnSwitchAdmin) {
+        btnSwitchAdmin.addEventListener("click", () => route("admin"));
+      }
+
+      // 清除缓存数据重置
+      const resetBtn = document.querySelector("[data-reset]");
+      if (resetBtn) {
+        resetBtn.addEventListener("click", () => {
+          showConfirm("确定要清除所有缓存数据吗？此操作不可撤销。", () => {
+            localStorage.removeItem(STORAGE_KEY);
+            store = clone(seed);
+            saveStore();
+            state.notice = "已清空数据并完成系统重置！";
+            route("home");
+          }, "确认清除");
+        });
+      }
+
+      // 搜索框焦点事件优化
+      const searchInput = document.querySelector("#searchInput");
+      if (searchInput) {
+        searchInput.addEventListener("input", (event) => {
+          state.query = event.target.value.trim();
+          render();
+          const next = document.querySelector("#searchInput");
+          next?.focus();
+          next?.setSelectionRange(next.value.length, next.value.length);
+        });
+      }
+
+      // 归还前照相机模拟照片上传事件
+      const photoInput = document.querySelector("#photoInput");
+      if (photoInput) {
+        photoInput.addEventListener("change", (e) => {
+          if (e.target.files && e.target.files[0]) {
+            document.querySelector("#photoName").innerText = "已加载现场物理防伪快照: " + e.target.files[0].name;
+          }
+        });
+      }
+
+      // 报修表单 — 器材切换时联动更新问题类型
+      const reportEquip = document.querySelector("#reportEquipment");
+      if (reportEquip) {
+        reportEquip.addEventListener("change", () => {
+          const typeSelect = document.querySelector("#reportType");
+          if (typeSelect) typeSelect.innerHTML = issueOptionsFor(reportEquip.value);
+        });
+      }
+
+      // 报修表单提交拦截处理
+      const reportForm = document.querySelector("#reportForm");
+      if (reportForm) {
+        reportForm.addEventListener("submit", (e) => {
+          e.preventDefault();
+          const eqId = document.querySelector("#reportEquipment").value;
+          const repType = document.querySelector("#reportType").value;
+          const repDesc = document.querySelector("#reportDesc").value;
+          createOrder(eqId, "手机端自主报备", repType + " (" + repDesc + ")");
+          state.notice = "故障工单已成功上架！";
+          route("home");
+        });
+      }
+    }
+
+    // ==================== 4. 电脑大屏说明面板侧交互 ====================
+    document.querySelector("#btnAdminAccess").addEventListener("click", () => {
+      route("admin");
+    });
+
+    document.querySelector("#btnClearCache").addEventListener("click", () => {
+      showConfirm("确定要清除所有缓存数据吗？此操作不可撤销。", () => {
+        localStorage.removeItem(STORAGE_KEY);
+        store = clone(seed);
+        saveStore();
+        state.notice = "数据已重置！";
+        route("home");
+      }, "确认清除");
+    });
+
+    // 首次进入渲染
+    window.onload = function() {
+      render();
+    };
+  </script>
+</body>
+</html>

@@ -1,0 +1,18 @@
+{
+  "name": "SportLoop",
+  "short_name": "SportLoop",
+  "description": "校园体育器材借用与维护系统",
+  "start_url": "./index.html",
+  "scope": "./",
+  "display": "standalone",
+  "background_color": "#fff8fa",
+  "theme_color": "#9f1239",
+  "icons": [
+    {
+      "src": "assets/app-icon.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any maskable"
+    }
+  ]
+}
