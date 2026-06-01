@@ -1705,21 +1705,21 @@
 
     .credit-summary-card {
       display: grid;
-      grid-template-columns: 96px minmax(0, 1fr);
+      grid-template-columns: 74px minmax(0, 1fr);
       align-items: center;
-      gap: 16px;
-      margin: 8px 0 14px;
-      padding: 18px;
+      gap: 12px;
+      margin: 6px 0 12px;
+      padding: 14px 15px;
       border: 1px solid rgba(159, 18, 57, 0.08);
-      border-radius: 24px;
+      border-radius: 22px;
       background: rgba(255, 255, 255, 0.96);
       box-shadow: var(--shadow-soft);
     }
 
     .credit-score-ring {
       --score: 90;
-      width: 86px;
-      height: 86px;
+      width: 72px;
+      height: 72px;
       display: grid;
       place-items: center;
       border-radius: 50%;
@@ -1727,26 +1727,35 @@
     }
 
     .credit-score-ring div {
-      width: 68px;
-      height: 68px;
-      display: grid;
-      place-items: center;
+      width: 58px;
+      height: 58px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      gap: 2px;
       border-radius: 50%;
       background: #ffffff;
+      text-align: center;
     }
 
     .credit-score-ring strong {
       display: block;
       color: var(--ink);
-      font-size: 24px;
-      line-height: 1;
+      font-size: 21px;
+      line-height: .9;
       font-weight: 900;
+      letter-spacing: 0;
     }
 
     .credit-score-ring span {
+      display: block;
       color: var(--muted);
       font-size: 10px;
+      line-height: 1;
       font-weight: 800;
+      letter-spacing: 0;
+      white-space: nowrap;
     }
 
     .credit-summary-card p,
@@ -1756,28 +1765,40 @@
 
     .credit-summary-card p {
       color: var(--muted);
-      font-size: 12px;
+      font-size: 11px;
       font-weight: 800;
     }
 
     .credit-summary-card h2 {
-      margin: 5px 0 6px;
+      margin: 3px 0 5px;
       color: var(--brand);
-      font-size: 28px;
+      font-size: 25px;
       line-height: 1.1;
       font-weight: 900;
     }
 
     .credit-summary-card small {
       color: var(--muted);
-      font-size: 12px;
-      line-height: 1.4;
+      font-size: 11px;
+      line-height: 1.35;
       font-weight: 700;
     }
 
+    .credit-formula {
+      grid-column: 1 / -1;
+      margin-top: 2px;
+      padding: 9px 10px;
+      border-radius: 14px;
+      color: var(--brand);
+      background: rgba(159, 18, 57, 0.06);
+      font-size: 11px;
+      line-height: 1.35;
+      font-weight: 850;
+    }
+
     .credit-rule-card {
-      margin-bottom: 14px;
-      padding: 12px 16px;
+      margin-bottom: 12px;
+      padding: 12px 14px;
     }
 
     .credit-rule-card h3 {
@@ -1788,7 +1809,7 @@
     }
 
     .credit-rule-row {
-      min-height: 54px;
+      min-height: 50px;
       display: grid;
       grid-template-columns: minmax(0, 1fr) auto;
       align-items: center;
@@ -3932,6 +3953,48 @@
       </svg>`;
     }
 
+    function clampScore(value) {
+      return Math.max(0, Math.min(100, value));
+    }
+
+    function creditLevel(score) {
+      if (score >= 90) return "优秀";
+      if (score >= 80) return "良好";
+      if (score >= 70) return "合格";
+      if (score >= 60) return "待提升";
+      return "暂停借用";
+    }
+
+    function creditSummary() {
+      const active = store.loans.filter((loan) => ["使用中", "待归还", "异常待归还"].includes(loan.status));
+      const returned = store.loans.filter((loan) => ["已归还", "异常已归还"].includes(loan.status));
+      const onTimeReturned = returned.filter((loan) => loan.returnedOnTime === true && loan.status === "已归还").length;
+      const lateReturned = returned.filter((loan) => loan.returnedOnTime === false).length;
+      const abnormalReturned = returned.filter((loan) => loan.status === "异常已归还" || loan.detectResult === "异常").length;
+      const abnormalActive = active.filter((loan) => loan.status === "异常待归还" || loan.detectResult === "异常").length;
+      const overdueActive = active.filter((loan) => Number.isFinite(Number(loan.dueAtMs)) && Date.now() > Number(loan.dueAtMs)).length;
+      const onTimeBonus = Math.min(onTimeReturned * 2, 10);
+      const latePenalty = lateReturned * 8;
+      const abnormalPenalty = (abnormalReturned + abnormalActive) * 10;
+      const overduePenalty = overdueActive * 12;
+      const score = clampScore(90 + onTimeBonus - latePenalty - abnormalPenalty - overduePenalty);
+      return {
+        score,
+        level: creditLevel(score),
+        onTimeReturned,
+        lateReturned,
+        abnormalCount: abnormalReturned + abnormalActive,
+        overdueActive,
+        rows: [
+          ["基础信用", "完成校园认证后的初始分", "+90"],
+          ["准时归还", `准时 ${onTimeReturned} 次，每次 +2，上限 +10`, `+${onTimeBonus}`],
+          ["超时归还", `超时 ${lateReturned} 次，每次 -8`, `-${latePenalty}`],
+          ["异常归还", `异常 ${abnormalReturned + abnormalActive} 次，每次 -10`, `-${abnormalPenalty}`],
+          ["当前逾期", `逾期未还 ${overdueActive} 件，每件 -12`, `-${overduePenalty}`],
+        ],
+      };
+    }
+
     function profilePage() {
       const active = store.loans.filter((loan) => ["使用中", "待归还", "异常待归还"].includes(loan.status));
       const returned = store.loans.filter((loan) => ["已归还", "异常已归还"].includes(loan.status) && typeof loan.returnedOnTime === "boolean");
@@ -3947,6 +4010,7 @@
       const dueText = Number.isFinite(nearestDue) ? formatDueTime(nearestDue) : (currentCount ? "待归还" : "暂无");
       const rateChart = profileRateChart(ratePoints);
       const nickname = profileNickname();
+      const credit = creditSummary();
       const body = `
         <main class="scroll profile-scroll">
           <section class="profile-identity">
@@ -3972,7 +4036,7 @@
                 <div class="profile-file-metrics">
                   <div class="profile-file-metric">
                     <span>${icon("shield")} 校园信用</span>
-                    <strong>优秀</strong>
+                    <strong>${escapeHtml(credit.level)}</strong>
                   </div>
                   <div class="profile-file-metric">
                     <span>${icon("bag")} 当前借用</span>
@@ -4021,7 +4085,7 @@
             <button class="profile-setting-row" data-route="borrow">${icon("bell")}<strong>归还提醒</strong><span>开启归还前提醒</span>${icon("chevron")}</button>
             <button class="profile-setting-row" data-route="messages">${icon("message")}<strong>消息通知</strong><span>系统通知与提醒</span>${icon("chevron")}</button>
             <button class="profile-setting-row" data-route="identity">${icon("idcard")}<strong>校园认证</strong><span>学号与身份管理</span>${icon("chevron")}</button>
-            <button class="profile-setting-row">${icon("shield")}<strong>信用规则</strong><span>了解信用评分规则</span>${icon("chevron")}</button>
+            <button class="profile-setting-row" data-route="creditRules">${icon("shield")}<strong>信用规则</strong><span>了解信用评分规则</span>${icon("chevron")}</button>
             <button class="profile-setting-row" data-route="report">${icon("help")}<strong>帮助与反馈</strong><span>常见问题与反馈</span>${icon("chevron")}</button>
             <button class="profile-setting-row" data-route="messages">${icon("headset")}<strong>联系管理员</strong><span>意见建议与咨询</span>${icon("chevron")}</button>
           </section>
@@ -4189,6 +4253,7 @@
 
     function profileInfoPage() {
       const profile = profileData();
+      const credit = creditSummary();
       const rows = [
         ["idcard", "学号", profile.studentId],
         ["user", "姓名", profile.realName],
@@ -4196,7 +4261,7 @@
         ["check", "认证状态", profile.authStatus],
         ["file", "院系", profile.college],
         ["bag", "校园卡", profile.campusCard],
-        ["clock", "借用信用", profile.credit],
+        ["clock", "借用信用", `${credit.level}（${credit.score}分）`],
       ];
       const body = `
         <main class="scroll profile-info-scroll">
@@ -4214,6 +4279,50 @@
         </main>
       `;
       return shell("个人信息", body, { tabs: false });
+    }
+
+    function creditRuleRow(title, desc, value) {
+      return `
+        <div class="credit-rule-row">
+          <span><strong>${escapeHtml(title)}</strong><span>${escapeHtml(desc)}</span></span>
+          <b>${escapeHtml(value)}</b>
+        </div>
+      `;
+    }
+
+    function creditRulesPage() {
+      const credit = creditSummary();
+      const levels = [
+        ["优秀", "90-100 分", "借用正常，信用表现稳定"],
+        ["良好", "80-89 分", "可正常借用，注意按时归还"],
+        ["合格", "70-79 分", "可借用，系统会加强提醒"],
+        ["待提升", "60-69 分", "建议减少逾期和异常记录"],
+        ["暂停借用", "0-59 分", "需联系管理员处理后恢复"],
+      ];
+      const body = `
+        <main class="scroll profile-info-scroll">
+          <section class="credit-summary-card">
+            <div class="credit-score-ring" style="--score:${credit.score}">
+              <div><span>信用分</span><strong>${credit.score}</strong></div>
+            </div>
+            <div>
+              <p>当前校园信用</p>
+              <h2>${escapeHtml(credit.level)}</h2>
+              <small>按借用记录实时计算，当前 ${credit.score} 分。</small>
+            </div>
+            <p class="credit-formula">计算公式：90 基础分 + 准时加分 - 超时扣分 - 异常扣分 - 当前逾期扣分。</p>
+          </section>
+          <section class="profile-settings credit-rule-card">
+            <h3>计分规则</h3>
+            ${credit.rows.map(([title, desc, value]) => creditRuleRow(title, desc, value)).join("")}
+          </section>
+          <section class="profile-settings credit-rule-card">
+            <h3>信用等级</h3>
+            ${levels.map(([title, value, desc]) => creditRuleRow(title, desc, value)).join("")}
+          </section>
+        </main>
+      `;
+      return shell("信用规则", body, { tabs: false });
     }
 
     function identityPage() {
@@ -4328,6 +4437,7 @@
         admin: adminPage,
         profile: profilePage,
         profileInfo: profileInfoPage,
+        creditRules: creditRulesPage,
         identity: identityPage,
       };
       appEl.innerHTML = (pages[state.route] || homePage)();
