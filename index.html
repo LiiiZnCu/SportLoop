@@ -7,7 +7,8 @@
   <meta name="apple-mobile-web-app-capable" content="yes">
   <meta name="apple-mobile-web-app-title" content="SportLoop">
   <link rel="manifest" href="manifest.webmanifest">
-  <link rel="apple-touch-icon" href="assets/app-icon.png">
+  <link rel="preload" as="image" href="assets/hero.png?v=12">
+  <link rel="apple-touch-icon" href="assets/app-icon.png?v=12">
   <title>SportLoop</title>
   <style>
     /* ==================== 1. 用户的 STYLES.CSS 原样导入 ==================== */
@@ -1394,6 +1395,67 @@
       line-height: 1.5;
     }
 
+    .message-item small {
+      color: var(--muted);
+      font-size: 11px;
+    }
+
+    .contact-thread {
+      align-items: flex-start;
+      background: rgba(255, 255, 255, 0.92);
+    }
+
+    .admin-contact-reply {
+      margin-top: 10px;
+      padding: 10px 12px;
+      border-radius: 14px;
+      color: var(--ink);
+      background: var(--brand-soft);
+    }
+
+    .admin-contact-reply b {
+      display: block;
+      margin-bottom: 4px;
+      font-size: 12px;
+    }
+
+    .admin-contact-card {
+      display: grid;
+      gap: 12px;
+      padding: 14px;
+      border: 1px solid var(--line);
+      border-radius: var(--radius-md);
+      background: rgba(255, 255, 255, 0.94);
+      box-shadow: var(--shadow-soft);
+    }
+
+    .admin-contact-head {
+      display: flex;
+      align-items: flex-start;
+      justify-content: space-between;
+      gap: 10px;
+    }
+
+    .admin-contact-head > div {
+      min-width: 0;
+    }
+
+    .admin-contact-card p {
+      margin: 6px 0;
+      color: var(--muted);
+      font-size: 13px;
+      line-height: 1.55;
+      overflow-wrap: anywhere;
+    }
+
+    .admin-reply-field {
+      margin-top: 0;
+    }
+
+    .admin-reply-field textarea {
+      min-height: 84px;
+    }
+
     .admin-hero {
       padding: 20px;
       color: #ffffff;
@@ -2753,7 +2815,7 @@
     .new-hero-container {
       background:
         linear-gradient(rgba(0, 0, 0, 0.10), rgba(0, 0, 0, 0.10)),
-        url(assets/hero.png) center/cover no-repeat;
+        url("assets/hero.png?v=12") center/cover no-repeat;
       padding: 22px 18px;
       border-radius: 28px;
       border: 1px solid rgba(255, 255, 255, 0.15);
@@ -2959,7 +3021,7 @@
     const STORAGE_KEY = "sportloop-ios-app-v7";
 
     // 替换 assets 下同名图片后，把此数字 +1，可避免浏览器继续显示旧图缓存
-    const ASSET_VERSION = "11";
+    const ASSET_VERSION = "12";
     const CLASS_PERIOD_MINUTES = 90;
     const BORROW_PERIOD_OPTIONS = [1, 2, 3];
 
@@ -3146,6 +3208,7 @@
       loans: [],
       workOrders: [],
       identityBindings: [],
+      adminMessages: [],
       messages: [
         { id: "m1", title: "欢迎使用 SportLoop", text: "借出与归还在场馆机器完成，手机负责查看状态、同步记录，以及归还前扫码/拍照检测。", time: "刚刚" },
       ],
@@ -3194,6 +3257,7 @@
         loans: parsed.loans || [],
         workOrders: parsed.workOrders || [],
         identityBindings: parsed.identityBindings || [],
+        adminMessages: parsed.adminMessages || [],
         messages: parsed.messages || clone(seed.messages),
       };
     }
@@ -3292,6 +3356,11 @@
       store.messages.unshift({ id: `m-${Date.now()}`, title, text, time: nowText() });
     }
 
+    function adminMessageList() {
+      if (!Array.isArray(store.adminMessages)) store.adminMessages = [];
+      return store.adminMessages;
+    }
+
     function clearScanTimers() {
       window.clearTimeout(window.__scanTimer);
       window.clearTimeout(window.__scanSuccessTimer);
@@ -3318,8 +3387,8 @@
     }
 
     function statusClass(status) {
-      if (status === "可借" || status === "已归还" || status === "已完成") return "ok";
-      if (status === "补充中" || status === "使用中" || status === "待归还") return "warn";
+      if (status === "可借" || status === "已归还" || status === "已完成" || status === "已回复") return "ok";
+      if (status === "补充中" || status === "使用中" || status === "待归还" || status === "待回复") return "warn";
       return "bad";
     }
 
@@ -3426,7 +3495,7 @@
       if (hasImageFile) {
         return `
           <div class="${className}" style="display:flex; align-items:center; justify-content:center; background:rgba(159,18,57,0.03); border-radius:12px; overflow:hidden; width:100%; height:100%;">
-            <img src="${escapeAttr(src)}" alt="${escapeAttr(item.name)}" style="width:100%; height:100%; object-fit:cover;" onerror="this.onerror=null; this.parentElement.innerHTML='⚽';"><!-- [IMAGE-ERR] 加载失败兜底 -->
+            <img src="${escapeAttr(src)}" alt="${escapeAttr(item.name)}" loading="lazy" decoding="async" style="width:100%; height:100%; object-fit:cover;" onerror="this.onerror=null; this.parentElement.innerHTML='⚽';"><!-- [IMAGE-ERR] 加载失败兜底 -->
           </div>
         `;
       }
@@ -3445,7 +3514,7 @@
         <section class="screen home-screen">
           <header class="home-top">
             <button class="icon-button" data-route="messages" aria-label="消息通知">${icon("bell")}</button>
-            <div class="brand"><img class="logo-mark app-icon" src="${escapeAttr(assetUrl(APP_ICON_SRC))}" alt="SportLoop" /><!-- [IMAGE-10] --><span>SportLoop</span></div>
+            <div class="brand"><img class="logo-mark app-icon" src="${escapeAttr(assetUrl(APP_ICON_SRC))}" alt="SportLoop" decoding="async" /><!-- [IMAGE-10] --><span>SportLoop</span></div>
             <button class="icon-button" data-route="list" aria-label="器材列表">${icon("search")}</button>
           </header>
           ${notice()}
@@ -3869,23 +3938,42 @@
     }
 
     function messagesPage() {
-      const body = `<main class="scroll"><div class="message-list">${store.messages.map((message) => `<article class="message-item"><i>${icon("bell")}</i><div><strong>${message.title}</strong><p>${message.text}</p><small>${message.time}</small></div></article>`).join("")}</div></main>`;
+      const messages = Array.isArray(store.messages) ? store.messages : [];
+      const body = `
+        <main class="scroll">
+          <div class="message-list">
+            ${messages.length ? messages.map((message) => `
+              <article class="message-item">
+                <i>${icon("bell")}</i>
+                <div>
+                  <strong>${escapeHtml(message.title)}</strong>
+                  <p>${escapeHtml(message.text)}</p>
+                  <small>${escapeHtml(message.time)}</small>
+                </div>
+              </article>
+            `).join("") : `<div class="empty">暂无消息。</div>`}
+          </div>
+        </main>
+      `;
       return shell("消息", body, { left: "none" });
     }
 
     function adminPage() {
       const pending = store.workOrders.filter((order) => order.status !== "已完成");
+      const waitingMessages = adminMessageList().filter((message) => message.status !== "已回复");
       const body = `
         <main class="scroll">
           <section class="admin-hero">
             <h1>管理员工作台</h1>
-            <p>处理异常、暂停借出、维修完成后恢复可借。</p>
+            <p>处理学生留言、报修工单和器材维护。</p>
           </section>
           <div class="kpi-grid">
+            ${kpi("待回复", waitingMessages.length, "条")}
             ${kpi("待处理", pending.length, "单")}
-            ${kpi("维修中", store.equipment.filter((item) => item.status === "维修中").length, "件")}
             ${kpi("可借总量", store.equipment.reduce((sum, item) => sum + item.available, 0), "件")}
           </div>
+          <div class="section-head"><h2>学生留言</h2></div>
+          <div class="admin-list">${adminMessageList().length ? adminMessageList().map(adminContactCard).join("") : `<div class="empty">暂无学生留言。</div>`}</div>
           <div class="section-head"><h2>报修工单</h2></div>
           <div class="admin-list">${store.workOrders.length ? store.workOrders.map(orderCard).join("") : `<div class="empty">暂无工单。学生提交异常后会出现在这里。</div>`}</div>
           <div class="section-head"><h2>器材档案</h2></div>
@@ -3893,6 +3981,35 @@
         </main>
       `;
       return shell("管理员端", body);
+    }
+
+    function adminContactCard(message) {
+      const reply = String(message.reply || "").trim();
+      return `
+        <article class="admin-contact-card" data-admin-contact-card="${escapeAttr(message.id)}">
+          <div class="admin-contact-head">
+            <div>
+              <strong>${escapeHtml(message.senderName)} · ${escapeHtml(message.studentId)}</strong>
+              <p>${escapeHtml(message.category)} · ${escapeHtml(message.createdAt)}</p>
+            </div>
+            ${tag(message.status || "待回复")}
+          </div>
+          <p>${escapeHtml(message.text)}</p>
+          ${reply ? `
+            <div class="admin-contact-reply">
+              <b>已回复学生</b>
+              <p>${escapeHtml(reply)}</p>
+              <small>${escapeHtml(message.repliedAt || "")}</small>
+            </div>
+          ` : `
+            <label class="field admin-reply-field">
+              <span>回复内容</span>
+              <textarea rows="3" maxlength="160" placeholder="输入给学生的回复"></textarea>
+            </label>
+            <button class="primary-button" data-admin-reply="${escapeAttr(message.id)}" type="button">${icon("message")} 发送回复</button>
+          `}
+        </article>
+      `;
     }
 
     function orderCard(order) {
@@ -3916,6 +4033,71 @@
 
     function adminEquipmentRow(item) {
       return `<div class="list-card static"><span class="list-media">${equipmentImage(item, "list-img")}</span><!-- [IMAGE-FN→list-img] 管理员·器材档案列表 --><span><strong>${item.name}</strong><small>${item.assetId} · ${cleanVenue(item.venue)}</small><small>剩余 ${item.available}/${item.total}</small></span>${tag(item.status)}</div>`;
+    }
+
+    function studentAdminMessages() {
+      const profile = profileData();
+      return adminMessageList().filter((message) =>
+        message.senderProfileId === "current-student" || message.studentId === profile.studentId
+      );
+    }
+
+    function studentContactThread(message) {
+      const reply = String(message.reply || "").trim();
+      return `
+        <article class="message-item contact-thread">
+          <i>${icon(reply ? "check" : "headset")}</i>
+          <div>
+            <strong>${escapeHtml(message.category)} · ${escapeHtml(message.status || "待回复")}</strong>
+            <p>${escapeHtml(message.text)}</p>
+            <small>${escapeHtml(message.createdAt)}</small>
+            ${reply ? `
+              <div class="admin-contact-reply">
+                <b>管理员回复</b>
+                <p>${escapeHtml(reply)}</p>
+                <small>${escapeHtml(message.repliedAt || "")}</small>
+              </div>
+            ` : `<p class="identity-hint">管理员暂未回复，回复后会同步到消息页。</p>`}
+          </div>
+        </article>
+      `;
+    }
+
+    function contactAdminPage() {
+      const history = studentAdminMessages();
+      const body = `
+        <main class="scroll profile-info-scroll">
+          <section class="profile-info-hero">
+            <div class="role-badge">${icon("headset")}</div>
+            <div>
+              <p>联系管理员</p>
+              <h2>发送问题或建议</h2>
+            </div>
+          </section>
+          <form class="profile-settings identity-form" id="adminContactForm">
+            <label class="field">
+              <span>咨询类型</span>
+              <select name="category">
+                <option>借用咨询</option>
+                <option>器材问题</option>
+                <option>认证问题</option>
+                <option>其他问题</option>
+              </select>
+            </label>
+            <label class="field">
+              <span>留言内容</span>
+              <textarea name="message" maxlength="180" required placeholder="请写清楚你遇到的问题，管理员会在管理员端收到。"></textarea>
+            </label>
+            <p class="identity-status" id="contactStatus" aria-live="polite"></p>
+            <button class="primary-button" type="submit">${icon("message")} 发送给管理员</button>
+          </form>
+          <section class="profile-settings credit-rule-card">
+            <h3>联系记录</h3>
+            <div class="message-list">${history.length ? history.map(studentContactThread).join("") : `<div class="empty">暂无联系记录。</div>`}</div>
+          </section>
+        </main>
+      `;
+      return shell("联系管理员", body, { tabs: false });
     }
 
     function profileRateData(loans) {
@@ -4026,7 +4208,7 @@
           </section>
 
           <section class="profile-file">
-            <img class="profile-folder-img" src="${escapeAttr(assetUrl(PROFILE_FOLDER_SRC))}" alt="" aria-hidden="true" />
+            <img class="profile-folder-img" src="${escapeAttr(assetUrl(PROFILE_FOLDER_SRC))}" alt="" aria-hidden="true" loading="eager" decoding="async" fetchpriority="high" />
             <div class="profile-file-card">
               <div class="profile-file-title">
                 <h2>我的借用档案</h2>
@@ -4078,7 +4260,7 @@
             <button class="profile-shortcut" data-route="borrow"><i>${icon("bag")}</i><strong>我的借用</strong><span>查看当前借用</span></button>
             <button class="profile-shortcut" data-route="borrow"><i>${icon("clock")}</i><strong>历史记录</strong><span>借用与归还记录</span></button>
             <button class="profile-shortcut" data-route="report"><i>${icon("wrench")}</i><strong>报修/报损</strong><span>器材问题反馈</span></button>
-            <button class="profile-shortcut" data-route="messages"><i>${icon("refresh")}</i><strong>我的申请</strong><span>续借等申请记录</span></button>
+            <button class="profile-shortcut" data-route="borrow"><i>${icon("refresh")}</i><strong>我的申请</strong><span>续借等申请记录</span></button>
           </section>
 
           <section class="profile-settings">
@@ -4087,7 +4269,7 @@
             <button class="profile-setting-row" data-route="identity">${icon("idcard")}<strong>校园认证</strong><span>学号与身份管理</span>${icon("chevron")}</button>
             <button class="profile-setting-row" data-route="creditRules">${icon("shield")}<strong>信用规则</strong><span>了解信用评分规则</span>${icon("chevron")}</button>
             <button class="profile-setting-row" data-route="report">${icon("help")}<strong>帮助与反馈</strong><span>常见问题与反馈</span>${icon("chevron")}</button>
-            <button class="profile-setting-row" data-route="messages">${icon("headset")}<strong>联系管理员</strong><span>意见建议与咨询</span>${icon("chevron")}</button>
+            <button class="profile-setting-row" data-route="contactAdmin">${icon("headset")}<strong>联系管理员</strong><span>意见建议与咨询</span>${icon("chevron")}</button>
           </section>
         </main>
       `;
@@ -4231,7 +4413,7 @@
         <section class="screen">
           <main class="scroll login-center">
             <div class="login-hero">
-              <img class="login-icon" src="${escapeAttr(assetUrl(APP_ICON_SRC))}" alt="SportLoop" />
+              <img class="login-icon" src="${escapeAttr(assetUrl(APP_ICON_SRC))}" alt="SportLoop" decoding="async" fetchpriority="high" />
               <h1>SportLoop</h1>
               <p>校园体育器材借用与维保</p>
             </div>
@@ -4434,6 +4616,7 @@
         result: resultPage,
         report: reportPage,
         messages: messagesPage,
+        contactAdmin: contactAdminPage,
         admin: adminPage,
         profile: profilePage,
         profileInfo: profileInfoPage,
@@ -4597,6 +4780,64 @@
       route("profileInfo");
     }
 
+    function setContactStatus(message, isError = true) {
+      const status = document.querySelector("#contactStatus");
+      if (!status) return;
+      status.textContent = message;
+      status.classList.toggle("is-error", isError);
+    }
+
+    function submitAdminContactForm(event) {
+      event.preventDefault();
+      const form = event.currentTarget;
+      const profile = profileData();
+      const textField = form.elements.message;
+      const categoryField = form.elements.category;
+      const text = String(textField.value || "").trim();
+      const category = String(categoryField.value || "其他问题").trim();
+      if (!text) {
+        setContactStatus("留言内容不能为空");
+        textField.focus();
+        return;
+      }
+
+      adminMessageList().unshift({
+        id: `admin-msg-${Date.now()}`,
+        senderProfileId: "current-student",
+        senderName: profile.realName || profileNickname(),
+        studentId: profile.studentId,
+        category,
+        text,
+        status: "待回复",
+        createdAt: nowText(),
+        reply: "",
+        repliedAt: "",
+      });
+      pushMessage("已发送给管理员", "你的留言已同步到管理员端，管理员回复后会出现在消息和联系记录里。");
+      saveStore();
+      state.notice = "已发送给管理员";
+      render();
+    }
+
+    function replyAdminMessage(messageId, card) {
+      const message = adminMessageList().find((item) => item.id === messageId);
+      const textarea = card ? card.querySelector("textarea") : null;
+      const reply = String(textarea?.value || "").trim();
+      if (!message || !textarea) return;
+      if (!reply) {
+        textarea.focus();
+        return;
+      }
+
+      message.reply = reply;
+      message.status = "已回复";
+      message.repliedAt = nowText();
+      pushMessage("管理员已回复", reply);
+      saveStore();
+      state.notice = "回复已发送给学生";
+      render();
+    }
+
     function bind() {
       document.querySelectorAll("[data-route]").forEach((node) => node.addEventListener("click", () => route(node.dataset.route)));
       document.querySelectorAll("[data-back]").forEach((node) => node.addEventListener("click", back));
@@ -4604,6 +4845,8 @@
       document.querySelectorAll("[data-edit-profile-name]").forEach((node) => node.addEventListener("click", showNameEditor));
       const identityForm = document.querySelector("#identityForm");
       if (identityForm) identityForm.addEventListener("submit", submitIdentityForm);
+      const adminContactForm = document.querySelector("#adminContactForm");
+      if (adminContactForm) adminContactForm.addEventListener("submit", submitAdminContactForm);
       document.querySelectorAll("[data-sync-borrow]").forEach((node) => node.addEventListener("click", () => {
         if (node.disabled) return;
         const itemId = node.dataset.syncBorrow || state.selectedId;
@@ -4655,6 +4898,7 @@
       document.querySelectorAll("[data-admin-pause]").forEach((node) => node.addEventListener("click", () => updateOrder(node.dataset.adminPause, "暂停借出")));
       document.querySelectorAll("[data-admin-repair]").forEach((node) => node.addEventListener("click", () => updateOrder(node.dataset.adminRepair, "维修中")));
       document.querySelectorAll("[data-admin-complete]").forEach((node) => node.addEventListener("click", () => updateOrder(node.dataset.adminComplete, "已完成")));
+      document.querySelectorAll("[data-admin-reply]").forEach((node) => node.addEventListener("click", () => replyAdminMessage(node.dataset.adminReply, node.closest(".admin-contact-card"))));
 
       // 额外的管理员切换绑定
       const btnSwitchAdmin = document.querySelector("#btnSwitchAdmin");
