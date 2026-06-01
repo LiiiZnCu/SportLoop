@@ -1451,9 +1451,8 @@
 
     .profile-screen {
       background:
-        radial-gradient(circle at 82% 12%, rgba(159, 18, 57, 0.05), transparent 24%),
-        radial-gradient(circle at 15% 38%, rgba(159, 18, 57, 0.035), transparent 30%),
-        linear-gradient(180deg, #ffffff 0%, #fffafa 48%, #fffefe 100%);
+        radial-gradient(circle at 82% 12%, rgba(159, 18, 57, 0.035), transparent 24%),
+        linear-gradient(180deg, #ffffff 0%, #f7f2f4 46%, #fffefe 100%);
     }
 
     .profile-topbar {
@@ -1551,6 +1550,7 @@
 
     .profile-file {
       position: relative;
+      isolation: isolate;
       aspect-ratio: 1400 / 1024;
       width: 100%;
       margin: 12px 0 20px;
@@ -1561,12 +1561,25 @@
       content: "";
       position: absolute;
       z-index: 0;
-      inset: 7% 1% 0;
-      border-radius: 34px;
-      background: linear-gradient(180deg, rgba(255, 255, 255, 0.88), rgba(255, 247, 249, 0.58));
+      inset: 11% -3% -2%;
+      border-radius: 28px;
+      background: linear-gradient(180deg, rgba(246, 239, 243, 0.96), rgba(238, 228, 235, 0.9));
       box-shadow:
-        0 14px 24px rgba(92, 12, 34, 0.1),
-        0 4px 10px rgba(159, 18, 57, 0.05);
+        0 18px 28px rgba(92, 12, 34, 0.13),
+        inset 0 0 0 1px rgba(159, 18, 57, 0.07);
+    }
+
+    .profile-file::after {
+      content: "";
+      position: absolute;
+      z-index: 0;
+      left: 12%;
+      right: 12%;
+      bottom: -1%;
+      height: 13%;
+      border-radius: 999px;
+      background: rgba(92, 12, 34, 0.12);
+      box-shadow: 0 10px 20px rgba(92, 12, 34, 0.12);
     }
 
     .profile-folder-img {
@@ -1579,11 +1592,7 @@
       object-position: center;
       pointer-events: none;
       user-select: none;
-      filter:
-        drop-shadow(0 10px 12px rgba(92, 12, 34, 0.1))
-        drop-shadow(0 2px 5px rgba(159, 18, 57, 0.05))
-        saturate(1.08)
-        contrast(1.04);
+      filter: none;
     }
 
     .profile-file-card {
@@ -2316,18 +2325,26 @@
       }
 
       .profile-file::before {
-        inset: 8% 0 0;
+        content: "";
+        inset: 12% -2.5% -1%;
+        border-radius: 24px;
+        background: linear-gradient(180deg, rgba(246, 239, 243, 0.96), rgba(238, 228, 235, 0.9));
         box-shadow:
-          0 9px 16px rgba(92, 12, 34, 0.1),
-          0 2px 6px rgba(159, 18, 57, 0.05);
+          0 14px 22px rgba(92, 12, 34, 0.12),
+          inset 0 0 0 1px rgba(159, 18, 57, 0.065);
+      }
+
+      .profile-file::after {
+        left: 13%;
+        right: 13%;
+        bottom: 0;
+        height: 12%;
+        background: rgba(92, 12, 34, 0.11);
+        box-shadow: 0 8px 16px rgba(92, 12, 34, 0.11);
       }
 
       .profile-folder-img {
-        filter:
-          drop-shadow(0 7px 8px rgba(92, 12, 34, 0.09))
-          drop-shadow(0 1px 4px rgba(159, 18, 57, 0.05))
-          saturate(1.08)
-          contrast(1.04);
+        filter: none;
       }
 
       .profile-file-title {
