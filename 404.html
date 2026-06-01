@@ -1493,7 +1493,7 @@
     .profile-identity {
       position: relative;
       display: grid;
-      grid-template-columns: 86px minmax(0, 1fr) 24px;
+      grid-template-columns: 86px minmax(0, 1fr) 32px;
       align-items: center;
       gap: 18px;
       padding: 12px 2px 18px;
@@ -1510,6 +1510,16 @@
       align-items: center;
       gap: 9px;
       min-width: 0;
+    }
+
+    .profile-name-edit-button {
+      max-width: 100%;
+      padding: 0;
+      border: 0;
+      color: inherit;
+      text-align: left;
+      background: transparent;
+      cursor: pointer;
     }
 
     .profile-name-line h2 {
@@ -1545,7 +1555,152 @@
     }
 
     .profile-identity-more {
+      width: 40px;
+      height: 40px;
+      display: grid;
+      place-items: center;
+      justify-self: end;
+      margin-right: -8px;
+      border: 0;
       color: var(--muted);
+      background: transparent;
+      cursor: pointer;
+    }
+
+    .profile-identity-more svg {
+      width: 24px;
+      height: 24px;
+    }
+
+    .profile-info-scroll {
+      padding-bottom: 24px;
+    }
+
+    .profile-info-hero {
+      display: grid;
+      grid-template-columns: 72px minmax(0, 1fr);
+      align-items: center;
+      gap: 16px;
+      margin: 8px 0 14px;
+      padding: 18px;
+      border: 1px solid rgba(159, 18, 57, 0.08);
+      border-radius: 24px;
+      background: rgba(255, 255, 255, 0.96);
+      box-shadow: var(--shadow-soft);
+    }
+
+    .profile-info-avatar {
+      width: 72px;
+      height: 72px;
+    }
+
+    .profile-info-hero p {
+      margin: 0 0 4px;
+      color: var(--muted);
+      font-size: 12px;
+      font-weight: 700;
+    }
+
+    .profile-info-hero h2 {
+      margin: 0;
+      overflow: hidden;
+      color: var(--ink);
+      font-size: 26px;
+      line-height: 1.1;
+      font-weight: 900;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+    }
+
+    .profile-info-edit {
+      display: inline-flex;
+      align-items: center;
+      gap: 5px;
+      margin-top: 10px;
+      color: var(--brand);
+      font-size: 13px;
+      font-weight: 800;
+      background: transparent;
+    }
+
+    .profile-info-edit svg {
+      width: 16px;
+      height: 16px;
+    }
+
+    .profile-info-card {
+      margin: 0;
+      padding: 8px 16px;
+    }
+
+    .profile-info-row {
+      min-height: 58px;
+      display: grid;
+      grid-template-columns: 28px minmax(72px, .7fr) minmax(0, 1.3fr);
+      align-items: center;
+      gap: 10px;
+      border-bottom: 1px solid rgba(234, 221, 225, 0.85);
+    }
+
+    .profile-info-row:last-child {
+      border-bottom: 0;
+    }
+
+    .profile-info-row svg {
+      width: 22px;
+      height: 22px;
+      color: var(--brand);
+    }
+
+    .profile-info-row strong {
+      color: var(--ink);
+      font-size: 14px;
+      font-weight: 850;
+      white-space: nowrap;
+    }
+
+    .profile-info-row span {
+      min-width: 0;
+      overflow: hidden;
+      color: var(--muted);
+      font-size: 13px;
+      font-weight: 700;
+      text-align: right;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+    }
+
+    .identity-form {
+      margin: 0;
+      padding: 16px;
+    }
+
+    .identity-form .field:first-child {
+      margin-top: 0;
+    }
+
+    .identity-hint {
+      margin: 14px 0 0;
+      color: var(--muted);
+      font-size: 12px;
+      line-height: 1.45;
+    }
+
+    .identity-status {
+      min-height: 18px;
+      margin: 12px 0 0;
+      color: var(--ok);
+      font-size: 12px;
+      font-weight: 800;
+      line-height: 1.4;
+    }
+
+    .identity-status.is-error {
+      color: var(--bad);
+    }
+
+    .identity-form .primary-button {
+      margin-top: 16px;
     }
 
     .profile-file {
@@ -2201,6 +2356,37 @@
       line-height: 1.5;
     }
 
+    .confirm-dialog h2 {
+      margin: 0 0 16px;
+      color: var(--ink);
+      font-size: 19px;
+      line-height: 1.2;
+    }
+
+    .name-dialog {
+      width: min(300px, calc(100% - 44px));
+      text-align: left;
+    }
+
+    .name-dialog input {
+      width: 100%;
+      min-height: 48px;
+      margin: 0 0 16px;
+      padding: 0 14px;
+      border: 1px solid rgba(159, 18, 57, 0.18);
+      border-radius: 15px;
+      color: var(--ink);
+      background: rgba(255, 247, 250, 0.72);
+      font-size: 17px;
+      font-weight: 800;
+      outline: none;
+    }
+
+    .name-dialog input:focus {
+      border-color: rgba(159, 18, 57, 0.5);
+      box-shadow: 0 0 0 4px rgba(159, 18, 57, 0.1);
+    }
+
     .confirm-dialog .confirm-actions {
       display: grid;
       grid-template-columns: 1fr 1fr;
@@ -2728,6 +2914,16 @@
     };
 
     const seed = {
+      profile: {
+        nickname: "李同学",
+        realName: "李同学",
+        studentId: "2023123456",
+        authStatus: "已认证",
+        college: "计算机学院",
+        campusRole: "学生",
+        campusCard: "已绑定",
+        credit: "优秀",
+      },
       equipment: [
         {
           id: "paddle-red",
@@ -2810,6 +3006,7 @@
       ],
       loans: [],
       workOrders: [],
+      identityBindings: [],
       messages: [
         { id: "m1", title: "欢迎使用 SportLoop", text: "借出与归还在场馆机器完成，手机负责查看状态、同步记录，以及归还前扫码/拍照检测。", time: "刚刚" },
       ],
@@ -2853,9 +3050,11 @@
       if (!raw) return clone(seed);
       const parsed = JSON.parse(raw);
       return {
+        profile: { ...clone(seed.profile), ...(parsed.profile || {}) },
         equipment: mergeEquipmentImages(parsed.equipment),
         loans: parsed.loans || [],
         workOrders: parsed.workOrders || [],
+        identityBindings: parsed.identityBindings || [],
         messages: parsed.messages || clone(seed.messages),
       };
     }
@@ -2872,6 +3071,29 @@
 
     function saveStore() {
       localStorage.setItem(STORAGE_KEY, JSON.stringify(store));
+    }
+
+    function profileData() {
+      return { ...clone(seed.profile), ...(store.profile || {}) };
+    }
+
+    function profileNickname() {
+      const profile = profileData();
+      const savedName = typeof profile.nickname === "string" ? profile.nickname.trim() : "";
+      return savedName || seed.profile.nickname;
+    }
+
+    function profileMetaText() {
+      const profile = profileData();
+      return `学号 ${profile.studentId}　|　${profile.authStatus}　|　${profile.college}`;
+    }
+
+    function normalizeIdentityText(value) {
+      return String(value || "").trim().replace(/\s+/g, "");
+    }
+
+    function normalizeStudentId(value) {
+      return normalizeIdentityText(value).toUpperCase();
     }
 
     function icon(name) {
@@ -3040,6 +3262,13 @@
         .replace(/&/g, "&amp;")
         .replace(/"/g, "&quot;")
         .replace(/</g, "&lt;");
+    }
+
+    function escapeHtml(value) {
+      return String(value)
+        .replace(/&/g, "&amp;")
+        .replace(/</g, "&lt;")
+        .replace(/>/g, "&gt;");
     }
 
     /** 静态资源 URL 加版本参数，绕过浏览器对同名图片的强缓存 */
@@ -3599,18 +3828,19 @@
         .sort((a, b) => a - b)[0];
       const dueText = Number.isFinite(nearestDue) ? formatDueTime(nearestDue) : (currentCount ? "待归还" : "暂无");
       const rateChart = profileRateChart(ratePoints);
+      const nickname = profileNickname();
       const body = `
         <main class="scroll profile-scroll">
           <section class="profile-identity">
             <div class="avatar profile-main-avatar"></div><!-- 保留原头像样式 -->
             <div>
-              <div class="profile-name-line">
-                <h2>李同学</h2>
+              <button class="profile-name-line profile-name-edit-button" data-edit-profile-name type="button" aria-label="编辑昵称">
+                <h2>${escapeHtml(nickname)}</h2>
                 <span class="profile-edit" aria-hidden="true">${icon("edit")}</span>
-              </div>
-              <p class="profile-meta">学号 2023123456　|　已认证　|　计算机学院 · 软工2302</p>
+              </button>
+              <p class="profile-meta">${escapeHtml(profileMetaText())}</p>
             </div>
-            <span class="profile-identity-more" aria-hidden="true">${icon("chevron")}</span>
+            <button class="profile-identity-more" data-route="profileInfo" type="button" aria-label="查看个人信息">${icon("chevron")}</button>
           </section>
 
           <section class="profile-file">
@@ -3672,7 +3902,7 @@
           <section class="profile-settings">
             <button class="profile-setting-row" data-route="borrow">${icon("bell")}<strong>归还提醒</strong><span>开启归还前提醒</span>${icon("chevron")}</button>
             <button class="profile-setting-row" data-route="messages">${icon("message")}<strong>消息通知</strong><span>系统通知与提醒</span>${icon("chevron")}</button>
-            <button class="profile-setting-row">${icon("idcard")}<strong>校园认证</strong><span>学号与身份管理</span>${icon("chevron")}</button>
+            <button class="profile-setting-row" data-route="identity">${icon("idcard")}<strong>校园认证</strong><span>学号与身份管理</span>${icon("chevron")}</button>
             <button class="profile-setting-row">${icon("shield")}<strong>信用规则</strong><span>了解信用评分规则</span>${icon("chevron")}</button>
             <button class="profile-setting-row" data-route="report">${icon("help")}<strong>帮助与反馈</strong><span>常见问题与反馈</span>${icon("chevron")}</button>
             <button class="profile-setting-row" data-route="messages">${icon("headset")}<strong>联系管理员</strong><span>意见建议与咨询</span>${icon("chevron")}</button>
@@ -3829,6 +4059,78 @@
       `;
     }
 
+    function profileInfoRow(iconName, label, value) {
+      return `
+        <div class="profile-info-row">
+          ${icon(iconName)}
+          <strong>${escapeHtml(label)}</strong>
+          <span>${escapeHtml(value)}</span>
+        </div>
+      `;
+    }
+
+    function profileInfoPage() {
+      const profile = profileData();
+      const rows = [
+        ["idcard", "学号", profile.studentId],
+        ["user", "姓名", profile.realName],
+        ["shield", "校园身份", profile.campusRole],
+        ["check", "认证状态", profile.authStatus],
+        ["file", "院系", profile.college],
+        ["bag", "校园卡", profile.campusCard],
+        ["clock", "借用信用", profile.credit],
+      ];
+      const body = `
+        <main class="scroll profile-info-scroll">
+          <section class="profile-info-hero">
+            <div class="avatar profile-info-avatar"></div>
+            <div>
+              <p>当前昵称</p>
+              <h2>${escapeHtml(profileNickname())}</h2>
+              <button class="profile-info-edit" data-edit-profile-name type="button">${icon("edit")} 编辑昵称</button>
+            </div>
+          </section>
+          <section class="profile-settings profile-info-card">
+            ${rows.map(([iconName, label, value]) => profileInfoRow(iconName, label, value)).join("")}
+          </section>
+        </main>
+      `;
+      return shell("个人信息", body, { tabs: false });
+    }
+
+    function identityPage() {
+      const profile = profileData();
+      const body = `
+        <main class="scroll profile-info-scroll">
+          <section class="profile-info-hero">
+            <div class="avatar profile-info-avatar"></div>
+            <div>
+              <p>认证状态</p>
+              <h2>${escapeHtml(profile.authStatus)}</h2>
+            </div>
+          </section>
+          <form class="profile-settings identity-form" id="identityForm">
+            <label class="field">
+              <span>姓名</span>
+              <input name="realName" value="${escapeAttr(profile.realName || "")}" maxlength="12" required placeholder="请输入真实姓名" />
+            </label>
+            <label class="field">
+              <span>学号</span>
+              <input name="studentId" value="${escapeAttr(profile.studentId || "")}" maxlength="18" required inputmode="numeric" placeholder="请输入学号" />
+            </label>
+            <label class="field">
+              <span>院系</span>
+              <input name="college" value="${escapeAttr(profile.college || "")}" maxlength="20" required placeholder="请输入院系" />
+            </label>
+            <p class="identity-hint">认证后会绑定姓名、学号和院系；同一学号不能重复绑定，同一姓名和院系只能绑定一个学号。</p>
+            <p class="identity-status" id="identityStatus" aria-live="polite"></p>
+            <button class="primary-button" type="submit">${icon("check")} 保存认证</button>
+          </form>
+        </main>
+      `;
+      return shell("校园认证", body, { tabs: false });
+    }
+
     function roleSelectPage() {
       return `
         <section class="screen">
@@ -3907,6 +4209,8 @@
         messages: messagesPage,
         admin: adminPage,
         profile: profilePage,
+        profileInfo: profileInfoPage,
+        identity: identityPage,
       };
       appEl.innerHTML = (pages[state.route] || homePage)();
       bind();
@@ -3965,10 +4269,113 @@
       document.querySelector("#app").appendChild(overlay);
     }
 
+    function showNameEditor() {
+      const overlay = document.createElement("div");
+      overlay.className = "confirm-overlay";
+      overlay.innerHTML = `
+        <form class="confirm-dialog name-dialog">
+          <h2>编辑昵称</h2>
+          <input name="nickname" value="${escapeAttr(profileNickname())}" maxlength="12" required aria-label="昵称" placeholder="请输入昵称" />
+          <div class="confirm-actions">
+            <button class="btn-cancel" type="button">取消</button>
+            <button class="btn-danger" type="submit">保存</button>
+          </div>
+        </form>
+      `;
+      const input = overlay.querySelector("input");
+      overlay.querySelector(".btn-cancel").addEventListener("click", () => overlay.remove());
+      overlay.querySelector("form").addEventListener("submit", (event) => {
+        event.preventDefault();
+        const nickname = input.value.trim();
+        if (!nickname) {
+          input.focus();
+          return;
+        }
+        store.profile = { ...(store.profile || {}), nickname };
+        saveStore();
+        state.notice = "昵称已更新";
+        overlay.remove();
+        render();
+      });
+      overlay.addEventListener("click", (e) => {
+        if (e.target === overlay) overlay.remove();
+      });
+      document.querySelector("#app").appendChild(overlay);
+      window.setTimeout(() => {
+        input.focus();
+        input.select();
+      }, 0);
+    }
+
+    function setIdentityStatus(message, isError = true) {
+      const status = document.querySelector("#identityStatus");
+      if (!status) return;
+      status.textContent = message;
+      status.classList.toggle("is-error", isError);
+    }
+
+    function submitIdentityForm(event) {
+      event.preventDefault();
+      const form = event.currentTarget;
+      const realName = normalizeIdentityText(form.realName.value);
+      const studentId = normalizeStudentId(form.studentId.value);
+      const college = normalizeIdentityText(form.college.value);
+      if (!realName || !studentId || !college) {
+        setIdentityStatus("姓名、学号和院系都要填写完整");
+        return;
+      }
+      if (!/^[0-9A-Z]{6,18}$/.test(studentId)) {
+        setIdentityStatus("学号格式不正确，请输入 6 到 18 位数字或字母");
+        return;
+      }
+
+      const profileId = "current-student";
+      const bindings = Array.isArray(store.identityBindings) ? store.identityBindings : [];
+      const currentBinding = bindings.find((item) => item.profileId === profileId);
+      const sameStudentId = bindings.find((item) => item.studentId === studentId && item.profileId !== profileId);
+      const samePerson = bindings.find((item) =>
+        item.profileId !== profileId &&
+        normalizeIdentityText(item.realName) === realName &&
+        normalizeIdentityText(item.college) === college
+      );
+      if (sameStudentId) {
+        setIdentityStatus("这个学号已经被其他身份绑定，不能重复认证");
+        return;
+      }
+      if (samePerson) {
+        setIdentityStatus("这个姓名和院系已经绑定过学号，不能重复换号");
+        return;
+      }
+      if (currentBinding && currentBinding.studentId !== studentId) {
+        setIdentityStatus("当前身份已经绑定过学号，不能重复换号");
+        return;
+      }
+
+      const verifiedAt = currentBinding?.verifiedAt || nowText();
+      const record = { profileId, realName, studentId, college, verifiedAt };
+      store.identityBindings = bindings.filter((item) => item.profileId !== profileId).concat(record);
+      store.profile = {
+        ...profileData(),
+        realName,
+        studentId,
+        college,
+        authStatus: "已认证",
+        campusRole: "学生",
+        campusCard: "已绑定",
+        verifiedAt,
+      };
+      saveStore();
+      state.notice = "校园身份认证已保存";
+      route("profileInfo");
+    }
+
     function bind() {
       document.querySelectorAll("[data-route]").forEach((node) => node.addEventListener("click", () => route(node.dataset.route)));
       document.querySelectorAll("[data-back]").forEach((node) => node.addEventListener("click", back));
       document.querySelectorAll("[data-detail]").forEach((node) => node.addEventListener("click", () => route("detail", { id: node.dataset.detail })));
+      document.querySelectorAll("[data-edit-profile-name]").forEach((node) => node.addEventListener("click", showNameEditor));
+      const identityForm = document.querySelector("#identityForm");
+      if (identityForm) identityForm.addEventListener("submit", submitIdentityForm);
       document.querySelectorAll("[data-sync-borrow]").forEach((node) => node.addEventListener("click", () => {
         if (node.disabled) return;
         const itemId = node.dataset.syncBorrow || state.selectedId;
