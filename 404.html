@@ -3437,27 +3437,50 @@
 
     function dbProfileToLocal(row) {
       return {
-        nickname: row.nickname,
-        realName: row.real_name,
-        studentId: row.student_id,
-        authStatus: row.auth_status,
-        college: row.college,
-        campusRole: row.campus_role,
-        campusCard: row.campus_card,
+        nickname: row.nickname || "",
+        realName: row.real_name || "",
+        studentId: row.student_id || "",
+        authStatus: row.auth_status || "未认证",
+        college: row.college || "",
+        campusRole: row.campus_role || "学生",
+        campusCard: row.campus_card || "未绑定",
+      };
+    }
+
+    function blankStudentProfile() {
+      return {
+        nickname: "",
+        realName: "",
+        studentId: "",
+        authStatus: "未认证",
+        college: "",
+        campusRole: "学生",
+        campusCard: "未绑定",
+        credit: "合格",
       };
     }
 
     function emptyRemoteProfile() {
-      return {
-        ...clone(seed.profile),
-        nickname: profileNickname(),
-        realName: "",
-        studentId: "",
-        authStatus: "未认证",
-        college: "未绑定院系",
-        campusRole: "学生",
-        campusCard: "未绑定",
-      };
+      return blankStudentProfile();
+    }
+
+    function isSeedDemoProfile(profile = {}) {
+      return profile.nickname === seed.profile.nickname
+        && profile.realName === seed.profile.realName
+        && profile.studentId === seed.profile.studentId
+        && profile.authStatus === seed.profile.authStatus
+        && profile.college === seed.profile.college;
+    }
+
+    function resetAccountScopedStore(userId) {
+      store.authUserId = userId || "";
+      store.profile = emptyRemoteProfile();
+      store.loans = [];
+      store.workOrders = [];
+      store.identityBindings = [];
+      store.adminMessages = [];
+      store.messages = [];
+      saveStore();
     }
 
     function dbLoanToLocal(row) {
@@ -3528,7 +3551,7 @@
       const email = normalizeLoginEmail(account);
       try {
         const data = await supabaseAuthRequest("token?grant_type=password", { email, password });
-        await finishAuth(data, role, role === "admin" ? "管理员登录成功" : "学生登录成功");
+        await finishAuth(data, role);
       } catch (error) {
         const message = String(error.message || "");
         if (message.includes("Invalid login credentials")) throw new Error("账号未注册或密码错误，请先注册");
@@ -3549,10 +3572,10 @@
         render();
         return;
       }
-      await finishAuth(data, role, role === "admin" ? "管理员注册成功" : "学生注册成功");
+      await finishAuth(data, role);
     }
 
-    async function finishAuth(data, role, successMessage) {
+    async function finishAuth(data, role) {
       const user = data.user || {};
       saveAuthSession({
         accessToken: data.access_token,
@@ -3562,13 +3585,14 @@
         email: user.email || email,
         role,
       });
+      if (store.authUserId !== user.id || isSeedDemoProfile(store.profile)) resetAccountScopedStore(user.id);
       try {
         await loadRemoteStore();
       } catch (error) {
         reportRemoteSyncError(error);
       }
       state.route = role === "admin" ? "admin" : "home";
-      state.notice = role === "admin" && !state.isAdmin ? "管理员账号已登录，等待授权" : successMessage;
+      state.notice = role === "admin" && !state.isAdmin ? "管理员账号已登录，等待授权" : "";
       render();
     }
 
@@ -3593,9 +3617,11 @@
       ]);
 
       if (equipmentRows.length) store.equipment = equipmentRows.map(dbEquipmentToLocal);
-      store.profile = profileRows.length ? { ...emptyRemoteProfile(), ...dbProfileToLocal(profileRows[0]) } : emptyRemoteProfile();
+      store.authUserId = authSession.userId;
+      const remoteProfile = profileRows.length ? dbProfileToLocal(profileRows[0]) : emptyRemoteProfile();
+      store.profile = isSeedDemoProfile(remoteProfile) ? emptyRemoteProfile() : { ...emptyRemoteProfile(), ...remoteProfile };
       store.loans = loanRows.map(dbLoanToLocal);
-      store.messages = messageRows.length ? messageRows.map(dbMessageToLocal) : clone(seed.messages);
+      store.messages = messageRows.map(dbMessageToLocal);
       store.adminMessages = contactRows.map(dbContactToLocal);
       store.workOrders = orderRows.map(dbWorkOrderToLocal);
       saveStore();
@@ -3649,13 +3675,13 @@
         headers: { Prefer: "resolution=merge-duplicates,return=representation" },
         body: {
           user_id: authSession.userId,
-          nickname: profile.nickname || profile.realName || "李同学",
-          real_name: profile.realName,
-          student_id: profile.studentId,
-          college: profile.college,
-          auth_status: profile.authStatus || "已认证",
+          nickname: profile.nickname || "",
+          real_name: profile.realName || "",
+          student_id: profile.studentId || "",
+          college: profile.college || "",
+          auth_status: profile.authStatus || "未认证",
           campus_role: profile.campusRole || "学生",
-          campus_card: profile.campusCard || "已绑定",
+          campus_card: profile.campusCard || "未绑定",
         },
       });
     }
@@ -3773,9 +3799,10 @@
 
     function loadStore() {
       const raw = localStorage.getItem(STORAGE_KEY);
-      if (!raw) return clone(seed);
+      if (!raw) return { ...clone(seed), authUserId: "" };
       const parsed = JSON.parse(raw);
       return {
+        authUserId: parsed.authUserId || "",
         profile: { ...clone(seed.profile), ...(parsed.profile || {}) },
         equipment: mergeEquipmentImages(parsed.equipment),
         loans: parsed.loans || [],
@@ -3803,19 +3830,22 @@
     }
 
     function profileData() {
-      return { ...clone(seed.profile), ...(store.profile || {}) };
+      const defaults = state.loggedIn ? emptyRemoteProfile() : clone(seed.profile);
+      const localProfile = state.loggedIn && isSeedDemoProfile(store.profile) ? {} : (store.profile || {});
+      return { ...defaults, ...localProfile };
     }
 
     function profileNickname() {
       const profile = profileData();
       const savedName = typeof profile.nickname === "string" ? profile.nickname.trim() : "";
-      return savedName || seed.profile.nickname;
+      return savedName || (state.loggedIn ? "未设置昵称" : seed.profile.nickname);
     }
 
     function profileMetaText() {
       const profile = profileData();
       const studentId = profile.studentId || "未绑定学号";
-      return `学号 ${studentId}　|　${profile.authStatus}　|　${profile.college}`;
+      const college = profile.college || "未绑定院系";
+      return `学号 ${studentId}　|　${profile.authStatus}　|　${college}`;
     }
 
     function normalizeIdentityText(value) {
@@ -5791,6 +5821,7 @@
 
     async function initApp() {
       if (authSession?.accessToken) {
+        if (store.authUserId !== authSession.userId || isSeedDemoProfile(store.profile)) resetAccountScopedStore(authSession.userId);
         try {
           await loadRemoteStore();
         } catch (error) {
