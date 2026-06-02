@@ -1473,11 +1473,388 @@
       background: linear-gradient(145deg, #211d20, #6f0b27);
     }
 
+    .admin-dashboard-hero {
+      position: relative;
+      display: grid;
+      gap: 18px;
+      padding: clamp(18px, 5vw, 24px);
+      overflow: hidden;
+      border: 1px solid rgba(255, 79, 134, 0.26);
+      background:
+        radial-gradient(circle at 82% 16%, rgba(255, 79, 134, 0.18), transparent 30%),
+        radial-gradient(circle at 8% 92%, rgba(139, 124, 255, 0.14), transparent 34%),
+        radial-gradient(circle at 86% 82%, rgba(53, 214, 181, 0.1), transparent 34%),
+        linear-gradient(145deg, #16070f 0%, #1b0d18 54%, #071116 100%);
+      box-shadow: 0 24px 52px rgba(111, 11, 39, 0.2);
+    }
+
+    .admin-dashboard-hero::after {
+      content: "";
+      position: absolute;
+      right: -44px;
+      bottom: -56px;
+      width: 150px;
+      height: 150px;
+      border-radius: 50%;
+      border: 34px solid rgba(255, 79, 134, 0.08);
+      pointer-events: none;
+    }
+
+    .admin-ring-top {
+      position: relative;
+      z-index: 1;
+      display: flex;
+      align-items: flex-start;
+      justify-content: space-between;
+      gap: 14px;
+    }
+
+    .admin-ring-top h1 {
+      margin-top: 4px;
+    }
+
+    .admin-overline {
+      margin: 0;
+      color: #b8c4bb;
+      font-size: 12px;
+      font-weight: 900;
+      letter-spacing: 0.04em;
+    }
+
+    .admin-ring-summary {
+      margin-top: 8px;
+      color: rgba(255, 255, 255, 0.78);
+      font-size: clamp(13px, 3.5vw, 15px);
+      line-height: 1.35;
+      white-space: nowrap;
+      word-break: keep-all;
+    }
+
+    .admin-ring-mode {
+      min-height: 34px;
+      display: inline-grid;
+      place-items: center;
+      padding: 0 14px;
+      border-radius: 999px;
+      color: #ffffff;
+      font-size: 12px;
+      font-weight: 900;
+      white-space: nowrap;
+      background: linear-gradient(135deg, #ff4f86, #b01242);
+      box-shadow: 0 0 24px rgba(255, 79, 134, 0.26);
+    }
+
+    .admin-ring-stage {
+      position: relative;
+      z-index: 1;
+      display: grid;
+      justify-items: center;
+      gap: 14px;
+    }
+
+    .admin-activity-ring {
+      position: relative;
+      width: clamp(180px, 55vw, 230px);
+      aspect-ratio: 1;
+      border-radius: 50%;
+      background: radial-gradient(circle, rgba(255, 255, 255, 0.08), rgba(255, 255, 255, 0.02) 55%, transparent 56%);
+    }
+
+    .admin-ring-layer {
+      position: absolute;
+      border-radius: 50%;
+      transform: rotate(-90deg);
+      background: conic-gradient(var(--ring-color) var(--ring-value), rgba(255, 255, 255, 0.12) 0);
+      -webkit-mask: radial-gradient(farthest-side, transparent calc(100% - var(--ring-width)), #000 0);
+      mask: radial-gradient(farthest-side, transparent calc(100% - var(--ring-width)), #000 0);
+      filter: drop-shadow(0 0 12px var(--ring-glow));
+    }
+
+    .admin-ring-message {
+      inset: 0;
+      --ring-width: 17px;
+      --ring-value: var(--message-rate);
+      --ring-color: #ff4f86;
+      --ring-glow: rgba(255, 79, 134, 0.34);
+    }
+
+    .admin-ring-work {
+      inset: 28px;
+      --ring-width: 15px;
+      --ring-value: var(--work-rate);
+      --ring-color: #8b7cff;
+      --ring-glow: rgba(139, 124, 255, 0.3);
+    }
+
+    .admin-ring-stock {
+      inset: 54px;
+      --ring-width: 13px;
+      --ring-value: var(--stock-rate);
+      --ring-color: #35d6b5;
+      --ring-glow: rgba(53, 214, 181, 0.3);
+    }
+
+    .admin-ring-center {
+      position: absolute;
+      inset: clamp(70px, 20vw, 88px);
+      display: grid;
+      place-content: center;
+      text-align: center;
+      border-radius: 50%;
+      background: rgba(2, 10, 6, 0.8);
+      box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.08);
+    }
+
+    .admin-ring-center strong {
+      color: #ffffff;
+      font-size: clamp(30px, 9vw, 42px);
+      line-height: 1;
+      font-family: "DIN Alternate", "SF Pro Display", Arial, sans-serif;
+    }
+
+    .admin-ring-center span {
+      margin-top: 6px;
+      color: #8d9b91;
+      font-size: 11px;
+      font-weight: 900;
+    }
+
+    .admin-ring-legend {
+      width: 100%;
+      display: grid;
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+      gap: 8px;
+    }
+
+    .admin-ring-legend-item {
+      min-width: 0;
+      display: grid;
+      gap: 4px;
+      padding: 9px 8px;
+      border-radius: 16px;
+      color: rgba(255, 255, 255, 0.92);
+      font-size: 11px;
+      font-weight: 900;
+      text-align: center;
+      background: rgba(255, 255, 255, 0.08);
+      box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.08);
+    }
+
+    .admin-ring-legend-item::before {
+      content: "";
+      width: 24px;
+      height: 4px;
+      justify-self: center;
+      border-radius: 999px;
+      background: var(--legend-color);
+      box-shadow: 0 0 14px var(--legend-glow);
+    }
+
+    .admin-ring-legend-item.is-message {
+      --legend-color: #ff4f86;
+      --legend-glow: rgba(255, 79, 134, 0.45);
+      background: rgba(255, 79, 134, 0.14);
+      box-shadow: inset 0 0 0 1px rgba(255, 79, 134, 0.2);
+    }
+
+    .admin-ring-legend-item.is-work {
+      --legend-color: #8b7cff;
+      --legend-glow: rgba(139, 124, 255, 0.42);
+      background: rgba(139, 124, 255, 0.14);
+      box-shadow: inset 0 0 0 1px rgba(139, 124, 255, 0.2);
+    }
+
+    .admin-ring-legend-item.is-stock {
+      --legend-color: #35d6b5;
+      --legend-glow: rgba(53, 214, 181, 0.42);
+      background: rgba(53, 214, 181, 0.13);
+      box-shadow: inset 0 0 0 1px rgba(53, 214, 181, 0.2);
+    }
+
+    .admin-ring-legend-item b {
+      color: #ffffff;
+      font-size: 15px;
+      font-family: "DIN Alternate", "SF Pro Display", Arial, sans-serif;
+    }
+
+    .admin-hero-main {
+      position: relative;
+      z-index: 1;
+      display: grid;
+      grid-template-columns: minmax(0, 1fr) auto;
+      gap: 14px;
+      align-items: center;
+    }
+
+    .admin-hero-icon {
+      width: 58px;
+      height: 58px;
+      display: grid;
+      place-items: center;
+      border-radius: 20px;
+      color: #ffffff;
+      background: rgba(255, 255, 255, 0.16);
+      box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.18);
+      backdrop-filter: blur(10px);
+    }
+
+    .admin-hero-icon svg {
+      width: 28px;
+      height: 28px;
+      stroke-width: 2.4;
+    }
+
+    .admin-hero-meta {
+      position: relative;
+      z-index: 1;
+      display: grid;
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+      gap: 8px;
+    }
+
+    .admin-hero-meta span {
+      min-height: 44px;
+      display: grid;
+      place-items: center;
+      padding: 8px 6px;
+      border-radius: 16px;
+      color: rgba(255, 255, 255, 0.9);
+      font-size: clamp(11px, 3.2vw, 12px);
+      font-weight: 800;
+      text-align: center;
+      background: rgba(255, 255, 255, 0.14);
+      box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.12);
+    }
+
+    .admin-kpi-grid {
+      display: grid;
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+      gap: 8px;
+      margin: 10px 0 14px;
+    }
+
+    .admin-kpi-card {
+      min-height: 104px;
+      display: grid;
+      gap: 10px;
+      padding: 13px;
+      border: 1px solid rgba(159, 18, 57, 0.12);
+      border-radius: 22px;
+      background:
+        linear-gradient(180deg, rgba(255, 255, 255, 0.98), rgba(255, 246, 248, 0.92));
+      box-shadow: 0 14px 32px rgba(111, 11, 39, 0.1);
+    }
+
+    .admin-kpi-card.is-compact {
+      min-height: 70px;
+      grid-template-columns: 30px minmax(0, 1fr);
+      align-items: center;
+      gap: 8px;
+      padding: 10px;
+      border-radius: 18px;
+      box-shadow: 0 10px 22px rgba(111, 11, 39, 0.08);
+    }
+
+    .admin-kpi-card.is-compact .admin-kpi-icon {
+      width: 30px;
+      height: 30px;
+      border-radius: 12px;
+    }
+
+    .admin-kpi-card.is-compact strong {
+      font-size: clamp(20px, 6vw, 25px);
+    }
+
+    .admin-kpi-icon {
+      width: 34px;
+      height: 34px;
+      display: grid;
+      place-items: center;
+      border-radius: 14px;
+      color: var(--brand);
+      background: var(--brand-soft);
+    }
+
+    .admin-kpi-icon svg {
+      width: 18px;
+      height: 18px;
+      stroke-width: 2.5;
+    }
+
+    .admin-kpi-card small {
+      color: var(--muted);
+      font-size: 12px;
+      font-weight: 800;
+    }
+
+    .admin-kpi-card strong {
+      display: block;
+      margin-top: 3px;
+      color: var(--ink);
+      font-size: clamp(24px, 7vw, 32px);
+      line-height: 1;
+      font-family: "DIN Alternate", "SF Pro Display", Arial, sans-serif;
+    }
+
+    .admin-kpi-card strong span {
+      margin-left: 2px;
+      color: var(--muted);
+      font-size: 12px;
+      font-family: inherit;
+    }
+
+    .admin-section-card {
+      display: grid;
+      gap: 12px;
+      margin-top: 16px;
+      padding: 14px;
+      border: 1px solid rgba(159, 18, 57, 0.1);
+      border-radius: 26px;
+      background: rgba(255, 255, 255, 0.92);
+      box-shadow: 0 16px 36px rgba(111, 11, 39, 0.08);
+    }
+
+    .admin-section-title {
+      display: grid;
+      grid-template-columns: minmax(0, 1fr) auto;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .admin-section-title h2 {
+      margin: 0;
+      font-size: clamp(20px, 6vw, 25px);
+      line-height: 1.2;
+    }
+
+    .admin-section-title p {
+      margin: 5px 0 0;
+      color: var(--muted);
+      font-size: clamp(12px, 3.5vw, 13px);
+      line-height: 1.45;
+    }
+
+    .admin-status-pill {
+      min-height: 34px;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      padding: 0 12px;
+      border-radius: 999px;
+      color: var(--brand);
+      font-size: 12px;
+      font-weight: 900;
+      white-space: nowrap;
+      background: var(--brand-soft);
+    }
+
     .order-card {
       display: grid;
       grid-template-columns: 78px 1fr;
       gap: 12px;
       padding: 13px;
+      border-radius: 20px;
+      background: rgba(255, 255, 255, 0.96);
     }
 
     .admin-actions {
@@ -3562,7 +3939,7 @@
     async function handleRegister(account, password) {
       const role = state.loginRole || "student";
       const email = normalizeLoginEmail(account);
-      const data = await supabaseAuthRequest("signup", { email, password });
+      const data = await supabaseAuthRequest("signup", { email, password, data: { sportloopRole: role } });
       if (data.user?.identities && data.user.identities.length === 0) {
         throw new Error("这个账号已经注册过，请直接登录");
       }
@@ -3572,35 +3949,80 @@
         render();
         return;
       }
-      await finishAuth(data, role);
+      await finishAuth(data, role, email);
     }
 
-    async function finishAuth(data, role) {
+    function declaredUserRole(user = {}) {
+      const role = user.user_metadata?.sportloopRole;
+      return role === "admin" || role === "student" ? role : "";
+    }
+
+    function actualUserRole(user, hasAdminAccess) {
+      if (hasAdminAccess) return "admin";
+      return declaredUserRole(user) || "student";
+    }
+
+    function actualSessionRole() {
+      if (state.isAdmin) return "admin";
+      return authSession?.declaredRole || "student";
+    }
+
+    function roleMismatchMessage(actualRole) {
+      return actualRole === "admin" ? "这是管理员账号，请从管理员端登录" : "这是学生账号，请从学生端登录";
+    }
+
+    async function checkAdminAccess() {
+      return await supabaseRequest("rpc/is_admin", { method: "POST", body: {} }) === true;
+    }
+
+    function ensureRoleMatch(requestedRole, actualRole) {
+      if (requestedRole === actualRole) return;
+      throw new Error(roleMismatchMessage(actualRole));
+    }
+
+    async function finishAuth(data, role, fallbackEmail = "") {
       const user = data.user || {};
       saveAuthSession({
         accessToken: data.access_token,
         refreshToken: data.refresh_token,
         expiresAt: data.expires_at || Math.floor(Date.now() / 1000) + Number(data.expires_in || 3600),
         userId: user.id,
-        email: user.email || email,
+        email: user.email || fallbackEmail,
         role,
+        declaredRole: declaredUserRole(user),
       });
+      state.isAdmin = await checkAdminAccess();
+      const actualRole = actualUserRole(user, state.isAdmin);
+      try {
+        ensureRoleMatch(role, actualRole);
+      } catch (error) {
+        clearAuthSession();
+        throw error;
+      }
+      saveAuthSession({ ...authSession, role: actualRole });
       if (store.authUserId !== user.id || isSeedDemoProfile(store.profile)) resetAccountScopedStore(user.id);
       try {
         await loadRemoteStore();
       } catch (error) {
         reportRemoteSyncError(error);
       }
-      state.route = role === "admin" ? "admin" : "home";
-      state.notice = role === "admin" && !state.isAdmin ? "管理员账号已登录，等待授权" : "";
+      state.route = actualRole === "admin" ? "admin" : "home";
+      state.notice = actualRole === "admin" && !state.isAdmin ? "管理员账号已登录，等待授权" : "";
       render();
     }
 
     async function refreshAdminAccess() {
-      const shouldCheckAdmin = (authSession?.role || state.loginRole) === "admin";
-      state.isAdmin = false;
-      if (!shouldCheckAdmin) return;
-      state.isAdmin = await supabaseRequest("rpc/is_admin", { method: "POST", body: {} }) === true;
+      state.isAdmin = await checkAdminAccess();
+      const requestedRole = authSession?.role || state.loginRole || "student";
+      const actualRole = actualSessionRole();
+      try {
+        ensureRoleMatch(requestedRole, actualRole);
+      } catch (error) {
+        clearAuthSession();
+        state.route = "credentials";
+        state.notice = error.message;
+        throw error;
+      }
     }
 
     async function loadRemoteStore() {
@@ -4625,23 +5047,34 @@
     function adminPage() {
       const pending = store.workOrders.filter((order) => order.status !== "已完成");
       const waitingMessages = adminMessageList().filter((message) => message.status !== "已回复");
+      const totalAvailable = store.equipment.reduce((sum, item) => sum + item.available, 0);
+      const totalStock = store.equipment.reduce((sum, item) => sum + item.total, 0);
+      const healthyCount = store.equipment.filter((item) => item.health >= 90).length;
+      const maintenanceCount = store.equipment.filter((item) => item.status !== "可借").length;
+      const progress = adminProgressMetrics();
       const body = `
         <main class="scroll">
-          <section class="admin-hero">
-            <h1>管理员工作台</h1>
-            <p>处理学生留言、报修工单和器材维护。</p>
+          <section class="admin-hero admin-dashboard-hero">
+            <div class="admin-ring-top">
+              <div>
+                <p class="admin-overline">今日运营</p>
+                <h1>管理员工作台</h1>
+                <p class="admin-ring-summary">留言·工单·库存实时计算</p>
+              </div>
+              <span class="admin-ring-mode">实时</span>
+            </div>
+            <div class="admin-ring-stage">
+              ${adminActivityRing(progress)}
+            </div>
           </section>
-          <div class="kpi-grid">
-            ${kpi("待回复", waitingMessages.length, "条")}
-            ${kpi("待处理", pending.length, "单")}
-            ${kpi("可借总量", store.equipment.reduce((sum, item) => sum + item.available, 0), "件")}
+          <div class="admin-kpi-grid">
+            ${adminKpi("待回复", waitingMessages.length, "条", "message")}
+            ${adminKpi("待处理", pending.length, "单", "wrench")}
+            ${adminKpi("可借总量", totalAvailable, "件", "bag")}
           </div>
-          <div class="section-head"><h2>学生留言</h2></div>
-          <div class="admin-list">${adminMessageList().length ? adminMessageList().map(adminContactCard).join("") : `<div class="empty">暂无学生留言。</div>`}</div>
-          <div class="section-head"><h2>报修工单</h2></div>
-          <div class="admin-list">${store.workOrders.length ? store.workOrders.map(orderCard).join("") : `<div class="empty">暂无工单。学生提交异常后会出现在这里。</div>`}</div>
-          <div class="section-head"><h2>器材档案</h2></div>
-          <div class="list-stack">${store.equipment.map(adminEquipmentRow).join("")}</div>
+          ${adminSection("学生留言", "优先处理未回复咨询，回复后会同步到学生端。", `${waitingMessages.length} 待回复`, adminMessageList().length ? adminMessageList().map(adminContactCard).join("") : `<div class="empty">暂无学生留言。</div>`)}
+          ${adminSection("报修工单", "跟踪器材异常、暂停借出和维修完成状态。", `${pending.length} 待处理`, store.workOrders.length ? store.workOrders.map(orderCard).join("") : `<div class="empty">暂无工单。学生提交异常后会出现在这里。</div>`)}
+          ${adminSection("器材档案", `当前 ${totalAvailable}/${totalStock} 件可借，${healthyCount} 类器材健康度良好。`, `${maintenanceCount} 需关注`, `<div class="list-stack">${store.equipment.map(adminEquipmentRow).join("")}</div>`)}
         </main>
       `;
       if (!state.isAdmin) {
@@ -4663,6 +5096,82 @@
         return shell("管理员端", body, { left: "none", right: "logout", tabs: false });
       }
       return shell("管理员端", body, { left: "none", right: "logout", tabs: false });
+    }
+
+    function boundedPercent(value) {
+      return Math.max(0, Math.min(100, Math.round(Number(value) || 0)));
+    }
+
+    function percentOf(done, total) {
+      if (total === 0) return 100;
+      return boundedPercent((done / total) * 100);
+    }
+
+    function adminProgressMetrics() {
+      const messages = adminMessageList();
+      const repliedMessages = messages.filter((message) => message.status === "已回复").length;
+      const completedOrders = store.workOrders.filter((order) => order.status === "已完成").length;
+      const totalStock = store.equipment.reduce((sum, item) => sum + item.total, 0);
+      const totalAvailable = store.equipment.reduce((sum, item) => sum + item.available, 0);
+      const messageRate = percentOf(repliedMessages, messages.length);
+      const workRate = percentOf(completedOrders, store.workOrders.length);
+      const stockRate = percentOf(totalAvailable, totalStock);
+      return {
+        messageRate,
+        workRate,
+        stockRate,
+        overallRate: boundedPercent((messageRate + workRate + stockRate) / 3),
+      };
+    }
+
+    function adminRingStyle(metrics) {
+      return `--message-rate: ${metrics.messageRate}%; --work-rate: ${metrics.workRate}%; --stock-rate: ${metrics.stockRate}%;`;
+    }
+
+    function adminActivityRing(metrics) {
+      return `
+        <div class="admin-activity-ring" style="${escapeAttr(adminRingStyle(metrics))}" role="img" aria-label="管理员运营完成度 ${metrics.overallRate}%">
+          <span class="admin-ring-layer admin-ring-message"></span>
+          <span class="admin-ring-layer admin-ring-work"></span>
+          <span class="admin-ring-layer admin-ring-stock"></span>
+          <div class="admin-ring-center">
+            <strong>${metrics.overallRate}%</strong>
+            <span>完成度</span>
+          </div>
+        </div>
+        <div class="admin-ring-legend">
+          <span class="admin-ring-legend-item is-message">留言<b>${metrics.messageRate}%</b></span>
+          <span class="admin-ring-legend-item is-work">工单<b>${metrics.workRate}%</b></span>
+          <span class="admin-ring-legend-item is-stock">库存<b>${metrics.stockRate}%</b></span>
+        </div>
+      `;
+    }
+
+    function adminKpi(label, value, unit, iconName) {
+      return `
+        <article class="admin-kpi-card is-compact">
+          <i class="admin-kpi-icon">${icon(iconName)}</i>
+          <div>
+            <small>${escapeHtml(label)}</small>
+            <strong>${value}<span>${escapeHtml(unit)}</span></strong>
+          </div>
+        </article>
+      `;
+    }
+
+    function adminSection(title, desc, status, content) {
+      return `
+        <section class="admin-section-card">
+          <div class="admin-section-title">
+            <div>
+              <h2>${escapeHtml(title)}</h2>
+              <p>${escapeHtml(desc)}</p>
+            </div>
+            <span class="admin-status-pill">${escapeHtml(status)}</span>
+          </div>
+          <div class="admin-list">${content}</div>
+        </section>
+      `;
     }
 
     function adminContactCard(message) {
@@ -4697,14 +5206,14 @@
     function orderCard(order) {
       const item = byId(order.equipmentId);
       return `
-        <article class="order-card" style="margin-bottom: 14px;">
+        <article class="order-card">
           ${equipmentImage(item, "order-img")}<!-- [IMAGE-FN→order-img] 管理员工单卡片 -->
           <div>
             <strong>${order.title}</strong>
             <p style="font-size: 11px; margin-top:2px;">${item.assetId} · ${order.source} · ${order.createdAt}</p>
             ${tag(order.status)}
           </div>
-          <div class="admin-actions" style="margin-top: 10px;">
+          <div class="admin-actions">
             <button class="secondary-button" data-admin-pause="${order.id}">${icon("shield")} 暂停</button>
             <button class="secondary-button" data-admin-repair="${order.id}">${icon("wrench")} 维修中</button>
             <button class="primary-button" data-admin-complete="${order.id}">${icon("check")} 完成</button>
@@ -5256,7 +5765,6 @@
               <span>院系</span>
               <input name="college" value="${escapeAttr(profile.college || "")}" maxlength="20" required placeholder="请输入院系" />
             </label>
-            <p class="identity-hint">认证后会绑定姓名、学号和院系；学号不能重复，姓名和院系可以相同。</p>
             <p class="identity-status" id="identityStatus" aria-live="polite"></p>
             <button class="primary-button" type="submit">${icon("check")} 保存认证</button>
           </form>
