@@ -3392,6 +3392,10 @@
       return state.notice ? `<p class="login-form-status">${escapeHtml(state.notice)}</p>` : `<p class="login-form-status"></p>`;
     }
 
+    function reportRemoteSyncError(error) {
+      console.error("远程数据同步失败", error);
+    }
+
     function makeUuid() {
       return crypto.randomUUID();
     }
@@ -3558,7 +3562,11 @@
         email: user.email || email,
         role,
       });
-      await loadRemoteStore();
+      try {
+        await loadRemoteStore();
+      } catch (error) {
+        reportRemoteSyncError(error);
+      }
       state.route = role === "admin" ? "admin" : "home";
       state.notice = successMessage;
       render();
@@ -3599,9 +3607,7 @@
         await loadRemoteStore();
         if (state.route === routeBefore) render();
       } catch (error) {
-        console.error(error);
-        state.notice = `数据库同步失败：${error.message}`;
-        render();
+        reportRemoteSyncError(error);
       } finally {
         state.remoteLoading = false;
       }
@@ -3611,12 +3617,27 @@
       return ["home", "list", "borrow", "renew", "messages", "admin", "profile", "profileInfo", "creditRules", "identity", "contactAdmin"].includes(to);
     }
 
+    const adminRoutes = new Set(["admin"]);
+    const studentRoutes = new Set([
+      "home", "list", "detail", "scanBorrow", "borrowConfirm", "borrow", "renew", "renewDetail",
+      "detect", "result", "report", "messages", "contactAdmin", "profile", "profileInfo", "creditRules", "identity",
+    ]);
+
+    function currentUserRole() {
+      return (authSession?.role || state.loginRole) === "admin" ? "admin" : "student";
+    }
+
+    function normalizeRouteForRole(to) {
+      if (!state.loggedIn) return to;
+      if (currentUserRole() === "admin") return adminRoutes.has(to) ? to : "admin";
+      if (adminRoutes.has(to)) return "home";
+      return studentRoutes.has(to) ? to : "home";
+    }
+
     function runRemote(task) {
       if (!authSession?.accessToken) return;
       task().catch((error) => {
-        console.error(error);
-        state.notice = `数据库同步失败：${error.message}`;
-        render();
+        reportRemoteSyncError(error);
       });
     }
 
@@ -3887,6 +3908,7 @@
     }
 
     function route(to, payload = {}) {
+      to = normalizeRouteForRole(to);
       if (state.route === "scanBorrow" && to !== "scanBorrow") {
         clearScanTimers();
         state.scanPhase = "idle";
@@ -3922,7 +3944,11 @@
       const left = options.left === "none"
         ? `<span></span>`
         : `<button class="icon-button" data-back aria-label="返回">${icon("back")}</button>`;
-      const right = `<button class="avatar" data-route="profile" aria-label="个人中心"></button>`; /* [IMAGE-12] 顶栏头像 */
+      const right = options.right === "none"
+        ? `<span></span>`
+        : options.right === "logout"
+          ? `<button class="icon-button" data-logout aria-label="退出登录">${icon("logout")}</button>`
+          : `<button class="avatar" data-route="profile" aria-label="个人中心"></button>`; /* [IMAGE-12] 顶栏头像 */
       return `
         <section class="screen">
           <header class="topbar">
@@ -4602,9 +4628,9 @@
             </section>
           </main>
         `;
-        return shell("管理员端", body);
+        return shell("管理员端", body, { left: "none", right: "logout", tabs: false });
       }
-      return shell("管理员端", body);
+      return shell("管理员端", body, { left: "none", right: "logout", tabs: false });
     }
 
     function adminContactCard(message) {
@@ -4902,7 +4928,7 @@
         <section class="screen profile-screen">
           <header class="profile-topbar">
             <h1>我的</h1>
-            <button class="profile-gear" id="btnSwitchAdmin" aria-label="设置">${icon("gear")}</button>
+            <button class="profile-gear" data-route="profileInfo" aria-label="个人信息">${icon("gear")}</button>
           </header>
           ${loginStatusHtml()}
           ${body}
@@ -5316,6 +5342,7 @@
         bindLogin();
         return;
       }
+      state.route = normalizeRouteForRole(state.route);
 
       const pages = {
         home: homePage,
@@ -5683,12 +5710,6 @@
       document.querySelectorAll("[data-admin-complete]").forEach((node) => node.addEventListener("click", () => updateOrder(node.dataset.adminComplete, "已完成")));
       document.querySelectorAll("[data-admin-reply]").forEach((node) => node.addEventListener("click", () => replyAdminMessage(node.dataset.adminReply, node.closest(".admin-contact-card"))));
 
-      // 额外的管理员切换绑定
-      const btnSwitchAdmin = document.querySelector("#btnSwitchAdmin");
-      if (btnSwitchAdmin) {
-        btnSwitchAdmin.addEventListener("click", () => route("admin"));
-      }
-
       // 清除缓存数据重置
       const resetBtn = document.querySelector("[data-reset]");
       if (resetBtn) {
@@ -5771,8 +5792,7 @@
         try {
           await loadRemoteStore();
         } catch (error) {
-          console.error(error);
-          state.notice = `数据库同步失败：${error.message}`;
+          reportRemoteSyncError(error);
         }
       }
       render();
