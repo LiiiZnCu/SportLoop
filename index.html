@@ -2520,6 +2520,23 @@
       font-size: 12px;
     }
 
+    .login-switch {
+      margin-top: 14px;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      gap: 6px;
+      color: var(--muted);
+      font-size: 13px;
+      font-weight: 700;
+    }
+
+    .login-switch .text-button {
+      min-height: 34px;
+      padding: 0 4px;
+      font-size: 13px;
+    }
+
     .locked-equip {
       min-height: 50px;
       display: flex;
@@ -3031,6 +3048,9 @@
   <script>
     // 💡 强刷版本键名，绕过老旧的缓存干扰，促使全新首页布局立刻下发
     const STORAGE_KEY = "sportloop-ios-app-v7";
+    const AUTH_STORAGE_KEY = "sportloop-supabase-auth-v1";
+    const SUPABASE_URL = "https://jwylvubakymfkdncuwhp.supabase.co";
+    const SUPABASE_PUBLIC_KEY = "sb_publishable_LQqefYrKcOKLIqqFqNTjgQ_qFjyZOB8";
 
     // 替换 assets 下同名图片后，把此数字 +1，可避免浏览器继续显示旧图缓存
     const ASSET_VERSION = "12";
@@ -3239,6 +3259,10 @@
       borrowPeriods: 1,
       loggedIn: false,
       loginRole: "",
+      currentUserId: "",
+      currentEmail: "",
+      isAdmin: false,
+      remoteLoading: false,
     };
 
     const appEl = document.querySelector("#app");
@@ -3246,6 +3270,429 @@
     function clone(value) {
       return JSON.parse(JSON.stringify(value));
     }
+
+    function loadAuthSession() {
+      try {
+        const raw = localStorage.getItem(AUTH_STORAGE_KEY);
+        if (!raw) return null;
+        const session = JSON.parse(raw);
+        if (!session?.accessToken || !session?.userId) return null;
+        if (Number(session.expiresAt || 0) * 1000 <= Date.now()) {
+          localStorage.removeItem(AUTH_STORAGE_KEY);
+          return null;
+        }
+        return session;
+      } catch {
+        localStorage.removeItem(AUTH_STORAGE_KEY);
+        return null;
+      }
+    }
+
+    function saveAuthSession(session) {
+      authSession = session;
+      localStorage.setItem(AUTH_STORAGE_KEY, JSON.stringify(session));
+      applyAuthSessionToState();
+    }
+
+    function applyAuthSessionToState() {
+      if (!authSession?.accessToken) return;
+      state.loggedIn = true;
+      state.currentUserId = authSession.userId;
+      state.currentEmail = authSession.email || "";
+      state.loginRole = authSession.role || state.loginRole || "student";
+    }
+
+    function clearAuthSession() {
+      authSession = null;
+      localStorage.removeItem(AUTH_STORAGE_KEY);
+      state.loggedIn = false;
+      state.currentUserId = "";
+      state.currentEmail = "";
+      state.isAdmin = false;
+    }
+
+    function supabaseHeaders(extra = {}) {
+      const headers = {
+        apikey: SUPABASE_PUBLIC_KEY,
+        "Content-Type": "application/json",
+        ...extra,
+      };
+      if (authSession?.accessToken) headers.Authorization = `Bearer ${authSession.accessToken}`;
+      return headers;
+    }
+
+    async function supabaseAuthRequest(path, body) {
+      const response = await fetch(`${SUPABASE_URL}/auth/v1/${path}`, {
+        method: "POST",
+        headers: supabaseHeaders(),
+        body: JSON.stringify(body),
+      });
+      const data = await response.json().catch(() => ({}));
+      if (!response.ok) throw new Error(data.msg || data.message || "认证失败");
+      return data;
+    }
+
+    async function supabaseRequest(path, options = {}) {
+      if (!authSession?.accessToken) throw new Error("请先登录");
+      const response = await fetch(`${SUPABASE_URL}/rest/v1/${path}`, {
+        method: options.method || "GET",
+        headers: supabaseHeaders(options.headers || {}),
+        body: options.body ? JSON.stringify(options.body) : undefined,
+      });
+      if (response.status === 204) return null;
+      const text = await response.text();
+      const data = text ? JSON.parse(text) : null;
+      if (!response.ok) throw new Error(data?.message || data?.hint || "数据库请求失败");
+      return data;
+    }
+
+    function normalizeLoginEmail(account) {
+      const raw = String(account || "").trim().toLowerCase();
+      if (raw.includes("@")) return raw;
+      const safe = raw.replace(/[^a-z0-9._-]/g, "");
+      if (!safe) throw new Error("账号请用学号、英文或邮箱");
+      return `${safe}@sportloop.local`;
+    }
+
+    function makeUuid() {
+      return crypto.randomUUID();
+    }
+
+    function dbTimeText(value) {
+      const ms = Date.parse(value || "");
+      return Number.isFinite(ms) ? formatDateTime(ms) : "";
+    }
+
+    function dbDueText(value) {
+      const ms = Date.parse(value || "");
+      return Number.isFinite(ms) ? formatDueTime(ms) : "";
+    }
+
+    function toIso(ms) {
+      return new Date(Number(ms)).toISOString();
+    }
+
+    function durationLabelFromMinutes(periods, minutes) {
+      const hours = Number(minutes || 0) / 60;
+      return `${Number(periods || 0)} 节课 · ${Number.isInteger(hours) ? hours : hours.toFixed(1)} 小时`;
+    }
+
+    function dbEquipmentToLocal(row) {
+      return {
+        id: row.id,
+        assetId: row.asset_id,
+        name: row.name,
+        category: row.category,
+        image: row.image,
+        total: row.total,
+        available: row.available,
+        status: row.status,
+        health: row.health,
+        venue: row.venue,
+        desc: row.description,
+      };
+    }
+
+    function dbProfileToLocal(row) {
+      return {
+        nickname: row.nickname,
+        realName: row.real_name,
+        studentId: row.student_id,
+        authStatus: row.auth_status,
+        college: row.college,
+        campusRole: row.campus_role,
+        campusCard: row.campus_card,
+      };
+    }
+
+    function emptyRemoteProfile() {
+      return {
+        ...clone(seed.profile),
+        nickname: profileNickname(),
+        realName: "",
+        studentId: "",
+        authStatus: "未认证",
+        college: "未绑定院系",
+        campusRole: "学生",
+        campusCard: "未绑定",
+      };
+    }
+
+    function dbLoanToLocal(row) {
+      const borrowedAtMs = Date.parse(row.borrowed_at || "");
+      const dueAtMs = Date.parse(row.due_at || "");
+      const returnedAtMs = row.returned_at ? Date.parse(row.returned_at) : null;
+      return {
+        id: row.id,
+        equipmentId: row.equipment_id,
+        borrowedAt: Number.isFinite(borrowedAtMs) ? formatDateTime(borrowedAtMs) : "",
+        borrowedAtMs,
+        dueAt: Number.isFinite(dueAtMs) ? formatDueTime(dueAtMs) : "",
+        dueAtMs,
+        durationPeriods: row.duration_periods,
+        durationMinutes: row.duration_minutes,
+        durationLabel: durationLabelFromMinutes(row.duration_periods, row.duration_minutes),
+        status: row.status,
+        detectResult: row.detect_result || "",
+        returnedAt: row.returned_at ? dbTimeText(row.returned_at) : "",
+        returnedAtMs,
+        returnedOnTime: row.returned_on_time,
+        renewedTimes: row.renewed_times || 0,
+        renewalRecords: row.renewal_records || [],
+      };
+    }
+
+    function dbMessageToLocal(row) {
+      return {
+        id: row.id,
+        title: row.title,
+        text: row.body,
+        time: dbTimeText(row.created_at),
+      };
+    }
+
+    function dbContactToLocal(row) {
+      return {
+        id: row.id,
+        userId: row.user_id,
+        senderProfileId: row.user_id,
+        senderName: row.sender_name,
+        studentId: row.student_id,
+        category: row.category,
+        text: row.body,
+        status: row.status,
+        createdAt: dbTimeText(row.created_at),
+        reply: row.reply || "",
+        repliedAt: row.replied_at ? dbTimeText(row.replied_at) : "",
+      };
+    }
+
+    function dbWorkOrderToLocal(row) {
+      return {
+        id: row.id,
+        userId: row.user_id,
+        equipmentId: row.equipment_id,
+        loanId: row.loan_id || "",
+        title: row.title,
+        source: row.source,
+        status: row.status,
+        createdAt: dbTimeText(row.created_at),
+        restored: !!row.restored,
+      };
+    }
+
+    async function handleLogin(account, password) {
+      const role = state.loginRole || "student";
+      const email = normalizeLoginEmail(account);
+      try {
+        const data = await supabaseAuthRequest("token?grant_type=password", { email, password });
+        await finishAuth(data, role, role === "admin" ? "管理员登录成功" : "学生登录成功");
+      } catch (error) {
+        const message = String(error.message || "");
+        if (message.includes("Invalid login credentials")) throw new Error("账号未注册或密码错误，请先注册");
+        throw error;
+      }
+    }
+
+    async function handleRegister(account, password) {
+      const role = state.loginRole || "student";
+      const email = normalizeLoginEmail(account);
+      const data = await supabaseAuthRequest("signup", { email, password });
+      if (data.user?.identities && data.user.identities.length === 0) {
+        throw new Error("这个账号已经注册过，请直接登录");
+      }
+      if (!data.access_token) {
+        state.route = "credentials";
+        state.notice = "注册成功，请返回登录。如果登录不了，请在 Supabase 关闭邮箱确认";
+        render();
+        return;
+      }
+      await finishAuth(data, role, role === "admin" ? "管理员注册成功" : "学生注册成功");
+    }
+
+    async function finishAuth(data, role, successMessage) {
+      const user = data.user || {};
+      saveAuthSession({
+        accessToken: data.access_token,
+        refreshToken: data.refresh_token,
+        expiresAt: data.expires_at || Math.floor(Date.now() / 1000) + Number(data.expires_in || 3600),
+        userId: user.id,
+        email: user.email || email,
+        role,
+      });
+      await loadRemoteStore();
+      state.route = role === "admin" ? "admin" : "home";
+      state.notice = successMessage;
+      render();
+    }
+
+    async function loadRemoteStore() {
+      if (!authSession?.accessToken) return;
+      const adminRows = await supabaseRequest(`admin_users?select=user_id&user_id=eq.${authSession.userId}`);
+      state.isAdmin = adminRows.length > 0;
+
+      const [equipmentRows, profileRows, loanRows, messageRows, contactRows, orderRows] = await Promise.all([
+        supabaseRequest("equipment?select=*&order=name.asc"),
+        supabaseRequest(`student_profiles?select=*&user_id=eq.${authSession.userId}`),
+        supabaseRequest("loans?select=*&order=created_at.desc"),
+        supabaseRequest("student_messages?select=*&order=created_at.desc"),
+        supabaseRequest("admin_contacts?select=*&order=created_at.desc"),
+        supabaseRequest("work_orders?select=*&order=created_at.desc"),
+      ]);
+
+      if (equipmentRows.length) store.equipment = equipmentRows.map(dbEquipmentToLocal);
+      store.profile = profileRows.length ? { ...emptyRemoteProfile(), ...dbProfileToLocal(profileRows[0]) } : emptyRemoteProfile();
+      store.loans = loanRows.map(dbLoanToLocal);
+      store.messages = messageRows.length ? messageRows.map(dbMessageToLocal) : clone(seed.messages);
+      store.adminMessages = contactRows.map(dbContactToLocal);
+      store.workOrders = orderRows.map(dbWorkOrderToLocal);
+      saveStore();
+    }
+
+    async function refreshRemoteStore() {
+      if (!authSession?.accessToken || state.remoteLoading) return;
+      state.remoteLoading = true;
+      const routeBefore = state.route;
+      try {
+        await loadRemoteStore();
+        if (state.route === routeBefore) render();
+      } catch (error) {
+        console.error(error);
+        state.notice = `数据库同步失败：${error.message}`;
+        render();
+      } finally {
+        state.remoteLoading = false;
+      }
+    }
+
+    function shouldRefreshOnRoute(to) {
+      return ["home", "list", "borrow", "renew", "messages", "admin", "profile", "profileInfo", "creditRules", "identity", "contactAdmin"].includes(to);
+    }
+
+    function runRemote(task) {
+      if (!authSession?.accessToken) return;
+      task().catch((error) => {
+        console.error(error);
+        state.notice = `数据库同步失败：${error.message}`;
+        render();
+      });
+    }
+
+    async function upsertRemoteProfile(profile) {
+      return supabaseRequest("student_profiles?on_conflict=user_id", {
+        method: "POST",
+        headers: { Prefer: "resolution=merge-duplicates,return=representation" },
+        body: {
+          user_id: authSession.userId,
+          nickname: profile.nickname || profile.realName || "李同学",
+          real_name: profile.realName,
+          student_id: profile.studentId,
+          college: profile.college,
+          auth_status: profile.authStatus || "已认证",
+          campus_role: profile.campusRole || "学生",
+          campus_card: profile.campusCard || "已绑定",
+        },
+      });
+    }
+
+    function saveRemoteStudentMessage(message, userId = authSession?.userId) {
+      if (!userId || !authSession?.accessToken) return;
+      runRemote(() => supabaseRequest("student_messages", {
+        method: "POST",
+        body: { user_id: userId, title: message.title, body: message.text },
+      }));
+    }
+
+    function saveRemoteEquipment(item) {
+      runRemote(() => supabaseRequest(`equipment?id=eq.${item.id}`, {
+        method: "PATCH",
+        body: { available: item.available, status: item.status, health: item.health },
+      }));
+    }
+
+    function saveRemoteLoan(loan) {
+      runRemote(() => supabaseRequest(`loans?id=eq.${loan.id}`, {
+        method: "PATCH",
+        body: {
+          due_at: toIso(loan.dueAtMs),
+          duration_periods: loan.durationPeriods,
+          duration_minutes: loan.durationMinutes,
+          status: loan.status,
+          detect_result: loan.detectResult || "",
+          returned_at: loan.returnedAtMs ? toIso(loan.returnedAtMs) : null,
+          returned_on_time: loan.returnedOnTime,
+          renewed_times: loan.renewedTimes || 0,
+          renewal_records: loan.renewalRecords || [],
+        },
+      }));
+    }
+
+    function createRemoteLoan(loan) {
+      runRemote(() => supabaseRequest("loans", {
+        method: "POST",
+        body: {
+          id: loan.id,
+          user_id: authSession.userId,
+          equipment_id: loan.equipmentId,
+          borrowed_at: toIso(loan.borrowedAtMs),
+          due_at: toIso(loan.dueAtMs),
+          duration_periods: loan.durationPeriods,
+          duration_minutes: loan.durationMinutes,
+          status: loan.status,
+          detect_result: loan.detectResult || "",
+        },
+      }));
+    }
+
+    function createRemoteWorkOrder(order) {
+      runRemote(() => supabaseRequest("work_orders", {
+        method: "POST",
+        body: {
+          id: order.id,
+          user_id: authSession.userId,
+          equipment_id: order.equipmentId,
+          loan_id: order.loanId || null,
+          title: order.title,
+          source: order.source,
+          status: order.status,
+          restored: !!order.restored,
+        },
+      }));
+    }
+
+    function saveRemoteWorkOrder(order) {
+      runRemote(() => supabaseRequest(`work_orders?id=eq.${order.id}`, {
+        method: "PATCH",
+        body: { status: order.status, restored: !!order.restored },
+      }));
+    }
+
+    async function createRemoteAdminContact(message) {
+      return supabaseRequest("admin_contacts", {
+        method: "POST",
+        body: {
+          id: message.id,
+          user_id: authSession.userId,
+          sender_name: message.senderName,
+          student_id: message.studentId,
+          category: message.category,
+          body: message.text,
+          status: message.status,
+        },
+      });
+    }
+
+    async function saveRemoteAdminContact(message) {
+      return supabaseRequest(`admin_contacts?id=eq.${message.id}`, {
+        method: "PATCH",
+        body: {
+          status: message.status,
+          reply: message.reply || "",
+          replied_at: message.repliedAtMs ? toIso(message.repliedAtMs) : new Date().toISOString(),
+        },
+      });
+    }
+
 
     function mergeEquipmentImages(cachedList) {
       const seedById = Object.fromEntries(seed.equipment.map((item) => [item.id, item]));
@@ -3279,6 +3726,8 @@
     }
 
     let store = loadStore();
+    let authSession = loadAuthSession();
+    applyAuthSessionToState();
     store.equipment.forEach((item) => {
       item.venue = cleanVenue(item.venue);
     });
@@ -3300,7 +3749,8 @@
 
     function profileMetaText() {
       const profile = profileData();
-      return `学号 ${profile.studentId}　|　${profile.authStatus}　|　${profile.college}`;
+      const studentId = profile.studentId || "未绑定学号";
+      return `学号 ${studentId}　|　${profile.authStatus}　|　${profile.college}`;
     }
 
     function normalizeIdentityText(value) {
@@ -3379,7 +3829,9 @@
     }
 
     function pushMessage(title, text) {
-      store.messages.unshift({ id: `m-${Date.now()}`, title, text, time: nowText() });
+      const message = { id: makeUuid(), title, text, time: nowText() };
+      store.messages.unshift(message);
+      saveRemoteStudentMessage(message);
     }
 
     function adminMessageList() {
@@ -3407,6 +3859,7 @@
         state.syncContext = payload.syncContext || "borrow";
       }
       render();
+      if (state.loggedIn && shouldRefreshOnRoute(to)) refreshRemoteStore();
     }
 
     function back() {
@@ -4091,6 +4544,24 @@
           <div class="list-stack">${store.equipment.map(adminEquipmentRow).join("")}</div>
         </main>
       `;
+      if (!state.isAdmin) {
+        const body = `
+          <main class="scroll">
+            <section class="admin-hero">
+              <h1>管理员未授权</h1>
+              <p>这个账号已经登录，但还没有加入管理员名单。</p>
+            </section>
+            <section class="profile-settings identity-form">
+              <p class="identity-hint">把下面这个 UID 复制到 Supabase 的 <strong>admin_users</strong> 表里，再重新登录管理员端。</p>
+              <div class="field">
+                <span>当前账号 UID</span>
+                <input value="${escapeAttr(state.currentUserId || "")}" readonly />
+              </div>
+            </section>
+          </main>
+        `;
+        return shell("管理员端", body);
+      }
       return shell("管理员端", body);
     }
 
@@ -4417,7 +4888,7 @@
       const durationMinutes = durationPeriods * CLASS_PERIOD_MINUTES;
       const dueAtMs = borrowedAtMs + durationMinutes * 60 * 1000;
       const loan = {
-        id: `loan-${Date.now()}`,
+        id: makeUuid(),
         equipmentId,
         borrowedAt: formatDateTime(borrowedAtMs),
         borrowedAtMs,
@@ -4432,6 +4903,8 @@
       store.loans.unshift(loan);
       pushMessage("借用记录已同步", `${item.name} ${item.assetId} 已同步，借用时长 ${loan.durationLabel}，归还截止 ${loan.dueAt}。`);
       saveStore();
+      saveRemoteEquipment(item);
+      createRemoteLoan(loan);
       if (options.skipNavigate) return loan;
       state.notice = "借用状态已同步";
       route("borrow", { loanId: loan.id });
@@ -4447,6 +4920,7 @@
       if (abnormal) createOrder(item.id, "手机拍照检测异常", "胶皮翘边 / 拍柄松动", loan.id);
       pushMessage("归还前检测完成", `${item.name} 检测结果：${loan.detectResult}。请到场馆机器扫码归还后再同步。`);
       saveStore();
+      saveRemoteLoan(loan);
       route("result", { loanId });
     }
 
@@ -4478,6 +4952,8 @@
       const punctualText = loan.returnedOnTime === true ? "准时归还" : (loan.returnedOnTime === false ? "超时归还" : "未计入准时率");
       pushMessage("归还记录已同步", `${item.name} 的归还状态已从场馆机器同步，检测结果：${loan.detectResult}，${punctualText}。`);
       saveStore();
+      saveRemoteEquipment(item);
+      saveRemoteLoan(loan);
       if (options.skipNavigate) return loan;
       state.notice = "归还状态已同步";
       route("borrow");
@@ -4510,6 +4986,7 @@
       });
       pushMessage("续借申请已通过", `${item.name} 已续借 ${borrowDurationLabel(periods)}，新的归还截止为 ${loan.dueAt}。`);
       saveStore();
+      saveRemoteLoan(loan);
       state.notice = "续借申请已通过";
       route("borrow", { loanId });
     }
@@ -4517,8 +4994,9 @@
     function createOrder(equipmentId, source, title, loanId = "") {
       const exists = store.workOrders.some((order) => order.loanId === loanId && loanId);
       if (exists) return;
-      store.workOrders.unshift({
-        id: `wo-${Date.now()}`,
+      const order = {
+        id: makeUuid(),
+        userId: state.currentUserId,
         equipmentId,
         loanId,
         title,
@@ -4526,7 +5004,10 @@
         status: "待处理",
         createdAt: nowText(),
         restored: false,
-      });
+      };
+      store.workOrders.unshift(order);
+      saveStore();
+      createRemoteWorkOrder(order);
     }
 
     function updateOrder(orderId, status) {
@@ -4545,6 +5026,8 @@
         pushMessage("报修已完成", `${item.name} 已维修完成，恢复可借。`);
       }
       saveStore();
+      saveRemoteWorkOrder(order);
+      saveRemoteEquipment(item);
       state.notice = `工单已更新为：${status}`;
       render();
     }
@@ -4672,7 +5155,7 @@
               <span>院系</span>
               <input name="college" value="${escapeAttr(profile.college || "")}" maxlength="20" required placeholder="请输入院系" />
             </label>
-            <p class="identity-hint">认证后会绑定姓名、学号和院系；同一学号不能重复绑定，同一姓名和院系只能绑定一个学号。</p>
+            <p class="identity-hint">认证后会绑定姓名、学号和院系；学号不能重复，姓名和院系可以相同。</p>
             <p class="identity-status" id="identityStatus" aria-live="polite"></p>
             <button class="primary-button" type="submit">${icon("check")} 保存认证</button>
           </form>
@@ -4730,8 +5213,53 @@
                 <span>密码</span>
                 <input id="loginPassword" type="password" placeholder="请输入密码" autocomplete="current-password" />
               </label>
-              <p class="login-hint">模拟登录，输入任意内容即可进入</p>
+              <p class="login-hint">请先注册账号；未注册的账号不能登录。</p>
               <button class="primary-button" type="submit">${icon("check")} 登录</button>
+              <div class="login-switch">
+                <span>还没有账号？</span>
+                <button class="text-button" type="button" data-route="register">去注册</button>
+              </div>
+              ${notice()}
+            </form>
+          </main>
+        </section>
+      `;
+    }
+
+    function registerPage() {
+      const isAdmin = state.loginRole === "admin";
+      return `
+        <section class="screen">
+          <header class="topbar">
+            <button class="icon-button" data-route="credentials" aria-label="返回">${icon("back")}</button>
+            <div class="page-title">${isAdmin ? "管理员注册" : "学生注册"}</div>
+            <span></span>
+          </header>
+          <main class="scroll">
+            <form class="login-form" id="registerForm">
+              <div class="login-avatar">
+                <div class="role-badge">${icon(isAdmin ? "shield" : "user")}</div>
+                <span>${isAdmin ? "管理员" : "学生"}</span>
+              </div>
+              <label class="field">
+                <span>用户名</span>
+                <input id="registerAccount" type="text" placeholder="请输入用户名" autocomplete="username" />
+              </label>
+              <label class="field">
+                <span>密码</span>
+                <input id="registerPassword" type="password" placeholder="至少 6 位密码" autocomplete="new-password" />
+              </label>
+              <label class="field">
+                <span>确认密码</span>
+                <input id="registerConfirm" type="password" placeholder="再输入一次密码" autocomplete="new-password" />
+              </label>
+              <p class="login-hint">注册后会连接 Supabase 创建真实账号。</p>
+              <button class="primary-button" type="submit">${icon("check")} 注册</button>
+              <div class="login-switch">
+                <span>已有账号？</span>
+                <button class="text-button" type="button" data-route="credentials">去登录</button>
+              </div>
+              ${notice()}
             </form>
           </main>
         </section>
@@ -4740,7 +5268,7 @@
 
     function render() {
       if (!state.loggedIn) {
-        const loginPages = { login: loginPage, roleSelect: roleSelectPage, credentials: credentialsPage };
+        const loginPages = { login: loginPage, roleSelect: roleSelectPage, credentials: credentialsPage, register: registerPage };
         appEl.innerHTML = (loginPages[state.route] || loginPage)();
         bindLogin();
         return;
@@ -4782,7 +5310,7 @@
 
       const loginForm = document.querySelector("#loginForm");
       if (loginForm) {
-        loginForm.addEventListener("submit", (event) => {
+        loginForm.addEventListener("submit", async (event) => {
           event.preventDefault();
           const account = document.querySelector("#loginAccount").value.trim();
           const password = document.querySelector("#loginPassword").value.trim();
@@ -4791,10 +5319,47 @@
             render();
             return;
           }
-          state.loggedIn = true;
-          state.route = state.loginRole === "admin" ? "admin" : "home";
-          state.notice = "欢迎回来，" + (state.loginRole === "admin" ? "管理员" : "同学");
-          render();
+          try {
+            state.notice = "正在连接 Supabase";
+            render();
+            await handleLogin(account, password);
+          } catch (error) {
+            state.notice = error.message || "登录失败";
+            render();
+          }
+        });
+      }
+
+      const registerForm = document.querySelector("#registerForm");
+      if (registerForm) {
+        registerForm.addEventListener("submit", async (event) => {
+          event.preventDefault();
+          const account = document.querySelector("#registerAccount").value.trim();
+          const password = document.querySelector("#registerPassword").value.trim();
+          const confirm = document.querySelector("#registerConfirm").value.trim();
+          if (!account || !password || !confirm) {
+            state.notice = "用户名和密码都要填写完整";
+            render();
+            return;
+          }
+          if (password.length < 6) {
+            state.notice = "密码至少 6 位";
+            render();
+            return;
+          }
+          if (password !== confirm) {
+            state.notice = "两次输入的密码不一致";
+            render();
+            return;
+          }
+          try {
+            state.notice = "正在注册账号";
+            render();
+            await handleRegister(account, password);
+          } catch (error) {
+            state.notice = error.message || "注册失败";
+            render();
+          }
         });
       }
     }
@@ -4847,6 +5412,10 @@
         }
         store.profile = { ...(store.profile || {}), nickname };
         saveStore();
+        const profile = profileData();
+        if (profile.realName && profile.studentId && profile.college && profile.authStatus === "已认证") {
+          runRemote(() => upsertRemoteProfile(profile));
+        }
         state.notice = "昵称已更新";
         overlay.remove();
         render();
@@ -4868,7 +5437,7 @@
       status.classList.toggle("is-error", isError);
     }
 
-    function submitIdentityForm(event) {
+    async function submitIdentityForm(event) {
       event.preventDefault();
       const form = event.currentTarget;
       const realName = normalizeIdentityText(form.realName.value);
@@ -4887,17 +5456,8 @@
       const bindings = Array.isArray(store.identityBindings) ? store.identityBindings : [];
       const currentBinding = bindings.find((item) => item.profileId === profileId);
       const sameStudentId = bindings.find((item) => item.studentId === studentId && item.profileId !== profileId);
-      const samePerson = bindings.find((item) =>
-        item.profileId !== profileId &&
-        normalizeIdentityText(item.realName) === realName &&
-        normalizeIdentityText(item.college) === college
-      );
       if (sameStudentId) {
         setIdentityStatus("这个学号已经被其他身份绑定，不能重复认证");
-        return;
-      }
-      if (samePerson) {
-        setIdentityStatus("这个姓名和院系已经绑定过学号，不能重复换号");
         return;
       }
       if (currentBinding && currentBinding.studentId !== studentId) {
@@ -4906,9 +5466,7 @@
       }
 
       const verifiedAt = currentBinding?.verifiedAt || nowText();
-      const record = { profileId, realName, studentId, college, verifiedAt };
-      store.identityBindings = bindings.filter((item) => item.profileId !== profileId).concat(record);
-      store.profile = {
+      const nextProfile = {
         ...profileData(),
         realName,
         studentId,
@@ -4918,6 +5476,16 @@
         campusCard: "已绑定",
         verifiedAt,
       };
+      try {
+        await upsertRemoteProfile(nextProfile);
+      } catch (error) {
+        const message = String(error.message || "");
+        setIdentityStatus(message.includes("duplicate") || message.includes("unique") ? "这个学号已经被绑定，不能重复认证" : message);
+        return;
+      }
+      const record = { profileId, realName, studentId, college, verifiedAt };
+      store.identityBindings = bindings.filter((item) => item.profileId !== profileId).concat(record);
+      store.profile = nextProfile;
       saveStore();
       state.notice = "校园身份认证已保存";
       route("profileInfo");
@@ -4930,7 +5498,7 @@
       status.classList.toggle("is-error", isError);
     }
 
-    function submitAdminContactForm(event) {
+    async function submitAdminContactForm(event) {
       event.preventDefault();
       const form = event.currentTarget;
       const profile = profileData();
@@ -4944,9 +5512,10 @@
         return;
       }
 
-      adminMessageList().unshift({
-        id: `admin-msg-${Date.now()}`,
-        senderProfileId: "current-student",
+      const message = {
+        id: makeUuid(),
+        userId: state.currentUserId,
+        senderProfileId: state.currentUserId,
         senderName: profile.realName || profileNickname(),
         studentId: profile.studentId,
         category,
@@ -4955,14 +5524,21 @@
         createdAt: nowText(),
         reply: "",
         repliedAt: "",
-      });
+      };
+      try {
+        await createRemoteAdminContact(message);
+      } catch (error) {
+        setContactStatus(error.message || "发送失败");
+        return;
+      }
+      adminMessageList().unshift(message);
       pushMessage("已发送给管理员", "你的留言已同步到管理员端，管理员回复后会出现在消息和联系记录里。");
       saveStore();
       state.notice = "已发送给管理员";
       render();
     }
 
-    function replyAdminMessage(messageId, card) {
+    async function replyAdminMessage(messageId, card) {
       const message = adminMessageList().find((item) => item.id === messageId);
       const textarea = card ? card.querySelector("textarea") : null;
       const reply = String(textarea?.value || "").trim();
@@ -4974,7 +5550,19 @@
 
       message.reply = reply;
       message.status = "已回复";
+      message.repliedAtMs = Date.now();
       message.repliedAt = nowText();
+      try {
+        await saveRemoteAdminContact(message);
+        await supabaseRequest("student_messages", {
+          method: "POST",
+          body: { user_id: message.userId, title: "管理员已回复", body: reply },
+        });
+      } catch (error) {
+        state.notice = error.message || "回复发送失败";
+        render();
+        return;
+      }
       pushMessage("管理员已回复", reply);
       saveStore();
       state.notice = "回复已发送给学生";
@@ -5063,6 +5651,7 @@
         resetBtn.addEventListener("click", () => {
           showConfirm("确定要清除所有缓存数据吗？此操作不可撤销。", () => {
             localStorage.removeItem(STORAGE_KEY);
+            clearAuthSession();
             store = clone(seed);
             saveStore();
             state.notice = "已清空数据并完成系统重置！";
@@ -5111,7 +5700,7 @@
           const repType = document.querySelector("#reportType").value;
           const repDesc = document.querySelector("#reportDesc").value;
           createOrder(eqId, "手机端自主报备", repType + " (" + repDesc + ")");
-          state.notice = "故障工单已成功上架！";
+          state.notice = "故障工单已同步到管理员端！";
           route("home");
         });
       }
@@ -5125,6 +5714,7 @@
     document.querySelector("#btnClearCache").addEventListener("click", () => {
       showConfirm("确定要清除所有缓存数据吗？此操作不可撤销。", () => {
         localStorage.removeItem(STORAGE_KEY);
+        clearAuthSession();
         store = clone(seed);
         saveStore();
         state.notice = "数据已重置！";
@@ -5132,9 +5722,21 @@
       }, "确认清除");
     });
 
+    async function initApp() {
+      if (authSession?.accessToken) {
+        try {
+          await loadRemoteStore();
+        } catch (error) {
+          console.error(error);
+          state.notice = `数据库同步失败：${error.message}`;
+        }
+      }
+      render();
+    }
+
     // 首次进入渲染
     window.onload = function() {
-      render();
+      initApp();
     };
   </script>
 </body>

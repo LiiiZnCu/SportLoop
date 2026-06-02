@@ -1,0 +1,273 @@
+-- SportLoop Supabase schema
+-- 公开前端只能使用 publishable/anon key，不能使用 service_role key。
+
+create extension if not exists pgcrypto;
+
+create table if not exists public.admin_users (
+  user_id uuid primary key references auth.users(id) on delete cascade,
+  created_at timestamptz not null default now()
+);
+
+create table if not exists public.student_profiles (
+  user_id uuid primary key references auth.users(id) on delete cascade,
+  nickname text not null default '李同学',
+  real_name text not null,
+  student_id text not null unique,
+  college text not null,
+  auth_status text not null default '已认证',
+  campus_role text not null default '学生',
+  campus_card text not null default '已绑定',
+  created_at timestamptz not null default now(),
+  updated_at timestamptz not null default now()
+);
+
+alter table public.student_profiles
+drop constraint if exists student_profiles_one_person;
+
+create table if not exists public.equipment (
+  id text primary key,
+  asset_id text not null unique,
+  name text not null,
+  category text not null,
+  image text not null,
+  total integer not null check (total >= 0),
+  available integer not null check (available >= 0),
+  status text not null,
+  health integer not null check (health between 0 and 100),
+  venue text not null,
+  description text not null,
+  created_at timestamptz not null default now(),
+  updated_at timestamptz not null default now(),
+  constraint equipment_available_within_total check (available <= total)
+);
+
+create table if not exists public.loans (
+  id uuid primary key default gen_random_uuid(),
+  user_id uuid not null references auth.users(id) on delete cascade,
+  equipment_id text not null references public.equipment(id),
+  borrowed_at timestamptz not null,
+  due_at timestamptz not null,
+  duration_periods integer not null check (duration_periods between 1 and 3),
+  duration_minutes integer not null check (duration_minutes > 0),
+  status text not null,
+  detect_result text not null default '',
+  returned_at timestamptz,
+  returned_on_time boolean,
+  renewed_times integer not null default 0,
+  renewal_records jsonb not null default '[]'::jsonb,
+  created_at timestamptz not null default now(),
+  updated_at timestamptz not null default now()
+);
+
+create table if not exists public.student_messages (
+  id uuid primary key default gen_random_uuid(),
+  user_id uuid not null references auth.users(id) on delete cascade,
+  title text not null,
+  body text not null,
+  created_at timestamptz not null default now()
+);
+
+create table if not exists public.admin_contacts (
+  id uuid primary key default gen_random_uuid(),
+  user_id uuid not null references auth.users(id) on delete cascade,
+  sender_name text not null,
+  student_id text not null,
+  category text not null,
+  body text not null,
+  status text not null default '待回复',
+  reply text not null default '',
+  replied_at timestamptz,
+  created_at timestamptz not null default now(),
+  updated_at timestamptz not null default now()
+);
+
+create table if not exists public.work_orders (
+  id uuid primary key default gen_random_uuid(),
+  user_id uuid not null references auth.users(id) on delete cascade,
+  equipment_id text not null references public.equipment(id),
+  loan_id uuid references public.loans(id) on delete set null,
+  title text not null,
+  source text not null,
+  status text not null default '待处理',
+  restored boolean not null default false,
+  created_at timestamptz not null default now(),
+  updated_at timestamptz not null default now()
+);
+
+create index if not exists loans_user_id_idx on public.loans (user_id);
+create index if not exists loans_equipment_id_idx on public.loans (equipment_id);
+create index if not exists loans_status_idx on public.loans (status);
+create index if not exists student_messages_user_id_idx on public.student_messages (user_id);
+create index if not exists admin_contacts_user_id_idx on public.admin_contacts (user_id);
+create index if not exists admin_contacts_status_idx on public.admin_contacts (status);
+create index if not exists work_orders_user_id_idx on public.work_orders (user_id);
+create index if not exists work_orders_equipment_id_idx on public.work_orders (equipment_id);
+create index if not exists work_orders_loan_id_idx on public.work_orders (loan_id);
+create index if not exists work_orders_status_idx on public.work_orders (status);
+
+create or replace function public.set_updated_at()
+returns trigger
+language plpgsql
+set search_path = public
+as $$
+begin
+  new.updated_at = now();
+  return new;
+end;
+$$;
+
+drop trigger if exists student_profiles_set_updated_at on public.student_profiles;
+create trigger student_profiles_set_updated_at
+before update on public.student_profiles
+for each row execute function public.set_updated_at();
+
+drop trigger if exists equipment_set_updated_at on public.equipment;
+create trigger equipment_set_updated_at
+before update on public.equipment
+for each row execute function public.set_updated_at();
+
+drop trigger if exists loans_set_updated_at on public.loans;
+create trigger loans_set_updated_at
+before update on public.loans
+for each row execute function public.set_updated_at();
+
+drop trigger if exists admin_contacts_set_updated_at on public.admin_contacts;
+create trigger admin_contacts_set_updated_at
+before update on public.admin_contacts
+for each row execute function public.set_updated_at();
+
+drop trigger if exists work_orders_set_updated_at on public.work_orders;
+create trigger work_orders_set_updated_at
+before update on public.work_orders
+for each row execute function public.set_updated_at();
+
+create or replace function public.is_admin()
+returns boolean
+language sql
+security definer
+set search_path = public
+as $$
+  select exists (
+    select 1
+    from public.admin_users
+    where user_id = (select auth.uid())
+  );
+$$;
+
+alter table public.admin_users enable row level security;
+alter table public.student_profiles enable row level security;
+alter table public.equipment enable row level security;
+alter table public.loans enable row level security;
+alter table public.student_messages enable row level security;
+alter table public.admin_contacts enable row level security;
+alter table public.work_orders enable row level security;
+
+drop policy if exists admin_users_select_self on public.admin_users;
+create policy admin_users_select_self on public.admin_users
+for select to authenticated
+using (user_id = (select auth.uid()));
+
+drop policy if exists student_profiles_own_select on public.student_profiles;
+create policy student_profiles_own_select on public.student_profiles
+for select to authenticated
+using (user_id = (select auth.uid()) or (select public.is_admin()));
+
+drop policy if exists student_profiles_own_insert on public.student_profiles;
+create policy student_profiles_own_insert on public.student_profiles
+for insert to authenticated
+with check (user_id = (select auth.uid()));
+
+drop policy if exists student_profiles_own_update on public.student_profiles;
+create policy student_profiles_own_update on public.student_profiles
+for update to authenticated
+using (user_id = (select auth.uid()) or (select public.is_admin()))
+with check (user_id = (select auth.uid()) or (select public.is_admin()));
+
+drop policy if exists equipment_authenticated_select on public.equipment;
+create policy equipment_authenticated_select on public.equipment
+for select to authenticated
+using (true);
+
+drop policy if exists equipment_authenticated_update on public.equipment;
+create policy equipment_authenticated_update on public.equipment
+for update to authenticated
+using (true)
+with check (true);
+
+drop policy if exists loans_access on public.loans;
+create policy loans_access on public.loans
+for select to authenticated
+using (user_id = (select auth.uid()) or (select public.is_admin()));
+
+drop policy if exists loans_insert_own on public.loans;
+create policy loans_insert_own on public.loans
+for insert to authenticated
+with check (user_id = (select auth.uid()));
+
+drop policy if exists loans_update_own_or_admin on public.loans;
+create policy loans_update_own_or_admin on public.loans
+for update to authenticated
+using (user_id = (select auth.uid()) or (select public.is_admin()))
+with check (user_id = (select auth.uid()) or (select public.is_admin()));
+
+drop policy if exists student_messages_access on public.student_messages;
+create policy student_messages_access on public.student_messages
+for select to authenticated
+using (user_id = (select auth.uid()) or (select public.is_admin()));
+
+drop policy if exists student_messages_insert_own_or_admin on public.student_messages;
+create policy student_messages_insert_own_or_admin on public.student_messages
+for insert to authenticated
+with check (user_id = (select auth.uid()) or (select public.is_admin()));
+
+drop policy if exists admin_contacts_access on public.admin_contacts;
+create policy admin_contacts_access on public.admin_contacts
+for select to authenticated
+using (user_id = (select auth.uid()) or (select public.is_admin()));
+
+drop policy if exists admin_contacts_insert_own on public.admin_contacts;
+create policy admin_contacts_insert_own on public.admin_contacts
+for insert to authenticated
+with check (user_id = (select auth.uid()));
+
+drop policy if exists admin_contacts_update_admin on public.admin_contacts;
+create policy admin_contacts_update_admin on public.admin_contacts
+for update to authenticated
+using ((select public.is_admin()))
+with check ((select public.is_admin()));
+
+drop policy if exists work_orders_access on public.work_orders;
+create policy work_orders_access on public.work_orders
+for select to authenticated
+using (user_id = (select auth.uid()) or (select public.is_admin()));
+
+drop policy if exists work_orders_insert_own on public.work_orders;
+create policy work_orders_insert_own on public.work_orders
+for insert to authenticated
+with check (user_id = (select auth.uid()));
+
+drop policy if exists work_orders_update_admin on public.work_orders;
+create policy work_orders_update_admin on public.work_orders
+for update to authenticated
+using ((select public.is_admin()))
+with check ((select public.is_admin()));
+
+insert into public.equipment (id, asset_id, name, category, image, total, available, status, health, venue, description)
+values
+  ('paddle-red', 'SL-PB-1024', '乒乓球拍（直拍）', '乒乓球拍', 'assets/paddle-red.png', 10, 6, '可借', 96, '东区体育馆', '适合课堂训练 and 日常对打，归还前重点检测胶皮、边缘和拍柄。'),
+  ('paddle-black', 'SL-PB-0921', '乒乓球拍（横拍）', '乒乓球拍', 'assets/paddle-black.png', 8, 4, '可借', 92, '西区球类馆', '常用球拍，借还记录会绑定唯一条形码。'),
+  ('racket', 'SL-BD-0318', '羽毛球拍', '羽毛球拍', 'assets/racket.png', 12, 8, '可借', 94, '综合训练馆', '归还前重点检查拍框、拍线和握柄。'),
+  ('shuttle', 'SL-SH-0208', '羽毛球', '羽毛球', 'assets/shuttle.png', 30, 12, '补充中', 88, '综合训练馆', '消耗较快，系统会按库存提醒管理员补充。'),
+  ('pingpong', 'SL-PP-0616', '乒乓球', '乒乓球', 'assets/pingpong.png', 40, 20, '可借', 91, '东区体育馆', '按盒借用，归还时机器扫码归档。'),
+  ('basketball', 'SL-BK-0027', '篮球', '篮球', 'assets/basketball.png', 12, 5, '可借', 90, '室外篮球场', '重点检测气压、表面磨损和裂纹。')
+on conflict (id) do update set
+  asset_id = excluded.asset_id,
+  name = excluded.name,
+  category = excluded.category,
+  image = excluded.image,
+  total = excluded.total,
+  available = least(public.equipment.available, excluded.total),
+  status = excluded.status,
+  health = excluded.health,
+  venue = excluded.venue,
+  description = excluded.description;
