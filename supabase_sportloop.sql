@@ -154,6 +154,16 @@ as $$
   );
 $$;
 
+grant usage on schema public to authenticated;
+grant execute on function public.is_admin() to authenticated;
+grant select on public.admin_users to authenticated;
+grant select, insert, update on public.student_profiles to authenticated;
+grant select, update on public.equipment to authenticated;
+grant select, insert, update on public.loans to authenticated;
+grant select, insert on public.student_messages to authenticated;
+grant select, insert, update on public.admin_contacts to authenticated;
+grant select, insert, update on public.work_orders to authenticated;
+
 alter table public.admin_users enable row level security;
 alter table public.student_profiles enable row level security;
 alter table public.equipment enable row level security;

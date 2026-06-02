@@ -3568,18 +3568,20 @@
         reportRemoteSyncError(error);
       }
       state.route = role === "admin" ? "admin" : "home";
-      state.notice = successMessage;
+      state.notice = role === "admin" && !state.isAdmin ? "管理员账号已登录，等待授权" : successMessage;
       render();
+    }
+
+    async function refreshAdminAccess() {
+      const shouldCheckAdmin = (authSession?.role || state.loginRole) === "admin";
+      state.isAdmin = false;
+      if (!shouldCheckAdmin) return;
+      state.isAdmin = await supabaseRequest("rpc/is_admin", { method: "POST", body: {} }) === true;
     }
 
     async function loadRemoteStore() {
       if (!authSession?.accessToken) return;
-      const shouldCheckAdmin = (authSession.role || state.loginRole) === "admin";
-      state.isAdmin = false;
-      if (shouldCheckAdmin) {
-        const adminRows = await supabaseRequest(`admin_users?select=user_id&user_id=eq.${authSession.userId}`);
-        state.isAdmin = adminRows.length > 0;
-      }
+      await refreshAdminAccess();
 
       const [equipmentRows, profileRows, loanRows, messageRows, contactRows, orderRows] = await Promise.all([
         supabaseRequest("equipment?select=*&order=name.asc"),
