@@ -1871,6 +1871,35 @@
       font-size: clamp(10px, 3vw, 12px);
     }
 
+    .admin-equipment-form {
+      display: grid;
+      gap: 12px;
+      padding: 12px;
+      border: 1px solid rgba(159, 18, 57, 0.1);
+      border-radius: 20px;
+      background: linear-gradient(180deg, rgba(255, 255, 255, 0.98), rgba(255, 248, 250, 0.92));
+    }
+
+    .admin-equipment-form-grid {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 10px;
+    }
+
+    .admin-equipment-form .field {
+      margin: 0;
+    }
+
+    .admin-equipment-form .primary-button {
+      width: 100%;
+    }
+
+    @media (max-width: 390px) {
+      .admin-equipment-form-grid {
+        grid-template-columns: 1fr;
+      }
+    }
+
     .profile-card {
       display: grid;
       gap: 11px;
@@ -3467,7 +3496,7 @@
 
     function issueOptionsFor(equipmentId) {
       const item = byId(equipmentId);
-      const types = reportIssueTypes[item.category] || reportIssueTypes["篮球"];
+      const types = item ? (reportIssueTypes[item.category] || reportIssueTypes["篮球"]) : reportIssueTypes["篮球"];
       return types.map((t) => `<option>${t}</option>`).join("") + `<option>其他</option>`;
     }
 
@@ -3852,6 +3881,7 @@
     function resetAccountScopedStore(userId) {
       store.authUserId = userId || "";
       store.profile = emptyRemoteProfile();
+      store.equipment = [];
       store.loans = [];
       store.workOrders = [];
       store.identityBindings = [];
@@ -4038,7 +4068,7 @@
         supabaseRequest("work_orders?select=*&order=created_at.desc"),
       ]);
 
-      if (equipmentRows.length) store.equipment = equipmentRows.map(dbEquipmentToLocal);
+      store.equipment = equipmentRows.map(dbEquipmentToLocal);
       store.authUserId = authSession.userId;
       const remoteProfile = profileRows.length ? dbProfileToLocal(profileRows[0]) : emptyRemoteProfile();
       store.profile = isSeedDemoProfile(remoteProfile) ? emptyRemoteProfile() : { ...emptyRemoteProfile(), ...remoteProfile };
@@ -4121,6 +4151,25 @@
         method: "PATCH",
         body: { available: item.available, status: item.status, health: item.health },
       }));
+    }
+
+    async function createRemoteEquipment(item) {
+      return supabaseRequest("equipment", {
+        method: "POST",
+        body: {
+          id: item.id,
+          asset_id: item.assetId,
+          name: item.name,
+          category: item.category,
+          image: item.image || "",
+          total: item.total,
+          available: item.available,
+          status: item.status,
+          health: item.health,
+          venue: item.venue,
+          description: item.desc,
+        },
+      });
     }
 
     function saveRemoteLoan(loan) {
@@ -4209,14 +4258,10 @@
 
     function mergeEquipmentImages(cachedList) {
       const seedById = Object.fromEntries(seed.equipment.map((item) => [item.id, item]));
-      const merged = (cachedList || []).map((item) => {
+      return (cachedList || []).map((item) => {
         const base = seedById[item.id];
-        return base ? { ...item, image: base.image, name: base.name, category: base.category, assetId: base.assetId, desc: base.desc } : item;
+        return base && !item.image ? { ...item, image: base.image } : item;
       });
-      seed.equipment.forEach((base) => {
-        if (!merged.some((item) => item.id === base.id)) merged.push(clone(base));
-      });
-      return merged;
     }
 
     function loadStore() {
@@ -4320,7 +4365,7 @@
     }
 
     function byId(id) {
-      return store.equipment.find((item) => item.id === id) || store.equipment[0];
+      return store.equipment.find((item) => item.id === id) || null;
     }
 
     function loanById(id) {
@@ -4491,26 +4536,29 @@
 
     // [IMAGE-FN] 器材图统一渲染：所有页面的器材缩略图/大图均由此函数输出 <img>
     function equipmentImage(item, className = "item-img") {
-      const src = assetUrl(item.image);
+      const name = item?.name || "暂无图片";
+      const rawImage = item?.image || "";
+      const src = rawImage ? assetUrl(rawImage) : "";
       const hasImageFile = src && (src.includes(".") || src.startsWith("data:") || src.startsWith("file:"));
 
       if (hasImageFile) {
         return `
           <div class="${className}" style="display:flex; align-items:center; justify-content:center; background:rgba(159,18,57,0.03); border-radius:12px; overflow:hidden; width:100%; height:100%;">
-            <img src="${escapeAttr(src)}" alt="${escapeAttr(item.name)}" loading="lazy" decoding="async" style="width:100%; height:100%; object-fit:cover;" onerror="this.onerror=null; this.parentElement.innerHTML='⚽';"><!-- [IMAGE-ERR] 加载失败兜底 -->
+            <img src="${escapeAttr(src)}" alt="${escapeAttr(name)}" loading="lazy" decoding="async" style="width:100%; height:100%; object-fit:cover;" onerror="this.onerror=null; this.parentElement.innerHTML='无图';"><!-- [IMAGE-ERR] 加载失败占位 -->
           </div>
         `;
       }
       
-      return `<span class="${className} equipment-placeholder-emoji" style="display:flex; align-items:center; justify-content:center; background:rgba(159,18,57,0.05); border-radius:12px; font-size:48px;">${item.image || '🏀'}</span>`; /* [IMAGE-PH] 无图片 URL 时用 emoji；也可把 image 设为 "🏓" 等 */
+      return `<span class="${className}" style="display:flex; align-items:center; justify-content:center; background:rgba(159,18,57,0.05); border-radius:12px; color:var(--muted); font-size:12px; font-weight:900;">无图</span>`;
     }
 
     // ⚡ 完美重组的首页核心渲染方法：保留全部原有生态，只精准重构顶部卡片和加上反馈入口
     function homePage() {
       const totalAvailable = store.equipment.reduce((sum, item) => sum + item.available, 0);
       const openVenues = new Set(store.equipment.filter((item) => item.available > 0).map((item) => cleanVenue(item.venue))).size;
-      const health = Math.round(store.equipment.reduce((sum, item) => sum + item.health, 0) / store.equipment.length);
+      const health = store.equipment.length ? Math.round(store.equipment.reduce((sum, item) => sum + item.health, 0) / store.equipment.length) : 0;
       const currentLoan = activeLoan();
+      const popularEquipment = store.equipment.slice(0, 4);
 
       return `
         <section class="screen home-screen">
@@ -4589,7 +4637,7 @@
               <button class="text-button" data-route="list">查看全部 ${icon("chevron")}</button>
             </div>
             <div class="equipment-grid">
-              ${store.equipment.slice(0, 4).map(equipmentCard).join("")}
+              ${popularEquipment.length ? popularEquipment.map(equipmentCard).join("") : `<div class="empty">暂无器材，管理员录入后会显示在这里。</div>`}
             </div>
           </main>
           ${tabbar()}
@@ -4615,6 +4663,7 @@
 
     function currentLoanCard(loan) {
       const item = byId(loan.equipmentId);
+      if (!item) return "";
       return `
         <section class="active-loan">
           ${equipmentImage(item, "loan-thumb")}<!-- [IMAGE-FN→loan-thumb] 首页·当前借用卡片 -->
@@ -4674,7 +4723,7 @@
             ${categories.map((name) => `<button class="chip ${state.category === name ? "active" : ""}" data-category="${name}">${name}</button>`).join("")}
           </div>
           <div class="list-meta"><span>${filtered.length} 类器材</span><span>可借优先</span></div>
-          <div class="list-stack">${filtered.map(listItem).join("")}</div>
+          <div class="list-stack">${filtered.length ? filtered.map(listItem).join("") : `<div class="empty">暂无器材。管理员录入后会出现在这里。</div>`}</div>
         </main>
       `;
       return shell("器材列表", body);
@@ -4696,6 +4745,7 @@
 
     function detailPage() {
       const item = byId(state.selectedId);
+      if (!item) return shell("器材详情", `<main class="scroll"><div class="empty">暂无这个器材，请先回到器材列表。</div></main>`);
       const periods = selectedBorrowPeriods();
       const durationText = borrowDurationLabel(periods);
       const body = `
@@ -4744,6 +4794,7 @@
       const isReturn = state.syncContext === "return";
       const loan = isReturn ? loanById(state.activeLoanId) : null;
       const item = isReturn ? byId(loan?.equipmentId || state.selectedId) : byId(state.selectedId);
+      if (!item) return shell(isReturn ? "同步归还记录" : "同步借用记录", `<main class="scroll"><div class="empty">暂无这个器材，无法同步。</div></main>`, { tabs: false });
       const isSuccess = state.scanPhase === "success";
       return `
         <section class="screen scan-screen">
@@ -4783,6 +4834,7 @@
         return shell("借用确认", `<main class="scroll"><div class="empty">未找到借用记录。</div></main>`, { tabs: false });
       }
       const item = byId(loan.equipmentId);
+      if (!item) return shell("借用确认", `<main class="scroll"><div class="empty">未找到对应器材。</div></main>`, { tabs: false });
       const body = `
         <main class="scroll">
           <section class="result-card">
@@ -4850,6 +4902,7 @@
 
     function renewLoanCard(loan) {
       const item = byId(loan.equipmentId);
+      if (!item) return "";
       const renewable = canRenewLoan(loan);
       return `
         <section class="borrow-card" style="margin-bottom: 14px;">
@@ -4877,6 +4930,7 @@
         return shell("续借确认", `<main class="scroll"><div class="empty">未找到要续借的借用记录。</div></main>`, { tabs: false });
       }
       const item = byId(loan.equipmentId);
+      if (!item) return shell("续借确认", `<main class="scroll"><div class="empty">未找到对应器材。</div></main>`, { tabs: false });
       const periods = selectedBorrowPeriods();
       const extensionLabel = borrowDurationLabel(periods);
       const newDueAtMs = renewedDueAtMs(loan, periods);
@@ -4916,6 +4970,7 @@
 
     function loanCard(loan) {
       const item = byId(loan.equipmentId);
+      if (!item) return "";
       const canReturn = loan.status === "待归还" || loan.status === "异常待归还";
       return `
         <section class="borrow-card" style="margin-bottom: 14px;">
@@ -4941,6 +4996,7 @@
 
     function historyRow(loan) {
       const item = byId(loan.equipmentId);
+      if (!item) return `<div class="timeline-item"><strong>未知器材</strong><span>${loan.status} · ${loan.returnedAt || loan.borrowedAt}</span></div>`;
       const punctualText = loan.returnedOnTime === true ? "准时" : (loan.returnedOnTime === false ? "超时" : "未计入准时率");
       return `<div class="timeline-item"><strong>${item.name}</strong><span>${loan.status} · ${loan.returnedAt || loan.borrowedAt} · ${punctualText}</span></div>`;
     }
@@ -4949,6 +5005,7 @@
       const loan = loanById(state.activeLoanId) || activeLoan();
       if (!loan) return shell("归还前检测", `<main class="scroll"><div class="empty">没有可检测的借用记录。</div></main>`);
       const item = byId(loan.equipmentId);
+      if (!item) return shell("归还前检测", `<main class="scroll"><div class="empty">未找到对应器材。</div></main>`);
       const body = `
         <main class="scroll">
           <section class="camera-panel">
@@ -4977,6 +5034,7 @@
       const loan = loanById(state.activeLoanId);
       if (!loan) return shell("检测结果", `<main class="scroll"><div class="empty">暂无检测结果。</div></main>`);
       const item = byId(loan.equipmentId);
+      if (!item) return shell("检测结果", `<main class="scroll"><div class="empty">未找到对应器材。</div></main>`);
       const abnormal = loan.detectResult === "异常";
       const body = `
         <main class="scroll">
@@ -5005,6 +5063,9 @@
     function reportPage() {
       const loan = loanById(state.activeLoanId) || activeLoan();
       const item = loan ? byId(loan.equipmentId) : byId(state.selectedId);
+      if (!item) {
+        return shell("报损反馈", `<main class="scroll"><div class="empty">暂无可报损器材。场馆或系统问题请先联系管理员。</div></main>`);
+      }
       const locked = !!loan;
       const equipField = locked
         ? `<div class="field"><span>问题器材</span><div class="locked-equip">${item.name} · ${item.assetId}</div><input type="hidden" id="reportEquipment" value="${item.id}" /></div>`
@@ -5052,6 +5113,16 @@
       const healthyCount = store.equipment.filter((item) => item.health >= 90).length;
       const maintenanceCount = store.equipment.filter((item) => item.status !== "可借").length;
       const progress = adminProgressMetrics();
+      const equipmentDesc = store.equipment.length
+        ? `当前 ${totalAvailable}/${totalStock} 件可借，${healthyCount} 类器材健康度良好。`
+        : "暂无器材，先录入后学生端才会显示。";
+      const equipmentStatus = store.equipment.length ? `${maintenanceCount} 需关注` : "未录入";
+      const equipmentContent = `
+        ${adminEquipmentForm()}
+        <div class="list-stack">
+          ${store.equipment.length ? store.equipment.map(adminEquipmentRow).join("") : `<div class="empty">暂无器材。录入第一件器材后，学生端才会显示可借内容。</div>`}
+        </div>
+      `;
       const body = `
         <main class="scroll">
           <section class="admin-hero admin-dashboard-hero">
@@ -5074,7 +5145,7 @@
           </div>
           ${adminSection("学生留言", "优先处理未回复咨询，回复后会同步到学生端。", `${waitingMessages.length} 待回复`, adminMessageList().length ? adminMessageList().map(adminContactCard).join("") : `<div class="empty">暂无学生留言。</div>`)}
           ${adminSection("报修工单", "跟踪器材异常、暂停借出和维修完成状态。", `${pending.length} 待处理`, store.workOrders.length ? store.workOrders.map(orderCard).join("") : `<div class="empty">暂无工单。学生提交异常后会出现在这里。</div>`)}
-          ${adminSection("器材档案", `当前 ${totalAvailable}/${totalStock} 件可借，${healthyCount} 类器材健康度良好。`, `${maintenanceCount} 需关注`, `<div class="list-stack">${store.equipment.map(adminEquipmentRow).join("")}</div>`)}
+          ${adminSection("器材档案", equipmentDesc, equipmentStatus, equipmentContent)}
         </main>
       `;
       if (!state.isAdmin) {
@@ -5103,7 +5174,7 @@
     }
 
     function percentOf(done, total) {
-      if (total === 0) return 100;
+      if (total === 0) return 0;
       return boundedPercent((done / total) * 100);
     }
 
@@ -5113,9 +5184,9 @@
       const completedOrders = store.workOrders.filter((order) => order.status === "已完成").length;
       const totalStock = store.equipment.reduce((sum, item) => sum + item.total, 0);
       const totalAvailable = store.equipment.reduce((sum, item) => sum + item.available, 0);
-      const messageRate = percentOf(repliedMessages, messages.length);
-      const workRate = percentOf(completedOrders, store.workOrders.length);
-      const stockRate = percentOf(totalAvailable, totalStock);
+      const messageRate = messages.length ? percentOf(repliedMessages, messages.length) : 100;
+      const workRate = store.workOrders.length ? percentOf(completedOrders, store.workOrders.length) : 100;
+      const stockRate = totalStock ? percentOf(totalAvailable, totalStock) : 0;
       return {
         messageRate,
         workRate,
@@ -5156,6 +5227,48 @@
             <strong>${value}<span>${escapeHtml(unit)}</span></strong>
           </div>
         </article>
+      `;
+    }
+
+    function adminEquipmentForm() {
+      return `
+        <form class="admin-equipment-form" id="adminEquipmentForm">
+          <div class="admin-equipment-form-grid">
+            <label class="field">
+              <span>器材名称</span>
+              <input id="adminEqName" maxlength="24" placeholder="例如 乒乓球拍" required />
+            </label>
+            <label class="field">
+              <span>器材编号</span>
+              <input id="adminEqAsset" maxlength="32" placeholder="例如 SL-PP-0001" required />
+            </label>
+            <label class="field">
+              <span>分类</span>
+              <input id="adminEqCategory" maxlength="20" placeholder="例如 乒乓球拍" required />
+            </label>
+            <label class="field">
+              <span>场馆</span>
+              <input id="adminEqVenue" maxlength="24" placeholder="例如 东区体育馆" required />
+            </label>
+            <label class="field">
+              <span>总量</span>
+              <input id="adminEqTotal" type="number" min="0" step="1" inputmode="numeric" placeholder="0" required />
+            </label>
+            <label class="field">
+              <span>可借数量</span>
+              <input id="adminEqAvailable" type="number" min="0" step="1" inputmode="numeric" placeholder="0" required />
+            </label>
+            <label class="field">
+              <span>图片地址</span>
+              <input id="adminEqImage" maxlength="180" placeholder="选填，如 assets/pingpong.png" />
+            </label>
+            <label class="field">
+              <span>说明</span>
+              <input id="adminEqDesc" maxlength="80" placeholder="选填，写借还或检测说明" />
+            </label>
+          </div>
+          <button class="primary-button" id="adminEquipmentSubmit" type="submit">${icon("check")} 录入器材</button>
+        </form>
       `;
     }
 
@@ -5205,6 +5318,7 @@
 
     function orderCard(order) {
       const item = byId(order.equipmentId);
+      if (!item) return "";
       return `
         <article class="order-card">
           ${equipmentImage(item, "order-img")}<!-- [IMAGE-FN→order-img] 管理员工单卡片 -->
@@ -5480,6 +5594,11 @@
 
     function syncBorrowFromMachine(equipmentId, options = {}) {
       const item = byId(equipmentId);
+      if (!item) {
+        state.notice = "暂无这个器材，无法借用";
+        if (!options.skipNavigate) render();
+        return null;
+      }
       const existing = store.loans.find((loan) => loan.equipmentId === equipmentId && ["使用中", "待归还", "异常待归还"].includes(loan.status));
       if (existing) {
         state.notice = "该器材已有进行中的借用，无需重复同步";
@@ -5525,6 +5644,7 @@
       const loan = loanById(loanId);
       if (!loan) return;
       const item = byId(loan.equipmentId);
+      if (!item) return;
       loan.detectResult = abnormal ? "异常" : "正常";
       loan.status = abnormal ? "异常待归还" : "待归还";
       if (abnormal) createOrder(item.id, "手机拍照检测异常", "胶皮翘边 / 拍柄松动", loan.id);
@@ -5538,6 +5658,7 @@
       const loan = loanById(loanId);
       if (!loan) return null;
       const item = byId(loan.equipmentId);
+      if (!item) return null;
       if (!loan.detectResult) {
         state.notice = "请先在手机完成归还前拍照检测";
         if (!options.skipNavigate) render();
@@ -5578,6 +5699,11 @@
         return;
       }
       const item = byId(loan.equipmentId);
+      if (!item) {
+        state.notice = "未找到对应器材";
+        render();
+        return;
+      }
       const periods = selectedBorrowPeriods();
       const extensionMinutes = periods * CLASS_PERIOD_MINUTES;
       const newDueAtMs = renewedDueAtMs(loan, periods);
@@ -5624,6 +5750,11 @@
       const order = store.workOrders.find((item) => item.id === orderId);
       if (!order) return;
       const item = byId(order.equipmentId);
+      if (!item) {
+        state.notice = "未找到对应器材";
+        render();
+        return;
+      }
       order.status = status;
       if (status === "暂停借出") item.status = "异常待确认";
       if (status === "维修中") item.status = "维修中";
@@ -6179,6 +6310,67 @@
       render();
     }
 
+    async function submitAdminEquipmentForm(event) {
+      event.preventDefault();
+      const form = event.currentTarget;
+      const name = normalizeIdentityText(form.querySelector("#adminEqName").value);
+      const assetId = normalizeIdentityText(form.querySelector("#adminEqAsset").value).toUpperCase();
+      const category = normalizeIdentityText(form.querySelector("#adminEqCategory").value);
+      const venue = normalizeIdentityText(form.querySelector("#adminEqVenue").value);
+      const image = String(form.querySelector("#adminEqImage").value || "").trim();
+      const desc = normalizeIdentityText(form.querySelector("#adminEqDesc").value);
+      const total = Number(form.querySelector("#adminEqTotal").value);
+      const available = Number(form.querySelector("#adminEqAvailable").value);
+
+      if (!name || !assetId || !category || !venue) {
+        state.notice = "器材名称、编号、分类和场馆都要填写";
+        render();
+        return;
+      }
+      if (!Number.isInteger(total) || !Number.isInteger(available) || total < 0 || available < 0) {
+        state.notice = "数量必须是 0 或正整数";
+        render();
+        return;
+      }
+      if (available > total) {
+        state.notice = "可借数量不能大于总量";
+        render();
+        return;
+      }
+      if (store.equipment.some((item) => item.assetId === assetId)) {
+        state.notice = "这个器材编号已经存在，不能重复录入";
+        render();
+        return;
+      }
+
+      const item = {
+        id: `eq-${makeUuid()}`,
+        assetId,
+        name,
+        category,
+        image,
+        total,
+        available,
+        status: available > 0 ? "可借" : "补充中",
+        health: 100,
+        venue,
+        desc: desc || "管理员录入器材，按场馆机器扫码借还。",
+      };
+
+      try {
+        await createRemoteEquipment(item);
+      } catch (error) {
+        state.notice = error.message || "器材录入失败";
+        render();
+        return;
+      }
+
+      store.equipment.unshift(item);
+      saveStore();
+      state.notice = "器材已录入";
+      render();
+    }
+
     function bind() {
       document.querySelectorAll("[data-route]").forEach((node) => node.addEventListener("click", () => route(node.dataset.route)));
       document.querySelectorAll("[data-back]").forEach((node) => node.addEventListener("click", back));
@@ -6189,6 +6381,8 @@
       if (identityForm) identityForm.addEventListener("submit", submitIdentityForm);
       const adminContactForm = document.querySelector("#adminContactForm");
       if (adminContactForm) adminContactForm.addEventListener("submit", submitAdminContactForm);
+      const adminEquipmentForm = document.querySelector("#adminEquipmentForm");
+      if (adminEquipmentForm) adminEquipmentForm.addEventListener("submit", submitAdminEquipmentForm);
       document.querySelectorAll("[data-sync-borrow]").forEach((node) => node.addEventListener("click", () => {
         if (node.disabled) return;
         const itemId = node.dataset.syncBorrow || state.selectedId;

@@ -1,6 +1,6 @@
 # SportLoop GitHub Pages
 
-这是 SportLoop 的静态发布版本，可以直接部署到 GitHub Pages。当前版本已接入 Supabase，用来保存学生认证、借用续借、联系管理员和报修工单。
+这是 SportLoop 的静态发布版本，可以直接部署到 GitHub Pages。当前版本已接入 Supabase，用来保存学生认证、器材档案、借用续借、联系管理员和报修工单。
 
 ## 发布内容
 
@@ -27,6 +27,7 @@ https://jwylvubakymfkdncuwhp.supabase.co
 2. 进入 `SQL Editor`。
 3. 复制 `supabase_sportloop.sql` 全部内容并运行。
 4. 如果管理员端提示“管理员未授权”，复制页面显示的 UID，插入 `admin_users` 表。
+5. 管理员授权后，在管理员端录入器材；脚本不会再自动生成演示器材。
 
 登录和注册是分开的：未注册账号不能直接登录，必须先在网页注册页创建账号。账号不能重复；校园认证里只有学号不能重复，姓名和院系可以相同。
 

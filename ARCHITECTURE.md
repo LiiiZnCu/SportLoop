@@ -6,13 +6,14 @@
 - `404.html`：GitHub Pages 兜底页，内容必须和 `index.html` 保持一致。
 - `assets/`：页面加载的图片资源。
 - `manifest.webmanifest`：手机和平板添加到主屏幕时使用。
-- `supabase_sportloop.sql`：Supabase 数据表、索引、权限和初始器材数据。
+- `supabase_sportloop.sql`：Supabase 数据表、索引和权限脚本。
 
 ## 数据流
 
 - 学生登录后，前端通过 Supabase Auth 获取登录身份。
 - 登录和注册分开处理：登录只调用密码登录，注册页才调用 Supabase 注册。
 - 器材、认证、借用、续借、留言和工单通过 Supabase REST 接口读写。
+- 器材档案由管理员端录入，数据库没有器材时学生端显示空状态。
 - `student_profiles` 保存姓名、学号、院系和认证状态，只有学号不可重复；姓名和院系允许重复。
 - `loans` 保存借用、续借和归还结果。
 - `admin_contacts` 保存学生联系管理员的消息和管理员回复。

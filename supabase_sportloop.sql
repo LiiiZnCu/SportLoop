@@ -158,7 +158,7 @@ grant usage on schema public to authenticated;
 grant execute on function public.is_admin() to authenticated;
 grant select on public.admin_users to authenticated;
 grant select, insert, update on public.student_profiles to authenticated;
-grant select, update on public.equipment to authenticated;
+grant select, insert, update on public.equipment to authenticated;
 grant select, insert, update on public.loans to authenticated;
 grant select, insert on public.student_messages to authenticated;
 grant select, insert, update on public.admin_contacts to authenticated;
@@ -197,6 +197,11 @@ drop policy if exists equipment_authenticated_select on public.equipment;
 create policy equipment_authenticated_select on public.equipment
 for select to authenticated
 using (true);
+
+drop policy if exists equipment_authenticated_insert on public.equipment;
+create policy equipment_authenticated_insert on public.equipment
+for insert to authenticated
+with check ((select public.is_admin()));
 
 drop policy if exists equipment_authenticated_update on public.equipment;
 create policy equipment_authenticated_update on public.equipment
@@ -261,23 +266,3 @@ create policy work_orders_update_admin on public.work_orders
 for update to authenticated
 using ((select public.is_admin()))
 with check ((select public.is_admin()));
-
-insert into public.equipment (id, asset_id, name, category, image, total, available, status, health, venue, description)
-values
-  ('paddle-red', 'SL-PB-1024', '乒乓球拍（直拍）', '乒乓球拍', 'assets/paddle-red.png', 10, 6, '可借', 96, '东区体育馆', '适合课堂训练 and 日常对打，归还前重点检测胶皮、边缘和拍柄。'),
-  ('paddle-black', 'SL-PB-0921', '乒乓球拍（横拍）', '乒乓球拍', 'assets/paddle-black.png', 8, 4, '可借', 92, '西区球类馆', '常用球拍，借还记录会绑定唯一条形码。'),
-  ('racket', 'SL-BD-0318', '羽毛球拍', '羽毛球拍', 'assets/racket.png', 12, 8, '可借', 94, '综合训练馆', '归还前重点检查拍框、拍线和握柄。'),
-  ('shuttle', 'SL-SH-0208', '羽毛球', '羽毛球', 'assets/shuttle.png', 30, 12, '补充中', 88, '综合训练馆', '消耗较快，系统会按库存提醒管理员补充。'),
-  ('pingpong', 'SL-PP-0616', '乒乓球', '乒乓球', 'assets/pingpong.png', 40, 20, '可借', 91, '东区体育馆', '按盒借用，归还时机器扫码归档。'),
-  ('basketball', 'SL-BK-0027', '篮球', '篮球', 'assets/basketball.png', 12, 5, '可借', 90, '室外篮球场', '重点检测气压、表面磨损和裂纹。')
-on conflict (id) do update set
-  asset_id = excluded.asset_id,
-  name = excluded.name,
-  category = excluded.category,
-  image = excluded.image,
-  total = excluded.total,
-  available = least(public.equipment.available, excluded.total),
-  status = excluded.status,
-  health = excluded.health,
-  venue = excluded.venue,
-  description = excluded.description;
