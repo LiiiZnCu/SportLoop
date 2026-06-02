@@ -2520,6 +2520,21 @@
       font-size: 12px;
     }
 
+    .login-form-status {
+      min-height: 20px;
+      margin: 10px 0 0;
+      text-align: center;
+      color: var(--brand);
+      font-size: 13px;
+      font-weight: 800;
+      line-height: 1.45;
+      overflow-wrap: anywhere;
+    }
+
+    .login-form-status:empty {
+      display: none;
+    }
+
     .login-switch {
       margin-top: 14px;
       display: flex;
@@ -3328,7 +3343,7 @@
         body: JSON.stringify(body),
       });
       const data = await response.json().catch(() => ({}));
-      if (!response.ok) throw new Error(data.msg || data.message || "认证失败");
+      if (!response.ok) throw new Error(data.msg || data.message || data.error_description || data.error || "认证失败");
       return data;
     }
 
@@ -3346,12 +3361,22 @@
       return data;
     }
 
+    function usernameToSafeEmail(username) {
+      const bytes = new TextEncoder().encode(username);
+      const binary = Array.from(bytes, (byte) => String.fromCharCode(byte)).join("");
+      const safe = btoa(binary).replace(/\+/g, "-").replace(/\//g, "_").replace(/=+$/g, "");
+      return `u-${safe}@sportloop.app`;
+    }
+
     function normalizeLoginEmail(account) {
-      const raw = String(account || "").trim().toLowerCase();
+      const raw = String(account || "").trim().normalize("NFKC").toLowerCase();
+      if (!raw) throw new Error("账号不能为空");
       if (raw.includes("@")) return raw;
-      const safe = raw.replace(/[^a-z0-9._-]/g, "");
-      if (!safe) throw new Error("账号请用学号、英文或邮箱");
-      return `${safe}@sportloop.local`;
+      return usernameToSafeEmail(raw);
+    }
+
+    function loginStatusHtml() {
+      return state.notice ? `<p class="login-form-status">${escapeHtml(state.notice)}</p>` : `<p class="login-form-status"></p>`;
     }
 
     function makeUuid() {
@@ -3888,7 +3913,7 @@
             <div class="page-title">${title}</div>
             ${right}
           </header>
-          ${notice()}
+          ${loginStatusHtml()}
           ${body}
           ${options.tabs === false ? "" : tabbar()}
         </section>
@@ -3997,7 +4022,7 @@
             <div class="brand"><img class="logo-mark app-icon" src="${escapeAttr(assetUrl(APP_ICON_SRC))}" alt="SportLoop" decoding="async" /><!-- [IMAGE-10] --><span>SportLoop</span></div>
             <button class="icon-button" data-route="list" aria-label="器材列表">${icon("search")}</button>
           </header>
-          ${notice()}
+          ${loginStatusHtml()}
           <main class="scroll">
             
             <!-- 📷 完美像素级还原参考图样式的头部卡片组 -->
@@ -4861,7 +4886,7 @@
             <h1>我的</h1>
             <button class="profile-gear" id="btnSwitchAdmin" aria-label="设置">${icon("gear")}</button>
           </header>
-          ${notice()}
+          ${loginStatusHtml()}
           ${body}
           ${tabbar()}
         </section>
@@ -5219,7 +5244,7 @@
                 <span>还没有账号？</span>
                 <button class="text-button" type="button" data-route="register">去注册</button>
               </div>
-              ${notice()}
+              ${loginStatusHtml()}
             </form>
           </main>
         </section>
@@ -5259,7 +5284,7 @@
                 <span>已有账号？</span>
                 <button class="text-button" type="button" data-route="credentials">去登录</button>
               </div>
-              ${notice()}
+              ${loginStatusHtml()}
             </form>
           </main>
         </section>
