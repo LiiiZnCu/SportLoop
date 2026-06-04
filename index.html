@@ -834,6 +834,188 @@
       color: rgba(255, 255, 255, 0.76);
     }
 
+    .batch-apply-panel,
+    .batch-request-card {
+      display: grid;
+      gap: 14px;
+      padding: 16px;
+      border: 1px solid rgba(159, 18, 57, 0.1);
+      border-radius: 22px;
+      background: rgba(255, 255, 255, 0.94);
+      box-shadow: var(--shadow-soft);
+    }
+
+    .batch-apply-panel .duration-picker {
+      margin: 0;
+    }
+
+    .batch-equipment-list {
+      display: grid;
+      gap: 10px;
+    }
+
+    .batch-equipment-option {
+      display: grid;
+      grid-template-columns: minmax(0, 1fr) 78px;
+      gap: 10px;
+      align-items: center;
+      padding: 10px;
+      border: 1px solid var(--line);
+      border-radius: 18px;
+      background: rgba(255, 250, 252, 0.78);
+    }
+
+    .batch-equipment-main {
+      min-width: 0;
+      display: grid;
+      grid-template-columns: 22px 72px minmax(0, 1fr);
+      align-items: center;
+      gap: 10px;
+    }
+
+    .batch-equipment-main input {
+      width: 18px;
+      height: 18px;
+      accent-color: var(--brand);
+    }
+
+    .batch-equipment-main .list-media {
+      width: 72px;
+      height: 58px;
+      border-radius: 12px;
+    }
+
+    .batch-equipment-main .list-img {
+      width: 58px;
+      height: 46px;
+    }
+
+    .batch-equipment-main strong,
+    .batch-request-title strong {
+      display: block;
+      min-width: 0;
+      overflow: hidden;
+      color: var(--ink);
+      font-size: clamp(14px, 4vw, 16px);
+      line-height: 1.25;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+    }
+
+    .batch-equipment-main small,
+    .batch-request-title small,
+    .batch-item-line {
+      display: block;
+      min-width: 0;
+      overflow-wrap: anywhere;
+      color: var(--muted);
+      font-size: clamp(10px, 3vw, 12px);
+      line-height: 1.35;
+    }
+
+    .batch-qty {
+      display: grid;
+      gap: 5px;
+      color: var(--muted);
+      font-size: 11px;
+      font-weight: 800;
+    }
+
+    .batch-qty input {
+      width: 100%;
+      height: 38px;
+      padding: 0 8px;
+      color: var(--ink);
+      border: 1px solid var(--line);
+      border-radius: 12px;
+      background: #ffffff;
+      font-size: 15px;
+      font-weight: 900;
+      text-align: center;
+    }
+
+    .batch-request-card {
+      margin-bottom: 12px;
+    }
+
+    .batch-request-head {
+      display: grid;
+      grid-template-columns: minmax(0, 1fr) auto;
+      align-items: start;
+      gap: 10px;
+    }
+
+    .batch-request-meta {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 6px;
+      margin-top: 8px;
+    }
+
+    .batch-request-meta span {
+      min-height: 26px;
+      display: inline-flex;
+      align-items: center;
+      padding: 0 9px;
+      border-radius: 999px;
+      color: var(--brand);
+      background: var(--brand-soft);
+      font-size: 11px;
+      font-weight: 850;
+      white-space: nowrap;
+    }
+
+    .batch-item-list {
+      display: grid;
+      gap: 6px;
+      padding: 10px;
+      border-radius: 16px;
+      background: rgba(159, 18, 57, 0.045);
+    }
+
+    .batch-request-actions {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 8px;
+    }
+
+    .batch-request-actions .primary-button,
+    .batch-request-actions .secondary-button {
+      min-height: 42px;
+      border-radius: 14px;
+      font-size: clamp(11px, 3.2vw, 13px);
+    }
+
+    .batch-form-status {
+      min-height: 18px;
+      margin: 0;
+      color: var(--brand);
+      font-size: 12px;
+      font-weight: 850;
+      line-height: 1.35;
+    }
+
+    @media (max-width: 390px) {
+      .batch-equipment-option {
+        grid-template-columns: 1fr;
+      }
+
+      .batch-equipment-main {
+        grid-template-columns: 22px 64px minmax(0, 1fr);
+      }
+
+      .batch-equipment-main .list-media {
+        width: 64px;
+        height: 52px;
+      }
+
+      .batch-qty {
+        grid-template-columns: auto 96px;
+        align-items: center;
+        justify-content: space-between;
+      }
+    }
+
     .primary-button,
     .secondary-button {
       min-height: 52px;
@@ -2949,6 +3131,35 @@
       display: none;
     }
 
+    .loading-spinner {
+      width: 22px;
+      height: 22px;
+      display: inline-block;
+      border-radius: 50%;
+      border: 3px solid rgba(159, 18, 57, 0.16);
+      border-top-color: var(--brand);
+      animation: loading-spin 760ms linear infinite;
+      vertical-align: middle;
+    }
+
+    .login-form-status.is-loading {
+      display: grid;
+      place-items: center;
+      min-height: 34px;
+    }
+
+    @keyframes loading-spin {
+      to {
+        transform: rotate(360deg);
+      }
+    }
+
+    @media (prefers-reduced-motion: reduce) {
+      .loading-spinner {
+        animation: none;
+      }
+    }
+
     .login-switch {
       margin-top: 14px;
       display: flex;
@@ -3561,7 +3772,7 @@
       check: `<svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><circle cx="12" cy="12" r="9" stroke="currentColor" stroke-width="2"/><path d="m8 12 2.7 2.7L16.5 9" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>`,
       alert: `<svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="m12 3 10 18H2L12 3z" stroke="currentColor" stroke-width="2" stroke-linejoin="round"/><path d="M12 9v5M12 17h.01" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"/></svg>`,
       shield: `<svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M12 3 19 6v5c0 4.4-2.8 8.2-7 10-4.2-1.8-7-5.6-7-10V6l7-3z" stroke="currentColor" stroke-width="2"/><path d="m8.5 12 2.2 2.2 4.8-5" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>`,
-      wrench: `<svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M14.7 6.3a4.5 4.5 0 0 0 5 5L11 20a3 3 0 0 1-4.2-4.2l8.7-8.7a4.5 4.5 0 0 0-.8-.8z" stroke="currentColor" stroke-width="2" stroke-linejoin="round"/></svg>`,
+      wrench: `<svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="m14.7 5.3 4 4-9.9 9.9a2.8 2.8 0 0 1-4 0 2.8 2.8 0 0 1 0-4l9.9-9.9Z" stroke="currentColor" stroke-width="2" stroke-linejoin="round"/><path d="m16.8 3.2 4 4-2.1 2.1-4-4 2.1-2.1Z" stroke="currentColor" stroke-width="2" stroke-linejoin="round"/><path d="M7.4 16.6h.01" stroke="currentColor" stroke-width="2.8" stroke-linecap="round"/></svg>`,
       chevron: `<svg class="chev" viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="m9 5 7 7-7 7" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"/></svg>`,
       qr: `<svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M4 4h6v6H4V4zM14 4h6v6h-6V4zM4 14h6v6H4v-6zM14 14h2v2h-2v-2zM18 14h2v6h-4v-2h2v-4zM12 18h2v2h-2v-2z" stroke="currentColor" stroke-linejoin="round" stroke-width="2"/></svg>`,
       gear: `<svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M12 8.2a3.8 3.8 0 1 0 0 7.6 3.8 3.8 0 0 0 0-7.6Z" stroke="currentColor" stroke-width="2"/><path d="M19.4 13.5c.1-.5.1-1 .1-1.5s0-1-.1-1.5l2-1.5-2-3.5-2.4 1a8 8 0 0 0-2.6-1.5L14 2.5h-4L9.6 5a8 8 0 0 0-2.6 1.5l-2.4-1-2 3.5 2 1.5c-.1.5-.1 1-.1 1.5s0 1 .1 1.5l-2 1.5 2 3.5 2.4-1a8 8 0 0 0 2.6 1.5l.4 2.5h4l.4-2.5a8 8 0 0 0 2.6-1.5l2.4 1 2-3.5-2-1.5Z" stroke="currentColor" stroke-width="2" stroke-linejoin="round"/></svg>`,
@@ -3668,6 +3879,7 @@
         },
       ],
       loans: [],
+      batchRequests: [],
       workOrders: [],
       identityBindings: [],
       adminMessages: [],
@@ -3693,6 +3905,7 @@
       currentEmail: "",
       isAdmin: false,
       remoteLoading: false,
+      loading: false,
     };
 
     const appEl = document.querySelector("#app");
@@ -3739,6 +3952,7 @@
       state.currentUserId = "";
       state.currentEmail = "";
       state.isAdmin = false;
+      state.loading = false;
     }
 
     function handleLogout() {
@@ -3795,6 +4009,7 @@
     }
 
     function loginStatusHtml() {
+      if (state.loading) return `<p class="login-form-status is-loading"><span class="loading-spinner" aria-hidden="true"></span></p>`;
       return state.notice ? `<p class="login-form-status">${escapeHtml(state.notice)}</p>` : `<p class="login-form-status"></p>`;
     }
 
@@ -3883,6 +4098,7 @@
       store.profile = emptyRemoteProfile();
       store.equipment = [];
       store.loans = [];
+      store.batchRequests = [];
       store.workOrders = [];
       store.identityBindings = [];
       store.adminMessages = [];
@@ -3911,6 +4127,42 @@
         returnedOnTime: row.returned_on_time,
         renewedTimes: row.renewed_times || 0,
         renewalRecords: row.renewal_records || [],
+        batchRequestId: row.batch_request_id || "",
+      };
+    }
+
+    function jsonArrayValue(value) {
+      if (Array.isArray(value)) return value;
+      if (typeof value === "string") {
+        try {
+          const parsed = JSON.parse(value);
+          return Array.isArray(parsed) ? parsed : [];
+        } catch {
+          return [];
+        }
+      }
+      return [];
+    }
+
+    function dbBatchRequestToLocal(row) {
+      const borrowedAtMs = row.borrowed_at ? Date.parse(row.borrowed_at) : null;
+      const returnedAtMs = row.returned_at ? Date.parse(row.returned_at) : null;
+      return {
+        id: row.id,
+        userId: row.user_id,
+        studentName: row.student_name || "",
+        studentId: row.student_id || "",
+        items: jsonArrayValue(row.items),
+        durationPeriods: Number(row.duration_periods) || 1,
+        durationMinutes: Number(row.duration_minutes) || CLASS_PERIOD_MINUTES,
+        durationLabel: durationLabelFromMinutes(row.duration_periods, row.duration_minutes),
+        status: row.status || "待审核",
+        adminNote: row.admin_note || "",
+        createdAt: dbTimeText(row.created_at),
+        borrowedAt: row.borrowed_at ? dbTimeText(row.borrowed_at) : "",
+        borrowedAtMs,
+        returnedAt: row.returned_at ? dbTimeText(row.returned_at) : "",
+        returnedAtMs,
       };
     }
 
@@ -3975,6 +4227,7 @@
       }
       if (!data.access_token) {
         state.route = "credentials";
+        state.loading = false;
         state.notice = "注册成功，请返回登录。如果登录不了，请在 Supabase 关闭邮箱确认";
         render();
         return;
@@ -4036,6 +4289,7 @@
       } catch (error) {
         reportRemoteSyncError(error);
       }
+      state.loading = false;
       state.route = actualRole === "admin" ? "admin" : "home";
       state.notice = actualRole === "admin" && !state.isAdmin ? "管理员账号已登录，等待授权" : "";
       render();
@@ -4059,13 +4313,14 @@
       if (!authSession?.accessToken) return;
       await refreshAdminAccess();
 
-      const [equipmentRows, profileRows, loanRows, messageRows, contactRows, orderRows] = await Promise.all([
+      const [equipmentRows, profileRows, loanRows, messageRows, contactRows, orderRows, batchRows] = await Promise.all([
         supabaseRequest("equipment?select=*&order=name.asc"),
         supabaseRequest(`student_profiles?select=*&user_id=eq.${authSession.userId}`),
         supabaseRequest("loans?select=*&order=created_at.desc"),
         supabaseRequest("student_messages?select=*&order=created_at.desc"),
         supabaseRequest("admin_contacts?select=*&order=created_at.desc"),
         supabaseRequest("work_orders?select=*&order=created_at.desc"),
+        supabaseRequest("batch_borrow_requests?select=*&order=created_at.desc"),
       ]);
 
       store.equipment = equipmentRows.map(dbEquipmentToLocal);
@@ -4076,6 +4331,7 @@
       store.messages = messageRows.map(dbMessageToLocal);
       store.adminMessages = contactRows.map(dbContactToLocal);
       store.workOrders = orderRows.map(dbWorkOrderToLocal);
+      store.batchRequests = batchRows.map(dbBatchRequestToLocal);
       saveStore();
     }
 
@@ -4094,12 +4350,12 @@
     }
 
     function shouldRefreshOnRoute(to) {
-      return ["home", "list", "borrow", "renew", "messages", "admin", "profile", "profileInfo", "creditRules", "identity", "contactAdmin"].includes(to);
+      return ["home", "list", "borrow", "batchBorrow", "renew", "messages", "admin", "profile", "profileInfo", "creditRules", "identity", "contactAdmin"].includes(to);
     }
 
     const adminRoutes = new Set(["admin"]);
     const studentRoutes = new Set([
-      "home", "list", "detail", "scanBorrow", "borrowConfirm", "borrow", "renew", "renewDetail",
+      "home", "list", "detail", "scanBorrow", "borrowConfirm", "borrow", "batchBorrow", "renew", "renewDetail",
       "detect", "result", "report", "messages", "contactAdmin", "profile", "profileInfo", "creditRules", "identity",
     ]);
 
@@ -4146,11 +4402,15 @@
       }));
     }
 
-    function saveRemoteEquipment(item) {
-      runRemote(() => supabaseRequest(`equipment?id=eq.${item.id}`, {
+    function updateRemoteEquipment(item) {
+      return supabaseRequest(`equipment?id=eq.${item.id}`, {
         method: "PATCH",
         body: { available: item.available, status: item.status, health: item.health },
-      }));
+      });
+    }
+
+    function saveRemoteEquipment(item) {
+      runRemote(() => updateRemoteEquipment(item));
     }
 
     async function createRemoteEquipment(item) {
@@ -4172,8 +4432,8 @@
       });
     }
 
-    function saveRemoteLoan(loan) {
-      runRemote(() => supabaseRequest(`loans?id=eq.${loan.id}`, {
+    function updateRemoteLoan(loan) {
+      return supabaseRequest(`loans?id=eq.${loan.id}`, {
         method: "PATCH",
         body: {
           due_at: toIso(loan.dueAtMs),
@@ -4185,16 +4445,21 @@
           returned_on_time: loan.returnedOnTime,
           renewed_times: loan.renewedTimes || 0,
           renewal_records: loan.renewalRecords || [],
+          batch_request_id: loan.batchRequestId || null,
         },
-      }));
+      });
     }
 
-    function createRemoteLoan(loan) {
-      runRemote(() => supabaseRequest("loans", {
+    function saveRemoteLoan(loan) {
+      runRemote(() => updateRemoteLoan(loan));
+    }
+
+    function insertRemoteLoan(loan, userId = authSession?.userId) {
+      return supabaseRequest("loans", {
         method: "POST",
         body: {
           id: loan.id,
-          user_id: authSession.userId,
+          user_id: userId,
           equipment_id: loan.equipmentId,
           borrowed_at: toIso(loan.borrowedAtMs),
           due_at: toIso(loan.dueAtMs),
@@ -4202,8 +4467,43 @@
           duration_minutes: loan.durationMinutes,
           status: loan.status,
           detect_result: loan.detectResult || "",
+          batch_request_id: loan.batchRequestId || null,
         },
-      }));
+      });
+    }
+
+    function createRemoteLoan(loan) {
+      runRemote(() => insertRemoteLoan(loan));
+    }
+
+    function batchRequestRemoteBody(request) {
+      return {
+        id: request.id,
+        user_id: request.userId || authSession.userId,
+        student_name: request.studentName || "",
+        student_id: request.studentId || "",
+        items: request.items || [],
+        duration_periods: request.durationPeriods,
+        duration_minutes: request.durationMinutes,
+        status: request.status,
+        admin_note: request.adminNote || "",
+        borrowed_at: request.borrowedAtMs ? toIso(request.borrowedAtMs) : null,
+        returned_at: request.returnedAtMs ? toIso(request.returnedAtMs) : null,
+      };
+    }
+
+    async function createRemoteBatchRequest(request) {
+      return supabaseRequest("batch_borrow_requests", {
+        method: "POST",
+        body: batchRequestRemoteBody(request),
+      });
+    }
+
+    async function saveRemoteBatchRequest(request) {
+      return supabaseRequest(`batch_borrow_requests?id=eq.${request.id}`, {
+        method: "PATCH",
+        body: batchRequestRemoteBody(request),
+      });
     }
 
     function createRemoteWorkOrder(order) {
@@ -4273,6 +4573,7 @@
         profile: { ...clone(seed.profile), ...(parsed.profile || {}) },
         equipment: mergeEquipmentImages(parsed.equipment),
         loans: parsed.loans || [],
+        batchRequests: parsed.batchRequests || [],
         workOrders: parsed.workOrders || [],
         identityBindings: parsed.identityBindings || [],
         adminMessages: parsed.adminMessages || [],
@@ -4401,6 +4702,15 @@
       return store.adminMessages;
     }
 
+    function batchRequestList() {
+      if (!Array.isArray(store.batchRequests)) store.batchRequests = [];
+      return store.batchRequests;
+    }
+
+    function batchRequestById(id) {
+      return batchRequestList().find((request) => request.id === id) || null;
+    }
+
     function clearScanTimers() {
       window.clearTimeout(window.__scanTimer);
       window.clearTimeout(window.__scanSuccessTimer);
@@ -4430,8 +4740,8 @@
     }
 
     function statusClass(status) {
-      if (status === "可借" || status === "已归还" || status === "已完成" || status === "已回复") return "ok";
-      if (status === "补充中" || status === "使用中" || status === "待归还" || status === "待回复") return "warn";
+      if (status === "可借" || status === "已归还" || status === "已完成" || status === "已回复" || status === "已通过") return "ok";
+      if (status === "补充中" || status === "使用中" || status === "待归还" || status === "待回复" || status === "待审核" || status === "已借出") return "warn";
       return "bad";
     }
 
@@ -4455,7 +4765,7 @@
             <div class="page-title">${title}</div>
             ${right}
           </header>
-          ${loginStatusHtml()}
+          ${notice()}
           ${body}
           ${options.tabs === false ? "" : tabbar()}
         </section>
@@ -4464,13 +4774,13 @@
 
     function notice() {
       if (!state.notice) return "";
-      const html = `<div class="toast" id="noticeToast">${state.notice}</div>`;
+      const html = `<div class="toast" id="noticeToast">${escapeHtml(state.notice)}</div>`;
       window.clearTimeout(window.__noticeTimer);
       window.__noticeTimer = window.setTimeout(() => {
         state.notice = "";
         const toast = document.querySelector("#noticeToast");
         if (toast) toast.remove();
-      }, 1600);
+      }, 2200);
       return html;
     }
 
@@ -4567,7 +4877,7 @@
             <div class="brand"><img class="logo-mark app-icon" src="${escapeAttr(assetUrl(APP_ICON_SRC))}" alt="SportLoop" decoding="async" /><!-- [IMAGE-10] --><span>SportLoop</span></div>
             <button class="icon-button" data-route="list" aria-label="器材列表">${icon("search")}</button>
           </header>
-          ${loginStatusHtml()}
+          ${notice()}
           <main class="scroll">
             
             <!-- 📷 完美像素级还原参考图样式的头部卡片组 -->
@@ -4656,7 +4966,10 @@
             <h2>查器材</h2>
             <p>借还在场馆机器完成，手机同步记录。</p>
           </div>
-          <button class="primary-button" data-route="list">${icon("search")} 查看器材</button>
+          <div class="button-row">
+            <button class="primary-button" data-route="list">${icon("search")} 查看器材</button>
+            <button class="secondary-button" data-route="batchBorrow">${icon("bag")} 批量申请</button>
+          </div>
         </section>
       `;
     }
@@ -4672,7 +4985,7 @@
             <h2>${item.name}</h2>
             <p style="font-size: 11px; margin-top: 2px;">${item.assetId} · ${loan.status}</p>
             <div class="button-row" style="margin-top: 8px;">
-              <button class="secondary-button" style="min-height:36px; border-radius:10px; font-size:12px;" data-report-loan="${loan.id}">${icon("alert")} 报损</button>
+              <button class="secondary-button" style="min-height:36px; border-radius:10px; font-size:12px;" data-report-loan="${loan.id}">${icon("wrench")} 报损</button>
               <button class="primary-button" style="min-height:36px; border-radius:10px; font-size:12px;" data-loan-detect="${loan.id}" data-detect-mode="photo">${icon("camera")} 归还前检测</button>
             </div>
           </div>
@@ -4818,11 +5131,12 @@
                 <div class="sync-core">${icon(isReturn ? "check" : "bag")}</div>
               </div>
             `}
-            <p class="scan-hint">
-              ${isSuccess ? (isReturn ? "即将更新归还状态" : "即将进入借用确认") : (isReturn ? "正在拉取机器归还记录" : "正在拉取机器借出记录")}
-              <strong>${item.name}</strong>
-            </p>
-            <p class="scan-status-text ${isSuccess ? "" : "is-scanning"}">${isSuccess ? "写入本地记录中…" : "连接场馆设备中…"}</p>
+            ${isSuccess ? `
+              <p class="scan-hint">
+                ${isReturn ? "即将更新归还状态" : "即将进入借用确认"}
+                <strong>${item.name}</strong>
+              </p>
+            ` : ""}
           </div>
         </section>
       `;
@@ -4874,6 +5188,13 @@
       const history = store.loans.filter((loan) => !["使用中", "待归还", "异常待归还"].includes(loan.status));
       const body = `
         <main class="scroll">
+          <section class="action-panel" style="margin-bottom:14px;">
+            <div>
+              <h2>批量借出申请</h2>
+              <p>多人活动或课堂用器材，先提交申请，管理员通过后再到机器批量借还。</p>
+            </div>
+            <button class="primary-button" data-route="batchBorrow">${icon("bag")} 去申请</button>
+          </section>
           <div class="section-head"><h2>当前借用</h2></div>
           ${active.length ? active.map(loanCard).join("") : `<div class="empty">还没有借用记录。请先在场馆机器完成借出，再在器材详情页点击借用。</div>`}
           <div class="section-head"><h2>历史记录</h2></div>
@@ -4881,6 +5202,118 @@
         </main>
       `;
       return shell("我的借用", body, { left: "none" });
+    }
+
+    function batchBorrowPage() {
+      const available = store.equipment.filter((item) => item.status === "可借" && item.available > 0);
+      const ownRequests = batchRequestList().filter((request) => request.userId === state.currentUserId);
+      const formContent = available.length ? `
+        <form class="batch-apply-panel" id="batchBorrowForm">
+          <div>
+            <h2 style="margin:0;font-size:22px;">选择批量器材</h2>
+            <p class="body-text" style="margin-top:6px;">至少选择 2 件。管理员审批通过后，机器批量借出和归还按钮才会开放。</p>
+          </div>
+          <div class="duration-picker">
+            <div class="duration-picker-head">
+              <strong>借用时长</strong>
+              <span>1 节课 = ${CLASS_PERIOD_MINUTES} 分钟</span>
+            </div>
+            <div class="duration-options">${borrowDurationOptions()}</div>
+          </div>
+          <div class="batch-equipment-list">${available.map(batchEquipmentOption).join("")}</div>
+          <p class="batch-form-status" id="batchBorrowStatus"></p>
+          <button class="primary-button" type="submit">${icon("check")} 提交申请</button>
+        </form>
+      ` : `<div class="empty">暂无可借器材。管理员录入并开放库存后，才能提交批量申请。</div>`;
+      const body = `
+        <main class="scroll">
+          ${formContent}
+          <div class="section-head"><h2>我的批量申请</h2></div>
+          <div class="list-stack">${ownRequests.length ? ownRequests.map(studentBatchRequestCard).join("") : `<div class="empty">暂无批量申请。</div>`}</div>
+        </main>
+      `;
+      return shell("批量申请", body, { tabs: false });
+    }
+
+    function batchEquipmentOption(item) {
+      return `
+        <article class="batch-equipment-option">
+          <label class="batch-equipment-main">
+            <input type="checkbox" data-batch-select="${escapeAttr(item.id)}" />
+            <span class="list-media">${equipmentImage(item, "list-img")}</span><!-- [IMAGE-FN→list-img] 批量申请·器材选择 -->
+            <span>
+              <strong>${escapeHtml(item.name)}</strong>
+              <small>${escapeHtml(item.assetId)} · ${escapeHtml(cleanVenue(item.venue))}</small>
+              <small>剩余 ${item.available}/${item.total}</small>
+            </span>
+          </label>
+          <label class="batch-qty">
+            <span>数量</span>
+            <input type="number" min="1" max="${item.available}" step="1" value="1" inputmode="numeric" data-batch-qty="${escapeAttr(item.id)}" />
+          </label>
+        </article>
+      `;
+    }
+
+    function batchRequestItemCount(request) {
+      return (request.items || []).reduce((sum, item) => sum + Number(item.qty || 0), 0);
+    }
+
+    function batchRequestItemsHtml(request) {
+      return `
+        <div class="batch-item-list">
+          ${(request.items || []).map((item) => `<span class="batch-item-line">${escapeHtml(item.name)} × ${Number(item.qty || 0)} · ${escapeHtml(item.venue || "")}</span>`).join("")}
+        </div>
+      `;
+    }
+
+    function batchRequestTitle(request) {
+      return `
+        <div class="batch-request-title">
+          <strong>${escapeHtml(request.studentName || "未命名学生")} · ${escapeHtml(request.studentId || "未绑定学号")}</strong>
+          <small>${escapeHtml(request.createdAt || "")}</small>
+        </div>
+      `;
+    }
+
+    function batchRequestMeta(request) {
+      return `
+        <div class="batch-request-meta">
+          <span>${batchRequestItemCount(request)} 件</span>
+          <span>${escapeHtml(request.durationLabel || borrowDurationLabel(request.durationPeriods))}</span>
+          <span>${escapeHtml(request.adminNote || "等待流程更新")}</span>
+        </div>
+      `;
+    }
+
+    function studentBatchRequestCard(request) {
+      const borrowAction = request.status === "已通过"
+        ? `<button class="primary-button" data-batch-sync-borrow="${escapeAttr(request.id)}">${icon("bag")} 机器批量借出</button>`
+        : "";
+      const returnAction = request.status === "已借出"
+        ? `<button class="primary-button" data-batch-sync-return="${escapeAttr(request.id)}">${icon("refresh")} 机器批量归还</button>`
+        : "";
+      const actions = borrowAction || returnAction
+        ? `<div class="batch-request-actions">${borrowAction || ""}${returnAction || ""}<button class="secondary-button" data-route="borrow">${icon("clock")} 查看记录</button></div>`
+        : `<p class="machine-hint" style="margin:0;">${batchStudentHint(request.status)}</p>`;
+      return `
+        <article class="batch-request-card">
+          <div class="batch-request-head">
+            ${batchRequestTitle(request)}
+            ${tag(request.status)}
+          </div>
+          ${batchRequestMeta(request)}
+          ${batchRequestItemsHtml(request)}
+          ${actions}
+        </article>
+      `;
+    }
+
+    function batchStudentHint(status) {
+      if (status === "待审核") return "申请已提交，等待管理员审批。";
+      if (status === "已拒绝") return "管理员未通过这次申请，请调整后重新提交。";
+      if (status === "已归还") return "这次批量借还已经完成。";
+      return "管理员通过后才可以到机器批量借还。";
     }
 
     function renewPage() {
@@ -4984,7 +5417,7 @@
             </div>
           </div>
           <div class="button-row ${canRenewLoan(loan) ? "loan-action-row" : ""}" style="margin-top: 14px;">
-            <button class="secondary-button" data-report-loan="${loan.id}">${icon("alert")} 报损</button>
+            <button class="secondary-button" data-report-loan="${loan.id}">${icon("wrench")} 报损</button>
             ${canRenewLoan(loan) ? `<button class="secondary-button" data-renew-loan="${loan.id}">${icon("refresh")} 续借</button>` : ""}
             ${canReturn
               ? `<button class="primary-button" data-sync-return="${loan.id}">${icon("bag")} 同步归还状态</button>`
@@ -5077,7 +5510,7 @@
             <label class="field"><span>问题类型</span><select id="reportType">${issueOptionsFor(item.id)}</select></label>
             <label class="field"><span>问题说明</span><textarea id="reportDesc" placeholder="简单说明发现位置 and 使用场景"></textarea></label>
             <label class="upload-real">${icon("camera")} 上传照片<input id="reportPhoto" type="file" accept="image/*" capture="environment" /></label><!-- [IMAGE-14] 报损上传照片（非静态资源） -->
-            <button class="primary-button" type="submit">${icon("alert")} 提交报损</button>
+            <button class="primary-button" type="submit">${icon("wrench")} 提交报损</button>
           </form>
         </main>
       `;
@@ -5108,6 +5541,8 @@
     function adminPage() {
       const pending = store.workOrders.filter((order) => order.status !== "已完成");
       const waitingMessages = adminMessageList().filter((message) => message.status !== "已回复");
+      const batchRequests = batchRequestList();
+      const pendingBatchRequests = batchRequests.filter((request) => request.status === "待审核");
       const totalAvailable = store.equipment.reduce((sum, item) => sum + item.available, 0);
       const totalStock = store.equipment.reduce((sum, item) => sum + item.total, 0);
       const healthyCount = store.equipment.filter((item) => item.health >= 90).length;
@@ -5130,7 +5565,7 @@
               <div>
                 <p class="admin-overline">今日运营</p>
                 <h1>管理员工作台</h1>
-                <p class="admin-ring-summary">留言·工单·库存实时计算</p>
+                <p class="admin-ring-summary">留言·任务·库存实时计算</p>
               </div>
               <span class="admin-ring-mode">实时</span>
             </div>
@@ -5140,9 +5575,10 @@
           </section>
           <div class="admin-kpi-grid">
             ${adminKpi("待回复", waitingMessages.length, "条", "message")}
-            ${adminKpi("待处理", pending.length, "单", "wrench")}
+            ${adminKpi("待审批", pendingBatchRequests.length, "单", "check")}
             ${adminKpi("可借总量", totalAvailable, "件", "bag")}
           </div>
+          ${adminSection("批量申请", "审批通过后，学生才能在机器批量借还。", `${pendingBatchRequests.length} 待审批`, batchRequests.length ? batchRequests.map(adminBatchRequestCard).join("") : `<div class="empty">暂无批量申请。</div>`)}
           ${adminSection("学生留言", "优先处理未回复咨询，回复后会同步到学生端。", `${waitingMessages.length} 待回复`, adminMessageList().length ? adminMessageList().map(adminContactCard).join("") : `<div class="empty">暂无学生留言。</div>`)}
           ${adminSection("报修工单", "跟踪器材异常、暂停借出和维修完成状态。", `${pending.length} 待处理`, store.workOrders.length ? store.workOrders.map(orderCard).join("") : `<div class="empty">暂无工单。学生提交异常后会出现在这里。</div>`)}
           ${adminSection("器材档案", equipmentDesc, equipmentStatus, equipmentContent)}
@@ -5180,12 +5616,16 @@
 
     function adminProgressMetrics() {
       const messages = adminMessageList();
+      const batchRequests = batchRequestList();
       const repliedMessages = messages.filter((message) => message.status === "已回复").length;
       const completedOrders = store.workOrders.filter((order) => order.status === "已完成").length;
+      const finishedBatchRequests = batchRequests.filter((request) => request.status !== "待审核").length;
+      const taskTotal = store.workOrders.length + batchRequests.length;
+      const taskDone = completedOrders + finishedBatchRequests;
       const totalStock = store.equipment.reduce((sum, item) => sum + item.total, 0);
       const totalAvailable = store.equipment.reduce((sum, item) => sum + item.available, 0);
       const messageRate = messages.length ? percentOf(repliedMessages, messages.length) : 100;
-      const workRate = store.workOrders.length ? percentOf(completedOrders, store.workOrders.length) : 100;
+      const workRate = taskTotal ? percentOf(taskDone, taskTotal) : 100;
       const stockRate = totalStock ? percentOf(totalAvailable, totalStock) : 0;
       return {
         messageRate,
@@ -5212,7 +5652,7 @@
         </div>
         <div class="admin-ring-legend">
           <span class="admin-ring-legend-item is-message">留言<b>${metrics.messageRate}%</b></span>
-          <span class="admin-ring-legend-item is-work">工单<b>${metrics.workRate}%</b></span>
+          <span class="admin-ring-legend-item is-work">任务<b>${metrics.workRate}%</b></span>
           <span class="admin-ring-legend-item is-stock">库存<b>${metrics.stockRate}%</b></span>
         </div>
       `;
@@ -5312,6 +5752,26 @@
             </label>
             <button class="primary-button" data-admin-reply="${escapeAttr(message.id)}" type="button">${icon("message")} 发送回复</button>
           `}
+        </article>
+      `;
+    }
+
+    function adminBatchRequestCard(request) {
+      const actions = request.status === "待审核" ? `
+        <div class="batch-request-actions">
+          <button class="secondary-button" data-admin-batch-reject="${escapeAttr(request.id)}">${icon("alert")} 拒绝</button>
+          <button class="primary-button" data-admin-batch-approve="${escapeAttr(request.id)}">${icon("check")} 通过</button>
+        </div>
+      ` : `<p class="machine-hint" style="margin:0;">${escapeHtml(request.adminNote || "状态已更新")}</p>`;
+      return `
+        <article class="batch-request-card">
+          <div class="batch-request-head">
+            ${batchRequestTitle(request)}
+            ${tag(request.status)}
+          </div>
+          ${batchRequestMeta(request)}
+          ${batchRequestItemsHtml(request)}
+          ${actions}
         </article>
       `;
     }
@@ -5585,7 +6045,7 @@
             <h1>我的</h1>
             <button class="profile-gear" data-route="profileInfo" aria-label="个人信息">${icon("gear")}</button>
           </header>
-          ${loginStatusHtml()}
+          ${notice()}
           ${body}
           ${tabbar()}
         </section>
@@ -5689,6 +6149,255 @@
       state.notice = "归还状态已同步";
       route("borrow");
       return loan;
+    }
+
+    function setBatchBorrowStatus(message) {
+      const status = document.querySelector("#batchBorrowStatus");
+      if (status) status.textContent = message;
+    }
+
+    function batchFormItems(form) {
+      const qtyInputs = new Map(Array.from(form.querySelectorAll("[data-batch-qty]")).map((node) => [node.dataset.batchQty, node]));
+      const selected = Array.from(form.querySelectorAll("[data-batch-select]:checked"));
+      return selected.map((node) => {
+        const item = byId(node.dataset.batchSelect);
+        const qtyInput = qtyInputs.get(node.dataset.batchSelect);
+        const qty = Number(qtyInput?.value || 0);
+        return { item, qty };
+      });
+    }
+
+    async function submitBatchBorrowRequest(event) {
+      event.preventDefault();
+      const form = event.currentTarget;
+      const profile = profileData();
+      if (profile.authStatus !== "已认证" || !profile.realName || !profile.studentId || !profile.college) {
+        setBatchBorrowStatus("请先完成校园认证，再提交批量申请");
+        return;
+      }
+
+      const rows = batchFormItems(form);
+      if (!rows.length) {
+        setBatchBorrowStatus("请至少选择一种器材");
+        return;
+      }
+      const invalid = rows.find(({ item, qty }) => !item || !Number.isInteger(qty) || qty < 1 || qty > item.available);
+      if (invalid) {
+        setBatchBorrowStatus("数量必须是正整数，且不能超过剩余库存");
+        return;
+      }
+      const totalCount = rows.reduce((sum, row) => sum + row.qty, 0);
+      if (totalCount < 2) {
+        setBatchBorrowStatus("批量申请至少 2 件器材");
+        return;
+      }
+
+      const periods = selectedBorrowPeriods();
+      const request = {
+        id: makeUuid(),
+        userId: authSession.userId,
+        studentName: profile.realName,
+        studentId: profile.studentId,
+        items: rows.map(({ item, qty }) => ({
+          equipmentId: item.id,
+          assetId: item.assetId,
+          name: item.name,
+          venue: cleanVenue(item.venue),
+          qty,
+        })),
+        durationPeriods: periods,
+        durationMinutes: periods * CLASS_PERIOD_MINUTES,
+        durationLabel: borrowDurationLabel(periods),
+        status: "待审核",
+        adminNote: "等待管理员审批",
+        createdAt: nowText(),
+        borrowedAt: "",
+        returnedAt: "",
+      };
+
+      try {
+        await createRemoteBatchRequest(request);
+      } catch (error) {
+        setBatchBorrowStatus(error.message || "申请提交失败");
+        return;
+      }
+
+      batchRequestList().unshift(request);
+      saveStore();
+      state.notice = "";
+      render();
+    }
+
+    async function notifyBatchRequestUser(request, title, body) {
+      if (!request.userId) return;
+      await supabaseRequest("student_messages", {
+        method: "POST",
+        body: { user_id: request.userId, title, body },
+      });
+    }
+
+    async function approveBatchRequest(requestId, approved) {
+      const request = batchRequestById(requestId);
+      if (!request || request.status !== "待审核") return;
+      const previous = { status: request.status, adminNote: request.adminNote };
+      request.status = approved ? "已通过" : "已拒绝";
+      request.adminNote = approved ? "管理员已通过" : "管理员已拒绝";
+      try {
+        await saveRemoteBatchRequest(request);
+        await notifyBatchRequestUser(
+          request,
+          approved ? "批量申请已通过" : "批量申请未通过",
+          approved ? "请到场馆机器完成批量借出后，在批量申请页同步记录。" : "这次批量借出申请未通过，请调整后重新提交。"
+        );
+      } catch (error) {
+        request.status = previous.status;
+        request.adminNote = previous.adminNote;
+        state.notice = error.message || "审批失败";
+        render();
+        return;
+      }
+      saveStore();
+      state.notice = approved ? "批量申请已通过" : "批量申请已拒绝";
+      render();
+    }
+
+    function validateBatchBorrowRequest(request) {
+      if (!request) return "未找到这次批量申请";
+      if (request.status !== "已通过") return "管理员通过后才能机器批量借出";
+      const hasBorrowed = store.loans.some((loan) => loan.batchRequestId === request.id && ["使用中", "待归还", "异常待归还"].includes(loan.status));
+      if (hasBorrowed) return "这次申请已经同步过借出";
+      for (const row of request.items || []) {
+        const item = byId(row.equipmentId);
+        const qty = Number(row.qty || 0);
+        if (!item) return `未找到 ${row.name || "器材"}`;
+        if (item.status !== "可借" || item.available < qty) return `${item.name} 当前库存不足`;
+      }
+      return "";
+    }
+
+    async function syncBatchBorrowFromMachine(requestId) {
+      const request = batchRequestById(requestId);
+      const errorMessage = validateBatchBorrowRequest(request);
+      if (errorMessage) {
+        state.notice = errorMessage;
+        render();
+        return;
+      }
+      const borrowedAtMs = Date.now();
+      const dueAtMs = borrowedAtMs + request.durationMinutes * 60 * 1000;
+      const touchedItems = [];
+      const loans = [];
+      for (const row of request.items) {
+        const item = byId(row.equipmentId);
+        touchedItems.push({ item, available: item.available, status: item.status });
+        item.available -= Number(row.qty);
+        item.status = item.available > 0 ? "可借" : "补充中";
+        for (let index = 0; index < Number(row.qty); index += 1) {
+          loans.push({
+            id: makeUuid(),
+            equipmentId: item.id,
+            borrowedAt: formatDateTime(borrowedAtMs),
+            borrowedAtMs,
+            dueAt: formatDueTime(dueAtMs),
+            dueAtMs,
+            durationPeriods: request.durationPeriods,
+            durationMinutes: request.durationMinutes,
+            durationLabel: request.durationLabel,
+            status: "使用中",
+            detectResult: "",
+            batchRequestId: request.id,
+          });
+        }
+      }
+      const previous = { status: request.status, adminNote: request.adminNote, borrowedAt: request.borrowedAt, borrowedAtMs: request.borrowedAtMs };
+      request.status = "已借出";
+      request.adminNote = "已在机器批量借出";
+      request.borrowedAt = formatDateTime(borrowedAtMs);
+      request.borrowedAtMs = borrowedAtMs;
+      store.loans.unshift(...loans);
+
+      try {
+        await Promise.all([
+          ...touchedItems.map(({ item }) => updateRemoteEquipment(item)),
+          ...loans.map((loan) => insertRemoteLoan(loan, request.userId)),
+          saveRemoteBatchRequest(request),
+        ]);
+      } catch (error) {
+        touchedItems.forEach(({ item, available, status }) => {
+          item.available = available;
+          item.status = status;
+        });
+        store.loans = store.loans.filter((loan) => !loans.some((created) => created.id === loan.id));
+        Object.assign(request, previous);
+        state.notice = error.message || "机器批量借出同步失败";
+        render();
+        return;
+      }
+
+      pushMessage("批量借出已同步", `已批量借出 ${loans.length} 件器材，归还截止 ${formatDueTime(dueAtMs)}。`);
+      saveStore();
+      state.notice = "批量借出已同步";
+      route("borrow");
+    }
+
+    async function syncBatchReturnFromMachine(requestId) {
+      const request = batchRequestById(requestId);
+      if (!request || request.status !== "已借出") {
+        state.notice = "只有已借出的批量申请才能批量归还";
+        render();
+        return;
+      }
+      const loans = store.loans.filter((loan) => loan.batchRequestId === request.id && ["使用中", "待归还", "异常待归还"].includes(loan.status));
+      if (!loans.length) {
+        state.notice = "未找到可批量归还的借用记录";
+        render();
+        return;
+      }
+      const returnedAtMs = Date.now();
+      const touchedItems = [];
+      const previousLoans = loans.map((loan) => ({ loan, data: { ...loan } }));
+      loans.forEach((loan) => {
+        const item = byId(loan.equipmentId);
+        if (!item) return;
+        touchedItems.push({ item, available: item.available, status: item.status });
+        loan.detectResult = loan.detectResult || "正常";
+        loan.status = loan.detectResult === "异常" ? "异常已归还" : "已归还";
+        loan.returnedAt = formatDateTime(returnedAtMs);
+        loan.returnedAtMs = returnedAtMs;
+        loan.returnedOnTime = Number.isFinite(Number(loan.dueAtMs)) ? returnedAtMs <= Number(loan.dueAtMs) : null;
+        if (loan.detectResult !== "异常") {
+          item.available = Math.min(item.total, item.available + 1);
+          item.status = "可借";
+        }
+      });
+      const previous = { status: request.status, adminNote: request.adminNote, returnedAt: request.returnedAt, returnedAtMs: request.returnedAtMs };
+      request.status = "已归还";
+      request.adminNote = "已在机器批量归还";
+      request.returnedAt = formatDateTime(returnedAtMs);
+      request.returnedAtMs = returnedAtMs;
+
+      try {
+        await Promise.all([
+          ...touchedItems.map(({ item }) => updateRemoteEquipment(item)),
+          ...loans.map((loan) => updateRemoteLoan(loan)),
+          saveRemoteBatchRequest(request),
+        ]);
+      } catch (error) {
+        touchedItems.forEach(({ item, available, status }) => {
+          item.available = available;
+          item.status = status;
+        });
+        previousLoans.forEach(({ loan, data }) => Object.assign(loan, data));
+        Object.assign(request, previous);
+        state.notice = error.message || "机器批量归还同步失败";
+        render();
+        return;
+      }
+
+      pushMessage("批量归还已同步", `已批量归还 ${loans.length} 件器材。`);
+      saveStore();
+      state.notice = "批量归还已同步";
+      route("borrow");
     }
 
     function submitRenewLoan(loanId) {
@@ -6022,6 +6731,7 @@
         scanBorrow: scanBorrowPage,
         borrowConfirm: borrowConfirmPage,
         borrow: borrowPage,
+        batchBorrow: batchBorrowPage,
         renew: renewPage,
         renewDetail: renewDetailPage,
         detect: detectPage,
@@ -6061,10 +6771,12 @@
             return;
           }
           try {
-            state.notice = "正在连接 Supabase";
+            state.notice = "";
+            state.loading = true;
             render();
             await handleLogin(account, password);
           } catch (error) {
+            state.loading = false;
             state.notice = error.message || "登录失败";
             render();
           }
@@ -6094,10 +6806,12 @@
             return;
           }
           try {
-            state.notice = "正在注册账号";
+            state.notice = "";
+            state.loading = true;
             render();
             await handleRegister(account, password);
           } catch (error) {
+            state.loading = false;
             state.notice = error.message || "注册失败";
             render();
           }
@@ -6383,6 +7097,8 @@
       if (adminContactForm) adminContactForm.addEventListener("submit", submitAdminContactForm);
       const adminEquipmentForm = document.querySelector("#adminEquipmentForm");
       if (adminEquipmentForm) adminEquipmentForm.addEventListener("submit", submitAdminEquipmentForm);
+      const batchBorrowForm = document.querySelector("#batchBorrowForm");
+      if (batchBorrowForm) batchBorrowForm.addEventListener("submit", submitBatchBorrowRequest);
       document.querySelectorAll("[data-sync-borrow]").forEach((node) => node.addEventListener("click", () => {
         if (node.disabled) return;
         const itemId = node.dataset.syncBorrow || state.selectedId;
@@ -6393,6 +7109,20 @@
       }));
       document.querySelectorAll("[data-sync-return]").forEach((node) => node.addEventListener("click", () => {
         route("scanBorrow", { loanId: node.dataset.syncReturn, syncContext: "return" });
+      }));
+      document.querySelectorAll("[data-batch-sync-borrow]").forEach((node) => node.addEventListener("click", () => {
+        const request = batchRequestById(node.dataset.batchSyncBorrow);
+        if (!request) return;
+        showConfirm(`确认已在场馆机器完成 ${batchRequestItemCount(request)} 件器材的批量借出？`, () => {
+          syncBatchBorrowFromMachine(request.id);
+        });
+      }));
+      document.querySelectorAll("[data-batch-sync-return]").forEach((node) => node.addEventListener("click", () => {
+        const request = batchRequestById(node.dataset.batchSyncReturn);
+        if (!request) return;
+        showConfirm(`确认已在场馆机器完成 ${batchRequestItemCount(request)} 件器材的批量归还？`, () => {
+          syncBatchReturnFromMachine(request.id);
+        });
       }));
       document.querySelectorAll("[data-borrow-periods]").forEach((node) => node.addEventListener("click", () => {
         state.borrowPeriods = Number(node.dataset.borrowPeriods) || 1;
@@ -6443,6 +7173,8 @@
       document.querySelectorAll("[data-admin-repair]").forEach((node) => node.addEventListener("click", () => updateOrder(node.dataset.adminRepair, "维修中")));
       document.querySelectorAll("[data-admin-complete]").forEach((node) => node.addEventListener("click", () => updateOrder(node.dataset.adminComplete, "已完成")));
       document.querySelectorAll("[data-admin-reply]").forEach((node) => node.addEventListener("click", () => replyAdminMessage(node.dataset.adminReply, node.closest(".admin-contact-card"))));
+      document.querySelectorAll("[data-admin-batch-approve]").forEach((node) => node.addEventListener("click", () => approveBatchRequest(node.dataset.adminBatchApprove, true)));
+      document.querySelectorAll("[data-admin-batch-reject]").forEach((node) => node.addEventListener("click", () => approveBatchRequest(node.dataset.adminBatchReject, false)));
 
       // 清除缓存数据重置
       const resetBtn = document.querySelector("[data-reset]");

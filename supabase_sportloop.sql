@@ -41,10 +41,27 @@ create table if not exists public.equipment (
   constraint equipment_available_within_total check (available <= total)
 );
 
+create table if not exists public.batch_borrow_requests (
+  id uuid primary key default gen_random_uuid(),
+  user_id uuid not null references auth.users(id) on delete cascade,
+  student_name text not null default '',
+  student_id text not null default '',
+  items jsonb not null default '[]'::jsonb,
+  duration_periods integer not null check (duration_periods between 1 and 3),
+  duration_minutes integer not null check (duration_minutes > 0),
+  status text not null default '待审核',
+  admin_note text not null default '',
+  borrowed_at timestamptz,
+  returned_at timestamptz,
+  created_at timestamptz not null default now(),
+  updated_at timestamptz not null default now()
+);
+
 create table if not exists public.loans (
   id uuid primary key default gen_random_uuid(),
   user_id uuid not null references auth.users(id) on delete cascade,
   equipment_id text not null references public.equipment(id),
+  batch_request_id uuid references public.batch_borrow_requests(id) on delete set null,
   borrowed_at timestamptz not null,
   due_at timestamptz not null,
   duration_periods integer not null check (duration_periods between 1 and 3),
@@ -58,6 +75,9 @@ create table if not exists public.loans (
   created_at timestamptz not null default now(),
   updated_at timestamptz not null default now()
 );
+
+alter table public.loans
+add column if not exists batch_request_id uuid references public.batch_borrow_requests(id) on delete set null;
 
 create table if not exists public.student_messages (
   id uuid primary key default gen_random_uuid(),
@@ -96,7 +116,10 @@ create table if not exists public.work_orders (
 
 create index if not exists loans_user_id_idx on public.loans (user_id);
 create index if not exists loans_equipment_id_idx on public.loans (equipment_id);
+create index if not exists loans_batch_request_id_idx on public.loans (batch_request_id);
 create index if not exists loans_status_idx on public.loans (status);
+create index if not exists batch_borrow_requests_user_id_idx on public.batch_borrow_requests (user_id);
+create index if not exists batch_borrow_requests_status_idx on public.batch_borrow_requests (status);
 create index if not exists student_messages_user_id_idx on public.student_messages (user_id);
 create index if not exists admin_contacts_user_id_idx on public.admin_contacts (user_id);
 create index if not exists admin_contacts_status_idx on public.admin_contacts (status);
@@ -124,6 +147,11 @@ for each row execute function public.set_updated_at();
 drop trigger if exists equipment_set_updated_at on public.equipment;
 create trigger equipment_set_updated_at
 before update on public.equipment
+for each row execute function public.set_updated_at();
+
+drop trigger if exists batch_borrow_requests_set_updated_at on public.batch_borrow_requests;
+create trigger batch_borrow_requests_set_updated_at
+before update on public.batch_borrow_requests
 for each row execute function public.set_updated_at();
 
 drop trigger if exists loans_set_updated_at on public.loans;
@@ -159,6 +187,7 @@ grant execute on function public.is_admin() to authenticated;
 grant select on public.admin_users to authenticated;
 grant select, insert, update on public.student_profiles to authenticated;
 grant select, insert, update on public.equipment to authenticated;
+grant select, insert, update on public.batch_borrow_requests to authenticated;
 grant select, insert, update on public.loans to authenticated;
 grant select, insert on public.student_messages to authenticated;
 grant select, insert, update on public.admin_contacts to authenticated;
@@ -167,6 +196,7 @@ grant select, insert, update on public.work_orders to authenticated;
 alter table public.admin_users enable row level security;
 alter table public.student_profiles enable row level security;
 alter table public.equipment enable row level security;
+alter table public.batch_borrow_requests enable row level security;
 alter table public.loans enable row level security;
 alter table public.student_messages enable row level security;
 alter table public.admin_contacts enable row level security;
@@ -208,6 +238,28 @@ create policy equipment_authenticated_update on public.equipment
 for update to authenticated
 using (true)
 with check (true);
+
+drop policy if exists batch_borrow_requests_access on public.batch_borrow_requests;
+create policy batch_borrow_requests_access on public.batch_borrow_requests
+for select to authenticated
+using (user_id = (select auth.uid()) or (select public.is_admin()));
+
+drop policy if exists batch_borrow_requests_insert_own on public.batch_borrow_requests;
+create policy batch_borrow_requests_insert_own on public.batch_borrow_requests
+for insert to authenticated
+with check (user_id = (select auth.uid()));
+
+drop policy if exists batch_borrow_requests_update_admin on public.batch_borrow_requests;
+create policy batch_borrow_requests_update_admin on public.batch_borrow_requests
+for update to authenticated
+using ((select public.is_admin()))
+with check ((select public.is_admin()));
+
+drop policy if exists batch_borrow_requests_update_student_sync on public.batch_borrow_requests;
+create policy batch_borrow_requests_update_student_sync on public.batch_borrow_requests
+for update to authenticated
+using (user_id = (select auth.uid()))
+with check (user_id = (select auth.uid()) and status in ('已借出', '已归还'));
 
 drop policy if exists loans_access on public.loans;
 create policy loans_access on public.loans
