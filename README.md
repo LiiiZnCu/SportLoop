@@ -29,9 +29,9 @@ https://jwylvubakymfkdncuwhp.supabase.co
 4. 如果管理员端提示“管理员未授权”，复制页面显示的 UID，插入 `admin_users` 表。
 5. 管理员授权后，在管理员端录入器材；脚本不会再自动生成演示器材。
 
-这次新增了 `batch_borrow_requests` 表和 `loans.batch_request_id` 字段。线上数据库要重新运行一遍 `supabase_sportloop.sql`，批量申请才能同步。
+这次新增了 `batch_borrow_requests` 表、`loans.batch_request_id` 字段，以及 `equipment.nfc_tags`、`equipment.machine_synced_at` 字段。线上数据库要重新运行一遍 `supabase_sportloop.sql`，批量申请和机器库存同步才能生效。
 
-登录和注册是分开的：未注册账号不能直接登录，必须先在网页注册页创建账号。账号不能重复；校园认证里只有学号不能重复，姓名和院系可以相同。批量借出申请由学生提交，管理员审批通过后，学生才能在机器批量借出和归还。
+登录和注册是分开的：未注册账号不能直接登录，必须先在网页注册页创建账号。账号不能重复；校园认证里只有学号不能重复，姓名和院系可以相同。批量借出申请由学生提交，管理员审批通过后，学生才能在机器批量借出和归还。管理员端可以粘贴 NFC 机器导出的库存清单同步器材库存，也可以手动修改总量、可借数量和状态。
 
 ## GitHub Pages 设置
 

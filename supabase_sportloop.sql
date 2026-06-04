@@ -36,10 +36,18 @@ create table if not exists public.equipment (
   health integer not null check (health between 0 and 100),
   venue text not null,
   description text not null,
+  nfc_tags jsonb not null default '[]'::jsonb,
+  machine_synced_at timestamptz,
   created_at timestamptz not null default now(),
   updated_at timestamptz not null default now(),
   constraint equipment_available_within_total check (available <= total)
 );
+
+alter table public.equipment
+add column if not exists nfc_tags jsonb not null default '[]'::jsonb;
+
+alter table public.equipment
+add column if not exists machine_synced_at timestamptz;
 
 create table if not exists public.batch_borrow_requests (
   id uuid primary key default gen_random_uuid(),

@@ -1547,6 +1547,10 @@
       background: var(--brand-soft);
     }
 
+    .form-card .upload-real + .primary-button {
+      margin-top: 16px;
+    }
+
     .upload-real input {
       display: none;
     }
@@ -1915,6 +1919,147 @@
       margin: 10px 0 14px;
     }
 
+    .admin-quick-nav {
+      position: sticky;
+      top: 0;
+      z-index: 40;
+      margin: 0 0 14px;
+      padding: 8px;
+      border: 1px solid rgba(159, 18, 57, 0.1);
+      border-radius: 24px;
+      background:
+        linear-gradient(135deg, rgba(255, 255, 255, 0.94), rgba(255, 244, 248, 0.82)),
+        radial-gradient(circle at 12% 20%, rgba(255, 79, 139, 0.14), transparent 36%);
+      box-shadow: 0 16px 34px rgba(111, 11, 39, 0.12);
+      backdrop-filter: blur(14px);
+    }
+
+    .admin-quick-track {
+      display: grid;
+      grid-template-columns: repeat(4, minmax(0, 1fr));
+      gap: 8px;
+    }
+
+    .admin-quick-button {
+      position: relative;
+      min-height: 66px;
+      display: grid;
+      align-content: space-between;
+      gap: 8px;
+      min-width: 0;
+      padding: 10px;
+      overflow: hidden;
+      border: 1px solid var(--quick-border);
+      border-radius: 18px;
+      color: var(--ink);
+      background: linear-gradient(160deg, var(--quick-bg), rgba(255, 255, 255, 0.84));
+      box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.85);
+      text-align: left;
+    }
+
+    .admin-quick-button::before {
+      content: "";
+      position: absolute;
+      left: 10px;
+      right: 10px;
+      top: 7px;
+      height: 4px;
+      border-radius: 999px;
+      background: var(--quick-color);
+      opacity: 0.92;
+    }
+
+    .admin-quick-button i {
+      width: 30px;
+      height: 30px;
+      display: grid;
+      place-items: center;
+      margin-top: 5px;
+      border-radius: 13px;
+      color: var(--quick-color);
+      background: rgba(255, 255, 255, 0.78);
+    }
+
+    .admin-quick-button i svg {
+      width: 17px;
+      height: 17px;
+      stroke-width: 2.5;
+    }
+
+    .admin-quick-button span {
+      min-width: 0;
+      overflow: hidden;
+      color: var(--ink);
+      font-size: clamp(10px, 2.9vw, 12px);
+      font-weight: 900;
+      line-height: 1.2;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+    }
+
+    .admin-quick-button b {
+      position: absolute;
+      top: 15px;
+      right: 9px;
+      min-width: 24px;
+      height: 24px;
+      display: grid;
+      place-items: center;
+      padding: 0 6px;
+      border-radius: 999px;
+      color: #ffffff;
+      background: var(--quick-color);
+      font-size: 11px;
+      font-weight: 950;
+      line-height: 1;
+    }
+
+    .admin-quick-button.is-batch {
+      --quick-color: #7c6dff;
+      --quick-bg: rgba(124, 109, 255, 0.14);
+      --quick-border: rgba(124, 109, 255, 0.28);
+    }
+
+    .admin-quick-button.is-messages {
+      --quick-color: #ff4f8b;
+      --quick-bg: rgba(255, 79, 139, 0.15);
+      --quick-border: rgba(255, 79, 139, 0.28);
+    }
+
+    .admin-quick-button.is-orders {
+      --quick-color: #ad1747;
+      --quick-bg: rgba(173, 23, 71, 0.13);
+      --quick-border: rgba(173, 23, 71, 0.25);
+    }
+
+    .admin-quick-button.is-equipment {
+      --quick-color: #23bfa5;
+      --quick-bg: rgba(35, 191, 165, 0.14);
+      --quick-border: rgba(35, 191, 165, 0.26);
+    }
+
+    @media (max-width: 390px) {
+      .admin-quick-nav {
+        padding: 7px;
+        border-radius: 20px;
+      }
+
+      .admin-quick-track {
+        gap: 6px;
+      }
+
+      .admin-quick-button {
+        min-height: 62px;
+        padding: 9px 7px;
+        border-radius: 16px;
+      }
+
+      .admin-quick-button i {
+        width: 28px;
+        height: 28px;
+      }
+    }
+
     .admin-kpi-card {
       min-height: 104px;
       display: grid;
@@ -2076,9 +2221,160 @@
       width: 100%;
     }
 
+    .admin-machine-sync-card,
+    .admin-equipment-row {
+      display: grid;
+      gap: 12px;
+      padding: 13px;
+      border: 1px solid rgba(159, 18, 57, 0.1);
+      border-radius: 20px;
+      background: rgba(255, 255, 255, 0.96);
+    }
+
+    .admin-machine-sync-head {
+      display: flex;
+      align-items: flex-start;
+      justify-content: space-between;
+      gap: 10px;
+    }
+
+    .admin-machine-sync-head h3 {
+      margin: 0;
+      font-size: clamp(16px, 4vw, 20px);
+    }
+
+    .admin-machine-sync-head p {
+      margin: 4px 0 0;
+      color: var(--muted);
+      font-size: 12px;
+      line-height: 1.45;
+    }
+
+    .admin-machine-sync-head span,
+    .admin-equipment-chip {
+      min-height: 28px;
+      display: inline-flex;
+      align-items: center;
+      padding: 0 10px;
+      border-radius: 999px;
+      color: var(--brand);
+      background: var(--brand-soft);
+      font-size: 11px;
+      font-weight: 900;
+      white-space: nowrap;
+    }
+
+    .admin-machine-sync-card textarea {
+      width: 100%;
+      min-height: 118px;
+      resize: vertical;
+      padding: 12px;
+      color: var(--ink);
+      border: 1px solid var(--line);
+      border-radius: 16px;
+      background: rgba(255, 255, 255, 0.86);
+      font: inherit;
+      font-size: 13px;
+      line-height: 1.5;
+    }
+
+    .admin-equipment-row {
+      grid-template-columns: 72px minmax(0, 1fr);
+      align-items: center;
+    }
+
+    .admin-equipment-row .list-media {
+      width: 72px;
+      height: 60px;
+    }
+
+    .admin-equipment-main {
+      min-width: 0;
+    }
+
+    .admin-equipment-main strong,
+    .admin-equipment-main small {
+      display: block;
+      min-width: 0;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+    }
+
+    .admin-equipment-main small {
+      margin-top: 4px;
+      color: var(--muted);
+      font-size: 12px;
+      line-height: 1.35;
+    }
+
+    .admin-equipment-tags {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 6px;
+      margin-top: 8px;
+    }
+
+    .admin-equipment-edit {
+      grid-column: 1 / -1;
+      display: grid;
+      grid-template-columns: repeat(4, minmax(0, 1fr));
+      gap: 8px;
+      align-items: end;
+    }
+
+    .admin-mini-field {
+      display: grid;
+      gap: 5px;
+      color: var(--muted);
+      font-size: 11px;
+      font-weight: 850;
+    }
+
+    .admin-mini-field input,
+    .admin-mini-field select {
+      width: 100%;
+      height: 40px;
+      padding: 0 9px;
+      color: var(--ink);
+      border: 1px solid var(--line);
+      border-radius: 12px;
+      background: #ffffff;
+      font: inherit;
+      font-size: 13px;
+      font-weight: 850;
+    }
+
+    .admin-equipment-edit .secondary-button {
+      min-height: 40px;
+      border-radius: 12px;
+      font-size: 12px;
+    }
+
     @media (max-width: 390px) {
       .admin-equipment-form-grid {
         grid-template-columns: 1fr;
+      }
+
+      .admin-machine-sync-head {
+        display: grid;
+      }
+
+      .admin-equipment-row {
+        grid-template-columns: 60px minmax(0, 1fr);
+      }
+
+      .admin-equipment-row .list-media {
+        width: 60px;
+        height: 52px;
+      }
+
+      .admin-equipment-edit {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+      }
+
+      .admin-equipment-edit .secondary-button {
+        grid-column: 1 / -1;
       }
     }
 
@@ -3772,7 +4068,7 @@
       check: `<svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><circle cx="12" cy="12" r="9" stroke="currentColor" stroke-width="2"/><path d="m8 12 2.7 2.7L16.5 9" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>`,
       alert: `<svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="m12 3 10 18H2L12 3z" stroke="currentColor" stroke-width="2" stroke-linejoin="round"/><path d="M12 9v5M12 17h.01" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"/></svg>`,
       shield: `<svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M12 3 19 6v5c0 4.4-2.8 8.2-7 10-4.2-1.8-7-5.6-7-10V6l7-3z" stroke="currentColor" stroke-width="2"/><path d="m8.5 12 2.2 2.2 4.8-5" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>`,
-      wrench: `<svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="m14.7 5.3 4 4-9.9 9.9a2.8 2.8 0 0 1-4 0 2.8 2.8 0 0 1 0-4l9.9-9.9Z" stroke="currentColor" stroke-width="2" stroke-linejoin="round"/><path d="m16.8 3.2 4 4-2.1 2.1-4-4 2.1-2.1Z" stroke="currentColor" stroke-width="2" stroke-linejoin="round"/><path d="M7.4 16.6h.01" stroke="currentColor" stroke-width="2.8" stroke-linecap="round"/></svg>`,
+      wrench: `<svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M14.7 6.3a1 1 0 0 0 0 1.4l1.6 1.6a1 1 0 0 0 1.4 0l3.77-3.77a6 6 0 0 1-7.94 7.94l-6.91 6.91a2.12 2.12 0 0 1-3-3l6.91-6.91a6 6 0 0 1 7.94-7.94L14.7 6.3Z" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>`,
       chevron: `<svg class="chev" viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="m9 5 7 7-7 7" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"/></svg>`,
       qr: `<svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M4 4h6v6H4V4zM14 4h6v6h-6V4zM4 14h6v6H4v-6zM14 14h2v2h-2v-2zM18 14h2v6h-4v-2h2v-4zM12 18h2v2h-2v-2z" stroke="currentColor" stroke-linejoin="round" stroke-width="2"/></svg>`,
       gear: `<svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M12 8.2a3.8 3.8 0 1 0 0 7.6 3.8 3.8 0 0 0 0-7.6Z" stroke="currentColor" stroke-width="2"/><path d="M19.4 13.5c.1-.5.1-1 .1-1.5s0-1-.1-1.5l2-1.5-2-3.5-2.4 1a8 8 0 0 0-2.6-1.5L14 2.5h-4L9.6 5a8 8 0 0 0-2.6 1.5l-2.4-1-2 3.5 2 1.5c-.1.5-.1 1-.1 1.5s0 1 .1 1.5l-2 1.5 2 3.5 2.4-1a8 8 0 0 0 2.6 1.5l.4 2.5h4l.4-2.5a8 8 0 0 0 2.6-1.5l2.4 1 2-3.5-2-1.5Z" stroke="currentColor" stroke-width="2" stroke-linejoin="round"/></svg>`,
@@ -4053,6 +4349,26 @@
         health: row.health,
         venue: row.venue,
         desc: row.description,
+        nfcTags: Array.isArray(row.nfc_tags) ? row.nfc_tags : [],
+        machineSyncedAt: row.machine_synced_at || "",
+      };
+    }
+
+    function equipmentToDbPayload(item) {
+      return {
+        id: item.id,
+        asset_id: item.assetId,
+        name: item.name,
+        category: item.category,
+        image: item.image || "",
+        total: item.total,
+        available: item.available,
+        status: item.status,
+        health: item.health,
+        venue: item.venue,
+        description: item.desc,
+        nfc_tags: Array.isArray(item.nfcTags) ? item.nfcTags : [],
+        machine_synced_at: item.machineSyncedAt || null,
       };
     }
 
@@ -4405,7 +4721,14 @@
     function updateRemoteEquipment(item) {
       return supabaseRequest(`equipment?id=eq.${item.id}`, {
         method: "PATCH",
-        body: { available: item.available, status: item.status, health: item.health },
+        body: {
+          total: item.total,
+          available: item.available,
+          status: item.status,
+          health: item.health,
+          nfc_tags: Array.isArray(item.nfcTags) ? item.nfcTags : [],
+          machine_synced_at: item.machineSyncedAt || null,
+        },
       });
     }
 
@@ -4416,19 +4739,15 @@
     async function createRemoteEquipment(item) {
       return supabaseRequest("equipment", {
         method: "POST",
-        body: {
-          id: item.id,
-          asset_id: item.assetId,
-          name: item.name,
-          category: item.category,
-          image: item.image || "",
-          total: item.total,
-          available: item.available,
-          status: item.status,
-          health: item.health,
-          venue: item.venue,
-          description: item.desc,
-        },
+        body: equipmentToDbPayload(item),
+      });
+    }
+
+    async function upsertRemoteEquipmentBatch(items) {
+      return supabaseRequest("equipment?on_conflict=asset_id", {
+        method: "POST",
+        headers: { Prefer: "resolution=merge-duplicates,return=representation" },
+        body: items.map(equipmentToDbPayload),
       });
     }
 
@@ -4560,7 +4879,12 @@
       const seedById = Object.fromEntries(seed.equipment.map((item) => [item.id, item]));
       return (cachedList || []).map((item) => {
         const base = seedById[item.id];
-        return base && !item.image ? { ...item, image: base.image } : item;
+        const merged = base && !item.image ? { ...item, image: base.image } : item;
+        return {
+          ...merged,
+          nfcTags: Array.isArray(merged.nfcTags) ? merged.nfcTags : [],
+          machineSyncedAt: merged.machineSyncedAt || "",
+        };
       });
     }
 
@@ -4590,6 +4914,8 @@
     applyAuthSessionToState();
     store.equipment.forEach((item) => {
       item.venue = cleanVenue(item.venue);
+      item.nfcTags = Array.isArray(item.nfcTags) ? item.nfcTags : [];
+      item.machineSyncedAt = item.machineSyncedAt || "";
     });
     saveStore();
 
@@ -5553,6 +5879,7 @@
         : "暂无器材，先录入后学生端才会显示。";
       const equipmentStatus = store.equipment.length ? `${maintenanceCount} 需关注` : "未录入";
       const equipmentContent = `
+        ${adminMachineSyncCard()}
         ${adminEquipmentForm()}
         <div class="list-stack">
           ${store.equipment.length ? store.equipment.map(adminEquipmentRow).join("") : `<div class="empty">暂无器材。录入第一件器材后，学生端才会显示可借内容。</div>`}
@@ -5578,10 +5905,16 @@
             ${adminKpi("待审批", pendingBatchRequests.length, "单", "check")}
             ${adminKpi("可借总量", totalAvailable, "件", "bag")}
           </div>
-          ${adminSection("批量申请", "审批通过后，学生才能在机器批量借还。", `${pendingBatchRequests.length} 待审批`, batchRequests.length ? batchRequests.map(adminBatchRequestCard).join("") : `<div class="empty">暂无批量申请。</div>`)}
-          ${adminSection("学生留言", "优先处理未回复咨询，回复后会同步到学生端。", `${waitingMessages.length} 待回复`, adminMessageList().length ? adminMessageList().map(adminContactCard).join("") : `<div class="empty">暂无学生留言。</div>`)}
-          ${adminSection("报修工单", "跟踪器材异常、暂停借出和维修完成状态。", `${pending.length} 待处理`, store.workOrders.length ? store.workOrders.map(orderCard).join("") : `<div class="empty">暂无工单。学生提交异常后会出现在这里。</div>`)}
-          ${adminSection("器材档案", equipmentDesc, equipmentStatus, equipmentContent)}
+          ${adminQuickNav([
+            ["batch", "批量申请", pendingBatchRequests.length],
+            ["messages", "学生留言", waitingMessages.length],
+            ["orders", "报修工单", pending.length],
+            ["equipment", "器材档案", store.equipment.length],
+          ])}
+          ${adminSection("batch", "批量申请", "审批通过后，学生才能在机器批量借还。", `${pendingBatchRequests.length} 待审批`, batchRequests.length ? batchRequests.map(adminBatchRequestCard).join("") : `<div class="empty">暂无批量申请。</div>`)}
+          ${adminSection("messages", "学生留言", "优先处理未回复咨询，回复后会同步到学生端。", `${waitingMessages.length} 待回复`, adminMessageList().length ? adminMessageList().map(adminContactCard).join("") : `<div class="empty">暂无学生留言。</div>`)}
+          ${adminSection("orders", "报修工单", "跟踪器材异常、暂停借出和维修完成状态。", `${pending.length} 待处理`, store.workOrders.length ? store.workOrders.map(orderCard).join("") : `<div class="empty">暂无工单。学生提交异常后会出现在这里。</div>`)}
+          ${adminSection("equipment", "器材档案", equipmentDesc, equipmentStatus, equipmentContent)}
         </main>
       `;
       if (!state.isAdmin) {
@@ -5670,6 +6003,22 @@
       `;
     }
 
+    function adminMachineSyncCard() {
+      return `
+        <form class="admin-machine-sync-card" id="adminMachineSyncForm">
+          <div class="admin-machine-sync-head">
+            <div>
+              <h3>机器库存同步</h3>
+              <p>粘贴 NFC 机器导出的库存清单，系统按器材编号合并数量。</p>
+            </div>
+            <span>机器数据</span>
+          </div>
+          <textarea id="adminMachineInventory" placeholder="每行格式：器材编号,名称,分类,场馆,芯片号&#10;SL-PP-0616,乒乓球,乒乓球,东区体育馆,NFC-0001&#10;SL-PP-0616,乒乓球,乒乓球,东区体育馆,NFC-0002"></textarea>
+          <button class="primary-button" type="submit">${icon("refresh")} 同步机器库存</button>
+        </form>
+      `;
+    }
+
     function adminEquipmentForm() {
       return `
         <form class="admin-equipment-form" id="adminEquipmentForm">
@@ -5712,9 +6061,34 @@
       `;
     }
 
-    function adminSection(title, desc, status, content) {
+    function adminQuickNav(items) {
+      const meta = {
+        batch: ["check", "is-batch"],
+        messages: ["message", "is-messages"],
+        orders: ["wrench", "is-orders"],
+        equipment: ["bag", "is-equipment"],
+      };
       return `
-        <section class="admin-section-card">
+        <nav class="admin-quick-nav" aria-label="管理员端快捷目录">
+          <div class="admin-quick-track">
+            ${items.map(([key, label, count]) => {
+              const [iconName, className] = meta[key] || ["check", ""];
+              return `
+              <button class="admin-quick-button ${className}" type="button" data-admin-jump="${escapeAttr(key)}">
+                <i>${icon(iconName)}</i>
+                <span>${escapeHtml(label)}</span>
+                <b>${count}</b>
+              </button>
+            `;
+            }).join("")}
+          </div>
+        </nav>
+      `;
+    }
+
+    function adminSection(key, title, desc, status, content) {
+      return `
+        <section class="admin-section-card" data-admin-section="${escapeAttr(key)}">
           <div class="admin-section-title">
             <div>
               <h2>${escapeHtml(title)}</h2>
@@ -5797,7 +6171,40 @@
     }
 
     function adminEquipmentRow(item) {
-      return `<div class="list-card static"><span class="list-media">${equipmentImage(item, "list-img")}</span><!-- [IMAGE-FN→list-img] 管理员·器材档案列表 --><span><strong>${item.name}</strong><small>${item.assetId} · ${cleanVenue(item.venue)}</small><small>剩余 ${item.available}/${item.total}</small></span>${tag(item.status)}</div>`;
+      const nfcCount = Array.isArray(item.nfcTags) ? item.nfcTags.length : 0;
+      const syncedText = item.machineSyncedAt ? item.machineSyncedAt.replace("T", " ").slice(0, 16) : "未同步";
+      const statusOptions = ["可借", "补充中", "维修中"].map((status) =>
+        `<option value="${escapeAttr(status)}" ${item.status === status ? "selected" : ""}>${escapeHtml(status)}</option>`
+      ).join("");
+      return `
+        <article class="admin-equipment-row" data-admin-equipment-row="${escapeAttr(item.id)}">
+          <span class="list-media">${equipmentImage(item, "list-img")}</span><!-- [IMAGE-FN→list-img] 管理员·器材档案列表 -->
+          <div class="admin-equipment-main">
+            <strong>${escapeHtml(item.name)}</strong>
+            <small>${escapeHtml(item.assetId)} · ${escapeHtml(cleanVenue(item.venue))}</small>
+            <small>剩余 ${item.available}/${item.total}</small>
+            <div class="admin-equipment-tags">
+              <span class="admin-equipment-chip">芯片 ${nfcCount}</span>
+              <span class="admin-equipment-chip">同步 ${escapeHtml(syncedText)}</span>
+            </div>
+          </div>
+          <div class="admin-equipment-edit">
+            <label class="admin-mini-field">
+              总量
+              <input type="number" min="0" step="1" inputmode="numeric" value="${escapeAttr(item.total)}" data-admin-total />
+            </label>
+            <label class="admin-mini-field">
+              可借
+              <input type="number" min="0" step="1" inputmode="numeric" value="${escapeAttr(item.available)}" data-admin-available />
+            </label>
+            <label class="admin-mini-field">
+              状态
+              <select data-admin-status>${statusOptions}</select>
+            </label>
+            <button class="secondary-button" type="button" data-admin-save-equipment="${escapeAttr(item.id)}">${icon("check")} 保存</button>
+          </div>
+        </article>
+      `;
     }
 
     function studentAdminMessages() {
@@ -7069,6 +7476,8 @@
         health: 100,
         venue,
         desc: desc || "管理员录入器材，按场馆机器扫码借还。",
+        nfcTags: [],
+        machineSyncedAt: "",
       };
 
       try {
@@ -7085,6 +7494,132 @@
       render();
     }
 
+    function activeLoanCountForEquipment(equipmentId) {
+      return store.loans.filter((loan) =>
+        loan.equipmentId === equipmentId && ["使用中", "待归还", "异常待归还"].includes(loan.status)
+      ).length;
+    }
+
+    function parseMachineInventoryText(rawText) {
+      const lines = String(rawText || "").split(/\r?\n/).map((line) => line.trim()).filter(Boolean);
+      if (!lines.length) throw new Error("请先粘贴机器导出的库存清单");
+      const seenTags = new Set();
+      const groups = new Map();
+
+      lines.forEach((line, index) => {
+        const parts = line.split(/[,，\t]/).map((part) => normalizeIdentityText(part));
+        if (parts.length < 5) throw new Error(`第 ${index + 1} 行格式不完整`);
+        const assetId = parts[0].toUpperCase();
+        const name = parts[1];
+        const category = parts[2];
+        const venue = parts[3];
+        const tagId = parts[4].toUpperCase();
+        if (!assetId || !name || !category || !venue || !tagId) throw new Error(`第 ${index + 1} 行有空字段`);
+        if (seenTags.has(tagId)) throw new Error(`芯片号重复：${tagId}`);
+        seenTags.add(tagId);
+
+        const existing = groups.get(assetId);
+        if (existing) {
+          if (existing.name !== name || existing.category !== category || existing.venue !== venue) {
+            throw new Error(`${assetId} 的名称、分类或场馆不一致`);
+          }
+          existing.nfcTags.push(tagId);
+          return;
+        }
+
+        groups.set(assetId, { assetId, name, category, venue, nfcTags: [tagId] });
+      });
+
+      return [...groups.values()];
+    }
+
+    function machineInventoryItemsFromGroups(groups) {
+      const syncedAt = new Date().toISOString();
+      return groups.map((group) => {
+        const current = store.equipment.find((item) => item.assetId === group.assetId);
+        const activeCount = current ? activeLoanCountForEquipment(current.id) : 0;
+        const available = group.nfcTags.length;
+        return {
+          id: current?.id || `eq-${makeUuid()}`,
+          assetId: group.assetId,
+          name: group.name,
+          category: group.category,
+          image: current?.image || "",
+          total: available + activeCount,
+          available,
+          status: available > 0 ? "可借" : "补充中",
+          health: current?.health ?? 100,
+          venue: group.venue,
+          desc: current?.desc || "NFC 机器同步器材库存。",
+          nfcTags: group.nfcTags,
+          machineSyncedAt: syncedAt,
+        };
+      });
+    }
+
+    async function submitAdminMachineSync(event) {
+      event.preventDefault();
+      try {
+        const groups = parseMachineInventoryText(event.currentTarget.querySelector("#adminMachineInventory").value);
+        const syncedItems = machineInventoryItemsFromGroups(groups);
+        await upsertRemoteEquipmentBatch(syncedItems);
+        syncedItems.forEach((item) => {
+          const current = store.equipment.find((equipment) => equipment.assetId === item.assetId);
+          if (current) Object.assign(current, item);
+          else store.equipment.unshift(item);
+        });
+        saveStore();
+        const totalCount = syncedItems.reduce((sum, item) => sum + item.available, 0);
+        state.notice = `已同步 ${syncedItems.length} 类器材，${totalCount} 件库存`;
+      } catch (error) {
+        state.notice = error.message || "机器库存同步失败";
+      }
+      render();
+    }
+
+    async function saveAdminEquipmentEdit(equipmentId, row) {
+      const item = byId(equipmentId);
+      if (!item || !row) return;
+      const total = Number(row.querySelector("[data-admin-total]").value);
+      const available = Number(row.querySelector("[data-admin-available]").value);
+      const status = row.querySelector("[data-admin-status]").value;
+      if (!Number.isInteger(total) || !Number.isInteger(available) || total < 0 || available < 0) {
+        state.notice = "数量必须是 0 或正整数";
+        render();
+        return;
+      }
+      if (available > total) {
+        state.notice = "可借数量不能大于总量";
+        render();
+        return;
+      }
+
+      const previous = { total: item.total, available: item.available, status: item.status };
+      item.total = total;
+      item.available = available;
+      item.status = status;
+      try {
+        await updateRemoteEquipment(item);
+        saveStore();
+        state.notice = "器材库存已保存";
+      } catch (error) {
+        Object.assign(item, previous);
+        state.notice = error.message || "器材库存保存失败";
+      }
+      render();
+    }
+
+    function scrollAdminSection(key) {
+      const target = document.querySelector(`[data-admin-section="${CSS.escape(key)}"]`);
+      const scrollBox = target?.closest(".scroll");
+      if (!target || !scrollBox) return;
+      const offset = 62;
+      scrollBox.scrollTo({
+        top: target.offsetTop - offset,
+        behavior: "smooth",
+      });
+    }
+
     function bind() {
       document.querySelectorAll("[data-route]").forEach((node) => node.addEventListener("click", () => route(node.dataset.route)));
       document.querySelectorAll("[data-back]").forEach((node) => node.addEventListener("click", back));
@@ -7097,6 +7632,14 @@
       if (adminContactForm) adminContactForm.addEventListener("submit", submitAdminContactForm);
       const adminEquipmentForm = document.querySelector("#adminEquipmentForm");
       if (adminEquipmentForm) adminEquipmentForm.addEventListener("submit", submitAdminEquipmentForm);
+      const adminMachineSyncForm = document.querySelector("#adminMachineSyncForm");
+      if (adminMachineSyncForm) adminMachineSyncForm.addEventListener("submit", submitAdminMachineSync);
+      document.querySelectorAll("[data-admin-save-equipment]").forEach((node) =>
+        node.addEventListener("click", () => saveAdminEquipmentEdit(node.dataset.adminSaveEquipment, node.closest("[data-admin-equipment-row]")))
+      );
+      document.querySelectorAll("[data-admin-jump]").forEach((node) =>
+        node.addEventListener("click", () => scrollAdminSection(node.dataset.adminJump))
+      );
       const batchBorrowForm = document.querySelector("#batchBorrowForm");
       if (batchBorrowForm) batchBorrowForm.addEventListener("submit", submitBatchBorrowRequest);
       document.querySelectorAll("[data-sync-borrow]").forEach((node) => node.addEventListener("click", () => {
