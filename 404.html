@@ -1920,41 +1920,91 @@
     }
 
     .admin-quick-nav {
-      position: sticky;
-      top: 0;
-      z-index: 40;
-      margin: 0 0 14px;
-      padding: 8px;
-      border: 1px solid rgba(159, 18, 57, 0.1);
-      border-radius: 24px;
+      position: relative;
+      margin: 14px 0 22px;
+      padding: 18px 0 24px;
+      overflow: hidden;
+      border: 1px solid rgba(159, 18, 57, 0.13);
+      border-radius: 34px;
       background:
-        linear-gradient(135deg, rgba(255, 255, 255, 0.94), rgba(255, 244, 248, 0.82)),
-        radial-gradient(circle at 12% 20%, rgba(255, 79, 139, 0.14), transparent 36%);
-      box-shadow: 0 16px 34px rgba(111, 11, 39, 0.12);
+        radial-gradient(circle at 16% 18%, rgba(255, 79, 139, 0.16), transparent 32%),
+        radial-gradient(circle at 82% 76%, rgba(35, 191, 165, 0.16), transparent 34%),
+        linear-gradient(145deg, rgba(255, 255, 255, 0.98), rgba(255, 245, 249, 0.9));
+      box-shadow: 0 20px 42px rgba(111, 11, 39, 0.12);
       backdrop-filter: blur(14px);
     }
 
+    .admin-quick-nav::before {
+      content: "";
+      position: absolute;
+      inset: 0;
+      background:
+        linear-gradient(115deg, transparent 0 18%, rgba(255, 255, 255, 0.58) 18% 20%, transparent 21% 100%);
+      pointer-events: none;
+    }
+
+    .admin-quick-nav::after {
+      content: "";
+      position: absolute;
+      left: 50%;
+      bottom: 16px;
+      width: 92px;
+      height: 5px;
+      transform: translateX(-50%);
+      border-radius: 999px;
+      background: linear-gradient(90deg, rgba(255, 79, 139, 0.82), rgba(124, 109, 255, 0.76), rgba(35, 191, 165, 0.78));
+      box-shadow: 0 8px 18px rgba(173, 23, 71, 0.16);
+      pointer-events: none;
+    }
+
     .admin-quick-track {
-      display: grid;
-      grid-template-columns: repeat(4, minmax(0, 1fr));
-      gap: 8px;
+      position: relative;
+      z-index: 1;
+      display: flex;
+      gap: 18px;
+      min-height: 172px;
+      margin: 0;
+      padding: 22px 72px 32px;
+      overflow-x: auto;
+      overflow-y: hidden;
+      scroll-snap-type: x mandatory;
+      scrollbar-width: none;
+      -webkit-overflow-scrolling: touch;
+      perspective: 760px;
+    }
+
+    .admin-quick-track::-webkit-scrollbar {
+      display: none;
     }
 
     .admin-quick-button {
+      --fan-rotate: 0deg;
+      --fan-lift: 0px;
       position: relative;
-      min-height: 66px;
-      display: grid;
-      align-content: space-between;
-      gap: 8px;
+      flex: 0 0 clamp(136px, 39vw, 168px);
+      min-height: 136px;
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+      align-items: flex-start;
+      gap: 10px;
       min-width: 0;
-      padding: 10px;
+      padding: 16px 14px 14px;
       overflow: hidden;
       border: 1px solid var(--quick-border);
-      border-radius: 18px;
+      border-radius: 28px;
       color: var(--ink);
-      background: linear-gradient(160deg, var(--quick-bg), rgba(255, 255, 255, 0.84));
-      box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.85);
+      background:
+        linear-gradient(160deg, var(--quick-bg), rgba(255, 255, 255, 0.9)),
+        radial-gradient(circle at 20% 12%, rgba(255, 255, 255, 0.82), transparent 34%);
+      box-shadow:
+        0 14px 26px rgba(111, 11, 39, 0.12),
+        inset 0 1px 0 rgba(255, 255, 255, 0.88);
       text-align: left;
+      scroll-snap-align: center;
+      transform: translateY(var(--fan-lift)) rotate(var(--fan-rotate)) rotateX(4deg);
+      transform-origin: 50% 120%;
+      transition: transform 180ms ease, box-shadow 180ms ease;
     }
 
     .admin-quick-button::before {
@@ -1969,13 +2019,19 @@
       opacity: 0.92;
     }
 
+    .admin-quick-button:active {
+      box-shadow:
+        0 8px 18px rgba(111, 11, 39, 0.13),
+        inset 0 1px 0 rgba(255, 255, 255, 0.88);
+    }
+
     .admin-quick-button i {
       width: 30px;
       height: 30px;
       display: grid;
       place-items: center;
-      margin-top: 5px;
-      border-radius: 13px;
+      margin-top: 7px;
+      border-radius: 14px;
       color: var(--quick-color);
       background: rgba(255, 255, 255, 0.78);
     }
@@ -1990,10 +2046,18 @@
       min-width: 0;
       overflow: hidden;
       color: var(--ink);
-      font-size: clamp(10px, 2.9vw, 12px);
+      font-size: clamp(16px, 4.8vw, 20px);
       font-weight: 900;
       line-height: 1.2;
       text-overflow: ellipsis;
+      white-space: nowrap;
+    }
+
+    .admin-quick-button small {
+      color: var(--muted);
+      font-size: clamp(10px, 2.8vw, 12px);
+      font-weight: 800;
+      line-height: 1.2;
       white-space: nowrap;
     }
 
@@ -2018,45 +2082,96 @@
       --quick-color: #7c6dff;
       --quick-bg: rgba(124, 109, 255, 0.14);
       --quick-border: rgba(124, 109, 255, 0.28);
+      --fan-rotate: -10deg;
+      --fan-lift: 11px;
     }
 
     .admin-quick-button.is-messages {
       --quick-color: #ff4f8b;
       --quick-bg: rgba(255, 79, 139, 0.15);
       --quick-border: rgba(255, 79, 139, 0.28);
+      --fan-rotate: -3deg;
+      --fan-lift: 1px;
     }
 
     .admin-quick-button.is-orders {
-      --quick-color: #ad1747;
-      --quick-bg: rgba(173, 23, 71, 0.13);
-      --quick-border: rgba(173, 23, 71, 0.25);
+      --quick-color: #b0124f;
+      --quick-bg: rgba(176, 18, 79, 0.13);
+      --quick-border: rgba(176, 18, 79, 0.25);
+      --fan-rotate: 3deg;
+      --fan-lift: 1px;
     }
 
     .admin-quick-button.is-equipment {
       --quick-color: #23bfa5;
       --quick-bg: rgba(35, 191, 165, 0.14);
       --quick-border: rgba(35, 191, 165, 0.26);
+      --fan-rotate: 10deg;
+      --fan-lift: 11px;
+    }
+
+    .admin-quick-button.is-sync {
+      --quick-color: #0f8fdb;
+      --quick-bg: rgba(15, 143, 219, 0.13);
+      --quick-border: rgba(15, 143, 219, 0.24);
+      --fan-rotate: -8deg;
+      --fan-lift: 8px;
+    }
+
+    .admin-quick-button.is-logs {
+      --quick-color: #7457d8;
+      --quick-bg: rgba(116, 87, 216, 0.13);
+      --quick-border: rgba(116, 87, 216, 0.24);
+      --fan-rotate: 8deg;
+      --fan-lift: 8px;
+    }
+
+    .admin-quick-button.is-export {
+      --quick-color: #ad1747;
+      --quick-bg: rgba(173, 23, 71, 0.12);
+      --quick-border: rgba(173, 23, 71, 0.23);
+      --fan-rotate: -2deg;
+      --fan-lift: 0;
     }
 
     @media (max-width: 390px) {
       .admin-quick-nav {
-        padding: 7px;
-        border-radius: 20px;
+        padding: 16px 0 22px;
+        border-radius: 28px;
       }
 
       .admin-quick-track {
-        gap: 6px;
+        min-height: 158px;
+        gap: 16px;
+        padding: 20px 58px 30px;
       }
 
       .admin-quick-button {
-        min-height: 62px;
-        padding: 9px 7px;
-        border-radius: 16px;
+        flex-basis: 128px;
+        min-height: 124px;
+        padding: 15px 12px 13px;
+        border-radius: 24px;
       }
 
       .admin-quick-button i {
         width: 28px;
         height: 28px;
+      }
+
+      .admin-quick-button.is-batch {
+        --fan-rotate: -13deg;
+      }
+
+      .admin-quick-button.is-messages {
+        --fan-rotate: -4deg;
+      }
+
+      .admin-quick-button.is-orders {
+        --fan-rotate: 4deg;
+      }
+
+      .admin-quick-button.is-equipment {
+        --fan-rotate: 13deg;
       }
     }
 
@@ -2278,6 +2393,82 @@
       line-height: 1.5;
     }
 
+    .admin-tool-card,
+    .admin-filter-panel,
+    .admin-log-card {
+      display: grid;
+      gap: 10px;
+      padding: 13px;
+      border: 1px solid rgba(159, 18, 57, 0.1);
+      border-radius: 20px;
+      background: rgba(255, 255, 255, 0.96);
+    }
+
+    .admin-tool-head,
+    .admin-log-head {
+      display: flex;
+      align-items: flex-start;
+      justify-content: space-between;
+      gap: 10px;
+    }
+
+    .admin-tool-head h3,
+    .admin-log-head strong {
+      margin: 0;
+      color: var(--ink);
+      font-size: clamp(15px, 3.7vw, 18px);
+      font-weight: 950;
+      line-height: 1.25;
+    }
+
+    .admin-tool-head p,
+    .admin-log-card p {
+      margin: 3px 0 0;
+      color: var(--muted);
+      font-size: 12px;
+      line-height: 1.45;
+    }
+
+    .admin-export-actions {
+      display: grid;
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+      gap: 8px;
+    }
+
+    .admin-export-actions .secondary-button {
+      min-height: 44px;
+      border-radius: 14px;
+      font-size: clamp(10px, 3vw, 12px);
+    }
+
+    .admin-filter-panel {
+      grid-template-columns: minmax(0, 1fr) minmax(118px, 0.4fr);
+      align-items: end;
+    }
+
+    .admin-filter-panel .field {
+      margin: 0;
+    }
+
+    .admin-log-meta {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 6px;
+    }
+
+    .admin-log-meta span {
+      min-height: 26px;
+      display: inline-flex;
+      align-items: center;
+      padding: 0 9px;
+      border-radius: 999px;
+      color: var(--brand);
+      background: var(--brand-soft);
+      font-size: 11px;
+      font-weight: 900;
+      white-space: nowrap;
+    }
+
     .admin-equipment-row {
       grid-template-columns: 72px minmax(0, 1fr);
       align-items: center;
@@ -2353,6 +2544,11 @@
 
     @media (max-width: 390px) {
       .admin-equipment-form-grid {
+        grid-template-columns: 1fr;
+      }
+
+      .admin-filter-panel,
+      .admin-export-actions {
         grid-template-columns: 1fr;
       }
 
@@ -4179,6 +4375,8 @@
       workOrders: [],
       identityBindings: [],
       adminMessages: [],
+      machineSyncLogs: [],
+      adminOperationLogs: [],
       messages: [
         { id: "m1", title: "欢迎使用 SportLoop", text: "借出与归还在场馆机器完成，手机负责查看状态、同步记录，以及归还前扫码/拍照检测。", time: "刚刚" },
       ],
@@ -4202,6 +4400,8 @@
       isAdmin: false,
       remoteLoading: false,
       loading: false,
+      adminEquipmentQuery: "",
+      adminEquipmentStatus: "全部",
     };
 
     const appEl = document.querySelector("#app");
@@ -4418,6 +4618,8 @@
       store.workOrders = [];
       store.identityBindings = [];
       store.adminMessages = [];
+      store.machineSyncLogs = [];
+      store.adminOperationLogs = [];
       store.messages = [];
       saveStore();
     }
@@ -4518,6 +4720,51 @@
         status: row.status,
         createdAt: dbTimeText(row.created_at),
         restored: !!row.restored,
+      };
+    }
+
+    function jsonObjectValue(value) {
+      if (value && typeof value === "object" && !Array.isArray(value)) return value;
+      if (typeof value === "string") {
+        try {
+          const parsed = JSON.parse(value);
+          return parsed && typeof parsed === "object" && !Array.isArray(parsed) ? parsed : {};
+        } catch {
+          return {};
+        }
+      }
+      return {};
+    }
+
+    function dbMachineSyncLogToLocal(row) {
+      const createdAtMs = Date.parse(row.created_at || "");
+      return {
+        id: row.id,
+        operatorId: row.operator_id || "",
+        mode: row.mode || "入库同步",
+        itemCount: Number(row.item_count) || 0,
+        chipCount: Number(row.chip_count) || 0,
+        duplicateCount: Number(row.duplicate_count) || 0,
+        failedCount: Number(row.failed_count) || 0,
+        summary: row.summary || "",
+        details: jsonObjectValue(row.details),
+        createdAt: dbTimeText(row.created_at),
+        createdAtMs: Number.isFinite(createdAtMs) ? createdAtMs : 0,
+      };
+    }
+
+    function dbAdminOperationLogToLocal(row) {
+      const createdAtMs = Date.parse(row.created_at || "");
+      return {
+        id: row.id,
+        operatorId: row.operator_id || "",
+        action: row.action || "",
+        targetType: row.target_type || "",
+        targetId: row.target_id || "",
+        summary: row.summary || "",
+        details: jsonObjectValue(row.details),
+        createdAt: dbTimeText(row.created_at),
+        createdAtMs: Number.isFinite(createdAtMs) ? createdAtMs : 0,
       };
     }
 
@@ -4629,7 +4876,7 @@
       if (!authSession?.accessToken) return;
       await refreshAdminAccess();
 
-      const [equipmentRows, profileRows, loanRows, messageRows, contactRows, orderRows, batchRows] = await Promise.all([
+      const [equipmentRows, profileRows, loanRows, messageRows, contactRows, orderRows, batchRows, syncLogRows, operationLogRows] = await Promise.all([
         supabaseRequest("equipment?select=*&order=name.asc"),
         supabaseRequest(`student_profiles?select=*&user_id=eq.${authSession.userId}`),
         supabaseRequest("loans?select=*&order=created_at.desc"),
@@ -4637,6 +4884,8 @@
         supabaseRequest("admin_contacts?select=*&order=created_at.desc"),
         supabaseRequest("work_orders?select=*&order=created_at.desc"),
         supabaseRequest("batch_borrow_requests?select=*&order=created_at.desc"),
+        supabaseRequest("machine_sync_logs?select=*&order=created_at.desc&limit=40"),
+        supabaseRequest("admin_operation_logs?select=*&order=created_at.desc&limit=60"),
       ]);
 
       store.equipment = equipmentRows.map(dbEquipmentToLocal);
@@ -4648,6 +4897,8 @@
       store.adminMessages = contactRows.map(dbContactToLocal);
       store.workOrders = orderRows.map(dbWorkOrderToLocal);
       store.batchRequests = batchRows.map(dbBatchRequestToLocal);
+      store.machineSyncLogs = syncLogRows.map(dbMachineSyncLogToLocal);
+      store.adminOperationLogs = operationLogRows.map(dbAdminOperationLogToLocal);
       saveStore();
     }
 
@@ -4665,11 +4916,21 @@
       }
     }
 
+    const adminModuleRoutes = {
+      batch: "adminBatch",
+      messages: "adminMessages",
+      orders: "adminOrders",
+      equipment: "adminEquipment",
+      syncLogs: "adminSyncLogs",
+      logs: "adminLogs",
+      export: "adminExport",
+    };
+
     function shouldRefreshOnRoute(to) {
-      return ["home", "list", "borrow", "batchBorrow", "renew", "messages", "admin", "profile", "profileInfo", "creditRules", "identity", "contactAdmin"].includes(to);
+      return ["home", "list", "borrow", "batchBorrow", "renew", "messages", "admin", ...Object.values(adminModuleRoutes), "profile", "profileInfo", "creditRules", "identity", "contactAdmin"].includes(to);
     }
 
-    const adminRoutes = new Set(["admin"]);
+    const adminRoutes = new Set(["admin", ...Object.values(adminModuleRoutes)]);
     const studentRoutes = new Set([
       "home", "list", "detail", "scanBorrow", "borrowConfirm", "borrow", "batchBorrow", "renew", "renewDetail",
       "detect", "result", "report", "messages", "contactAdmin", "profile", "profileInfo", "creditRules", "identity",
@@ -4874,6 +5135,42 @@
       });
     }
 
+    function createRemoteMachineSyncLog(log) {
+      if (!authSession?.accessToken) return;
+      runRemote(() => supabaseRequest("machine_sync_logs", {
+        method: "POST",
+        body: {
+          id: log.id,
+          operator_id: authSession.userId,
+          mode: log.mode,
+          item_count: log.itemCount,
+          chip_count: log.chipCount,
+          duplicate_count: log.duplicateCount,
+          failed_count: log.failedCount,
+          summary: log.summary,
+          details: log.details || {},
+          created_at: log.createdAtMs ? toIso(log.createdAtMs) : new Date().toISOString(),
+        },
+      }));
+    }
+
+    function createRemoteAdminOperationLog(log) {
+      if (!authSession?.accessToken) return;
+      runRemote(() => supabaseRequest("admin_operation_logs", {
+        method: "POST",
+        body: {
+          id: log.id,
+          operator_id: authSession.userId,
+          action: log.action,
+          target_type: log.targetType,
+          target_id: log.targetId,
+          summary: log.summary,
+          details: log.details || {},
+          created_at: log.createdAtMs ? toIso(log.createdAtMs) : new Date().toISOString(),
+        },
+      }));
+    }
+
 
     function mergeEquipmentImages(cachedList) {
       const seedById = Object.fromEntries(seed.equipment.map((item) => [item.id, item]));
@@ -4901,6 +5198,8 @@
         workOrders: parsed.workOrders || [],
         identityBindings: parsed.identityBindings || [],
         adminMessages: parsed.adminMessages || [],
+        machineSyncLogs: parsed.machineSyncLogs || [],
+        adminOperationLogs: parsed.adminOperationLogs || [],
         messages: parsed.messages || clone(seed.messages),
       };
     }
@@ -5028,6 +5327,58 @@
       return store.adminMessages;
     }
 
+    function machineSyncLogList() {
+      if (!Array.isArray(store.machineSyncLogs)) store.machineSyncLogs = [];
+      return store.machineSyncLogs.sort((a, b) => Number(b.createdAtMs || 0) - Number(a.createdAtMs || 0));
+    }
+
+    function adminOperationLogList() {
+      if (!Array.isArray(store.adminOperationLogs)) store.adminOperationLogs = [];
+      return store.adminOperationLogs.sort((a, b) => Number(b.createdAtMs || 0) - Number(a.createdAtMs || 0));
+    }
+
+    function createMachineSyncLog(payload) {
+      const createdAtMs = Date.now();
+      const log = {
+        id: makeUuid(),
+        operatorId: state.currentUserId,
+        mode: payload.mode || "入库同步",
+        itemCount: Number(payload.itemCount) || 0,
+        chipCount: Number(payload.chipCount) || 0,
+        duplicateCount: Number(payload.duplicateCount) || 0,
+        failedCount: Number(payload.failedCount) || 0,
+        summary: payload.summary || "",
+        details: payload.details || {},
+        createdAt: formatDateTime(createdAtMs),
+        createdAtMs,
+      };
+      machineSyncLogList().unshift(log);
+      store.machineSyncLogs = machineSyncLogList().slice(0, 40);
+      saveStore();
+      createRemoteMachineSyncLog(log);
+      return log;
+    }
+
+    function createAdminOperationLog(action, targetType, targetId, summary, details = {}) {
+      const createdAtMs = Date.now();
+      const log = {
+        id: makeUuid(),
+        operatorId: state.currentUserId,
+        action,
+        targetType,
+        targetId,
+        summary,
+        details,
+        createdAt: formatDateTime(createdAtMs),
+        createdAtMs,
+      };
+      adminOperationLogList().unshift(log);
+      store.adminOperationLogs = adminOperationLogList().slice(0, 80);
+      saveStore();
+      createRemoteAdminOperationLog(log);
+      return log;
+    }
+
     function batchRequestList() {
       if (!Array.isArray(store.batchRequests)) store.batchRequests = [];
       return store.batchRequests;
@@ -5066,7 +5417,7 @@
     }
 
     function statusClass(status) {
-      if (status === "可借" || status === "已归还" || status === "已完成" || status === "已回复" || status === "已通过") return "ok";
+      if (status === "可借" || status === "已归还" || status === "已完成" || status === "已回复" || status === "已通过" || status === "已同步") return "ok";
       if (status === "补充中" || status === "使用中" || status === "待归还" || status === "待回复" || status === "待审核" || status === "已借出") return "warn";
       return "bad";
     }
@@ -5864,7 +6215,7 @@
       return shell("消息", body, { left: "none" });
     }
 
-    function adminPage() {
+    function adminDashboardData() {
       const pending = store.workOrders.filter((order) => order.status !== "已完成");
       const waitingMessages = adminMessageList().filter((message) => message.status !== "已回复");
       const batchRequests = batchRequestList();
@@ -5874,6 +6225,9 @@
       const healthyCount = store.equipment.filter((item) => item.health >= 90).length;
       const maintenanceCount = store.equipment.filter((item) => item.status !== "可借").length;
       const progress = adminProgressMetrics();
+      const filteredEquipment = filteredAdminEquipmentList();
+      const syncLogs = machineSyncLogList();
+      const operationLogs = adminOperationLogList();
       const equipmentDesc = store.equipment.length
         ? `当前 ${totalAvailable}/${totalStock} 件可借，${healthyCount} 类器材健康度良好。`
         : "暂无器材，先录入后学生端才会显示。";
@@ -5881,10 +6235,89 @@
       const equipmentContent = `
         ${adminMachineSyncCard()}
         ${adminEquipmentForm()}
+        ${adminEquipmentFilterPanel()}
         <div class="list-stack">
-          ${store.equipment.length ? store.equipment.map(adminEquipmentRow).join("") : `<div class="empty">暂无器材。录入第一件器材后，学生端才会显示可借内容。</div>`}
+          ${filteredEquipment.length ? filteredEquipment.map(adminEquipmentRow).join("") : `<div class="empty">暂无匹配器材。换个关键词或状态试试。</div>`}
         </div>
       `;
+      return {
+        pending,
+        waitingMessages,
+        batchRequests,
+        pendingBatchRequests,
+        totalAvailable,
+        totalStock,
+        progress,
+        filteredEquipment,
+        syncLogs,
+        operationLogs,
+        equipmentDesc,
+        equipmentStatus,
+        equipmentContent,
+      };
+    }
+
+    function adminModuleCards(data) {
+      return [
+        ["batch", "批量申请", data.pendingBatchRequests.length],
+        ["messages", "学生留言", data.waitingMessages.length],
+        ["orders", "报修工单", data.pending.length],
+        ["equipment", "器材档案", store.equipment.length],
+        ["syncLogs", "同步记录", data.syncLogs.length],
+        ["logs", "操作记录", data.operationLogs.length],
+        ["export", "数据导出", 3],
+      ];
+    }
+
+    function adminModuleDetails(data) {
+      return {
+        export: {
+          title: "数据导出",
+          desc: "导出库存、机器同步和管理员操作，方便盘点交接。",
+          status: "CSV",
+          content: adminExportTools(),
+        },
+        batch: {
+          title: "批量申请",
+          desc: "审批通过后，学生才能在机器批量借还。",
+          status: `${data.pendingBatchRequests.length} 待审批`,
+          content: data.batchRequests.length ? data.batchRequests.map(adminBatchRequestCard).join("") : `<div class="empty">暂无批量申请。</div>`,
+        },
+        messages: {
+          title: "学生留言",
+          desc: "优先处理未回复咨询，回复后会同步到学生端。",
+          status: `${data.waitingMessages.length} 待回复`,
+          content: adminMessageList().length ? adminMessageList().map(adminContactCard).join("") : `<div class="empty">暂无学生留言。</div>`,
+        },
+        orders: {
+          title: "报修工单",
+          desc: "跟踪器材异常、暂停借出和维修完成状态。",
+          status: `${data.pending.length} 待处理`,
+          content: store.workOrders.length ? store.workOrders.map(orderCard).join("") : `<div class="empty">暂无工单。学生提交异常后会出现在这里。</div>`,
+        },
+        equipment: {
+          title: "器材档案",
+          desc: data.equipmentDesc,
+          status: data.equipmentStatus,
+          content: data.equipmentContent,
+        },
+        syncLogs: {
+          title: "机器入库同步记录",
+          desc: "记录机器端入库同步结果，重复芯片不会重复增加库存。",
+          status: `${data.syncLogs.length} 条`,
+          content: data.syncLogs.length ? data.syncLogs.slice(0, 12).map(adminMachineSyncLogCard).join("") : `<div class="empty">暂无机器同步记录。</div>`,
+        },
+        logs: {
+          title: "操作记录",
+          desc: "记录管理员录入、审批、维修、导出等关键动作。",
+          status: `${data.operationLogs.length} 条`,
+          content: data.operationLogs.length ? data.operationLogs.slice(0, 16).map(adminOperationLogCard).join("") : `<div class="empty">暂无管理员操作记录。</div>`,
+        },
+      };
+    }
+
+    function adminPage() {
+      const data = adminDashboardData();
       const body = `
         <main class="scroll">
           <section class="admin-hero admin-dashboard-hero">
@@ -5897,24 +6330,15 @@
               <span class="admin-ring-mode">实时</span>
             </div>
             <div class="admin-ring-stage">
-              ${adminActivityRing(progress)}
+              ${adminActivityRing(data.progress)}
             </div>
           </section>
           <div class="admin-kpi-grid">
-            ${adminKpi("待回复", waitingMessages.length, "条", "message")}
-            ${adminKpi("待审批", pendingBatchRequests.length, "单", "check")}
-            ${adminKpi("可借总量", totalAvailable, "件", "bag")}
+            ${adminKpi("待回复", data.waitingMessages.length, "条", "message")}
+            ${adminKpi("待审批", data.pendingBatchRequests.length, "单", "check")}
+            ${adminKpi("可借总量", data.totalAvailable, "件", "bag")}
           </div>
-          ${adminQuickNav([
-            ["batch", "批量申请", pendingBatchRequests.length],
-            ["messages", "学生留言", waitingMessages.length],
-            ["orders", "报修工单", pending.length],
-            ["equipment", "器材档案", store.equipment.length],
-          ])}
-          ${adminSection("batch", "批量申请", "审批通过后，学生才能在机器批量借还。", `${pendingBatchRequests.length} 待审批`, batchRequests.length ? batchRequests.map(adminBatchRequestCard).join("") : `<div class="empty">暂无批量申请。</div>`)}
-          ${adminSection("messages", "学生留言", "优先处理未回复咨询，回复后会同步到学生端。", `${waitingMessages.length} 待回复`, adminMessageList().length ? adminMessageList().map(adminContactCard).join("") : `<div class="empty">暂无学生留言。</div>`)}
-          ${adminSection("orders", "报修工单", "跟踪器材异常、暂停借出和维修完成状态。", `${pending.length} 待处理`, store.workOrders.length ? store.workOrders.map(orderCard).join("") : `<div class="empty">暂无工单。学生提交异常后会出现在这里。</div>`)}
-          ${adminSection("equipment", "器材档案", equipmentDesc, equipmentStatus, equipmentContent)}
+          ${adminQuickNav(adminModuleCards(data))}
         </main>
       `;
       if (!state.isAdmin) {
@@ -5936,6 +6360,19 @@
         return shell("管理员端", body, { left: "none", right: "logout", tabs: false });
       }
       return shell("管理员端", body, { left: "none", right: "logout", tabs: false });
+    }
+
+    function adminModulePage(key) {
+      if (!state.isAdmin) return adminPage();
+      const data = adminDashboardData();
+      const details = adminModuleDetails(data);
+      const current = details[key] || details.batch;
+      const body = `
+        <main class="scroll admin-module-scroll">
+          ${adminSection(key, current.title, current.desc, current.status, current.content)}
+        </main>
+      `;
+      return shell(current.title, body, { left: "back", right: "logout", tabs: false });
     }
 
     function boundedPercent(value) {
@@ -6008,14 +6445,107 @@
         <form class="admin-machine-sync-card" id="adminMachineSyncForm">
           <div class="admin-machine-sync-head">
             <div>
-              <h3>机器库存同步</h3>
-              <p>粘贴 NFC 机器导出的库存清单，系统按器材编号合并数量。</p>
+              <h3>机器入库同步</h3>
+              <p>机器端进入入库模式后扫码，网页只接收机器同步结果。</p>
             </div>
-            <span>机器数据</span>
+            <span>入库数据</span>
           </div>
           <textarea id="adminMachineInventory" placeholder="每行格式：器材编号,名称,分类,场馆,芯片号&#10;SL-PP-0616,乒乓球,乒乓球,东区体育馆,NFC-0001&#10;SL-PP-0616,乒乓球,乒乓球,东区体育馆,NFC-0002"></textarea>
-          <button class="primary-button" type="submit">${icon("refresh")} 同步机器库存</button>
+          <button class="primary-button" type="submit">${icon("refresh")} 同步入库结果</button>
         </form>
+      `;
+    }
+
+    function adminExportTools() {
+      return `
+        <article class="admin-tool-card">
+          <div class="admin-tool-head">
+            <div>
+              <h3>导出管理数据</h3>
+              <p>生成 CSV 文件，可用表格软件打开。</p>
+            </div>
+            <span class="admin-equipment-chip">本地生成</span>
+          </div>
+          <div class="admin-export-actions">
+            <button class="secondary-button" type="button" data-admin-export="equipment">${icon("file")} 库存</button>
+            <button class="secondary-button" type="button" data-admin-export="sync">${icon("refresh")} 同步</button>
+            <button class="secondary-button" type="button" data-admin-export="logs">${icon("file")} 操作</button>
+          </div>
+        </article>
+      `;
+    }
+
+    function adminEquipmentFilterPanel() {
+      const statuses = ["全部", "可借", "补充中", "维修中", "异常待确认"];
+      return `
+        <div class="admin-filter-panel">
+          <label class="field">
+            <span>搜索器材</span>
+            <input id="adminEquipmentSearch" value="${escapeAttr(state.adminEquipmentQuery)}" placeholder="名称、编号、场馆或芯片号" />
+          </label>
+          <label class="field">
+            <span>状态</span>
+            <select id="adminEquipmentStatusFilter">
+              ${statuses.map((status) => `<option value="${escapeAttr(status)}" ${state.adminEquipmentStatus === status ? "selected" : ""}>${escapeHtml(status)}</option>`).join("")}
+            </select>
+          </label>
+        </div>
+      `;
+    }
+
+    function filteredAdminEquipmentList() {
+      const query = normalizeIdentityText(state.adminEquipmentQuery).toLowerCase();
+      const status = state.adminEquipmentStatus || "全部";
+      return store.equipment.filter((item) => {
+        const haystack = [
+          item.name,
+          item.assetId,
+          item.category,
+          item.venue,
+          item.status,
+          ...(Array.isArray(item.nfcTags) ? item.nfcTags : []),
+        ].join(" ").toLowerCase();
+        const matchQuery = !query || haystack.includes(query);
+        const matchStatus = status === "全部" || item.status === status;
+        return matchQuery && matchStatus;
+      });
+    }
+
+    function adminMachineSyncLogCard(log) {
+      return `
+        <article class="admin-log-card adminMachineSyncLog">
+          <div class="admin-log-head">
+            <div>
+              <strong>${escapeHtml(log.summary || "机器入库同步")}</strong>
+              <p>${escapeHtml(log.createdAt || "")}</p>
+            </div>
+            ${tag(log.failedCount ? "异常" : "已同步")}
+          </div>
+          <div class="admin-log-meta">
+            <span>器材 ${log.itemCount}</span>
+            <span>新增芯片 ${log.chipCount}</span>
+            <span>重复 ${log.duplicateCount}</span>
+            <span>失败 ${log.failedCount}</span>
+          </div>
+        </article>
+      `;
+    }
+
+    function adminOperationLogCard(log) {
+      return `
+        <article class="admin-log-card adminOperationLog">
+          <div class="admin-log-head">
+            <div>
+              <strong>${escapeHtml(log.action || "管理员操作")}</strong>
+              <p>${escapeHtml(log.summary || "")}</p>
+            </div>
+            <span class="admin-equipment-chip">${escapeHtml(log.createdAt || "")}</span>
+          </div>
+          <div class="admin-log-meta">
+            <span>${escapeHtml(log.targetType || "系统")}</span>
+            ${log.targetId ? `<span>${escapeHtml(log.targetId)}</span>` : ""}
+          </div>
+        </article>
       `;
     }
 
@@ -6067,16 +6597,21 @@
         messages: ["message", "is-messages"],
         orders: ["wrench", "is-orders"],
         equipment: ["bag", "is-equipment"],
+        syncLogs: ["refresh", "is-sync"],
+        logs: ["file", "is-logs"],
+        export: ["file", "is-export"],
       };
       return `
-        <nav class="admin-quick-nav" aria-label="管理员端快捷目录">
+        <nav class="admin-quick-nav admin-quick-fan" aria-label="管理员端快捷目录">
           <div class="admin-quick-track">
             ${items.map(([key, label, count]) => {
               const [iconName, className] = meta[key] || ["check", ""];
+              const targetRoute = adminModuleRoutes[key] || "admin";
               return `
-              <button class="admin-quick-button ${className}" type="button" data-admin-jump="${escapeAttr(key)}">
+              <button class="admin-quick-button ${className}" type="button" data-admin-route="${escapeAttr(targetRoute)}">
                 <i>${icon(iconName)}</i>
                 <span>${escapeHtml(label)}</span>
+                <small>点击进入</small>
                 <b>${count}</b>
               </button>
             `;
@@ -6664,6 +7199,13 @@
         return;
       }
       saveStore();
+      createAdminOperationLog(
+        approved ? "通过批量申请" : "拒绝批量申请",
+        "batch_borrow_requests",
+        request.id,
+        `${request.studentName || "学生"} 的批量申请已${approved ? "通过" : "拒绝"}`,
+        { studentId: request.studentId, itemCount: (request.items || []).length }
+      );
       state.notice = approved ? "批量申请已通过" : "批量申请已拒绝";
       render();
     }
@@ -6885,6 +7427,10 @@
       saveStore();
       saveRemoteWorkOrder(order);
       saveRemoteEquipment(item);
+      createAdminOperationLog("更新报修工单", "work_orders", order.id, `${item.name} 更新为 ${status}`, {
+        equipmentId: item.id,
+        assetId: item.assetId,
+      });
       state.notice = `工单已更新为：${status}`;
       render();
     }
@@ -7147,6 +7693,13 @@
         messages: messagesPage,
         contactAdmin: contactAdminPage,
         admin: adminPage,
+        adminBatch: () => adminModulePage("batch"),
+        adminMessages: () => adminModulePage("messages"),
+        adminOrders: () => adminModulePage("orders"),
+        adminEquipment: () => adminModulePage("equipment"),
+        adminSyncLogs: () => adminModulePage("syncLogs"),
+        adminLogs: () => adminModulePage("logs"),
+        adminExport: () => adminModulePage("export"),
         profile: profilePage,
         profileInfo: profileInfoPage,
         creditRules: creditRulesPage,
@@ -7426,6 +7979,10 @@
         return;
       }
       pushMessage("管理员已回复", reply);
+      createAdminOperationLog("回复学生留言", "admin_contacts", message.id, `${message.senderName || "学生"} 的留言已回复`, {
+        studentId: message.studentId,
+        category: message.category,
+      });
       saveStore();
       state.notice = "回复已发送给学生";
       render();
@@ -7489,6 +8046,11 @@
       }
 
       store.equipment.unshift(item);
+      createAdminOperationLog("录入器材", "equipment", item.id, `${item.name} 已录入，数量 ${available}/${total}`, {
+        assetId: item.assetId,
+        category: item.category,
+        venue: item.venue,
+      });
       saveStore();
       state.notice = "器材已录入";
       render();
@@ -7503,7 +8065,8 @@
     function parseMachineInventoryText(rawText) {
       const lines = String(rawText || "").split(/\r?\n/).map((line) => line.trim()).filter(Boolean);
       if (!lines.length) throw new Error("请先粘贴机器导出的库存清单");
-      const seenTags = new Set();
+      const seenTags = new Map();
+      const duplicateTags = [];
       const groups = new Map();
 
       lines.forEach((line, index) => {
@@ -7515,8 +8078,11 @@
         const venue = parts[3];
         const tagId = parts[4].toUpperCase();
         if (!assetId || !name || !category || !venue || !tagId) throw new Error(`第 ${index + 1} 行有空字段`);
-        if (seenTags.has(tagId)) throw new Error(`芯片号重复：${tagId}`);
-        seenTags.add(tagId);
+        if (seenTags.has(tagId)) {
+          duplicateTags.push(tagId);
+          return;
+        }
+        seenTags.set(tagId, assetId);
 
         const existing = groups.get(assetId);
         if (existing) {
@@ -7530,48 +8096,112 @@
         groups.set(assetId, { assetId, name, category, venue, nfcTags: [tagId] });
       });
 
-      return [...groups.values()];
+      return { groups: [...groups.values()], inputCount: lines.length, duplicateTags };
+    }
+
+    function currentNfcTagIndex() {
+      const index = new Map();
+      store.equipment.forEach((item) => {
+        (Array.isArray(item.nfcTags) ? item.nfcTags : []).forEach((tag) => {
+          index.set(String(tag).toUpperCase(), item.assetId);
+        });
+      });
+      return index;
     }
 
     function machineInventoryItemsFromGroups(groups) {
       const syncedAt = new Date().toISOString();
-      return groups.map((group) => {
+      const tagIndex = currentNfcTagIndex();
+      let addedChipCount = 0;
+      let duplicateCount = 0;
+      const duplicateTags = [];
+      const items = groups.map((group) => {
         const current = store.equipment.find((item) => item.assetId === group.assetId);
-        const activeCount = current ? activeLoanCountForEquipment(current.id) : 0;
-        const available = group.nfcTags.length;
+        const currentTags = new Set((Array.isArray(current?.nfcTags) ? current.nfcTags : []).map((tag) => String(tag).toUpperCase()));
+        const newTags = [];
+        group.nfcTags.forEach((tag) => {
+          const tagId = String(tag).toUpperCase();
+          const boundAsset = tagIndex.get(tagId);
+          if (boundAsset && boundAsset !== group.assetId) throw new Error(`芯片号 ${tagId} 已绑定到 ${boundAsset}`);
+          if (currentTags.has(tagId)) {
+            duplicateCount += 1;
+            duplicateTags.push(tagId);
+            return;
+          }
+          currentTags.add(tagId);
+          newTags.push(tagId);
+          addedChipCount += 1;
+        });
+        const available = current ? Number(current.available || 0) + newTags.length : newTags.length;
+        const total = current ? Number(current.total || 0) + newTags.length : newTags.length;
+        if (!newTags.length && current) return null;
         return {
           id: current?.id || `eq-${makeUuid()}`,
           assetId: group.assetId,
           name: group.name,
           category: group.category,
           image: current?.image || "",
-          total: available + activeCount,
+          total,
           available,
           status: available > 0 ? "可借" : "补充中",
           health: current?.health ?? 100,
           venue: group.venue,
-          desc: current?.desc || "NFC 机器同步器材库存。",
-          nfcTags: group.nfcTags,
+          desc: current?.desc || "NFC 机器入库同步器材库存。",
+          nfcTags: [...currentTags],
           machineSyncedAt: syncedAt,
         };
-      });
+      }).filter((item) => item && item.total > 0);
+      return { items, addedChipCount, duplicateCount, duplicateTags, syncedAt };
     }
 
     async function submitAdminMachineSync(event) {
       event.preventDefault();
       try {
-        const groups = parseMachineInventoryText(event.currentTarget.querySelector("#adminMachineInventory").value);
-        const syncedItems = machineInventoryItemsFromGroups(groups);
-        await upsertRemoteEquipmentBatch(syncedItems);
+        const parsed = parseMachineInventoryText(event.currentTarget.querySelector("#adminMachineInventory").value);
+        const syncResult = machineInventoryItemsFromGroups(parsed.groups);
+        const syncedItems = syncResult.items;
+        if (syncedItems.length) await upsertRemoteEquipmentBatch(syncedItems);
         syncedItems.forEach((item) => {
           const current = store.equipment.find((equipment) => equipment.assetId === item.assetId);
           if (current) Object.assign(current, item);
           else store.equipment.unshift(item);
         });
+        const duplicateCount = syncResult.duplicateCount + parsed.duplicateTags.length;
+        const summary = syncResult.addedChipCount
+          ? `机器入库新增 ${syncResult.addedChipCount} 个芯片`
+          : "机器入库没有新增芯片";
+        createMachineSyncLog({
+          mode: "入库同步",
+          itemCount: syncedItems.length,
+          chipCount: syncResult.addedChipCount,
+          duplicateCount,
+          failedCount: 0,
+          summary,
+          details: {
+            inputCount: parsed.inputCount,
+            duplicateTags: syncResult.duplicateTags.concat(parsed.duplicateTags).slice(0, 30),
+            assetIds: syncedItems.map((item) => item.assetId),
+          },
+        });
+        createAdminOperationLog("机器入库同步", "machine_sync", "", summary, {
+          itemCount: syncedItems.length,
+          chipCount: syncResult.addedChipCount,
+          duplicateCount,
+        });
         saveStore();
-        const totalCount = syncedItems.reduce((sum, item) => sum + item.available, 0);
-        state.notice = `已同步 ${syncedItems.length} 类器材，${totalCount} 件库存`;
+        state.notice = duplicateCount
+          ? `已入库 ${syncResult.addedChipCount} 个芯片，${duplicateCount} 个重复芯片未重复增加`
+          : `已入库 ${syncResult.addedChipCount} 个芯片`;
       } catch (error) {
+        createMachineSyncLog({
+          mode: "入库同步失败",
+          itemCount: 0,
+          chipCount: 0,
+          duplicateCount: 0,
+          failedCount: 1,
+          summary: error.message || "机器入库同步失败",
+          details: { reason: error.message || "" },
+        });
         state.notice = error.message || "机器库存同步失败";
       }
       render();
@@ -7600,6 +8230,11 @@
       item.status = status;
       try {
         await updateRemoteEquipment(item);
+        createAdminOperationLog("修改器材库存", "equipment", item.id, `${item.name} 库存改为 ${available}/${total}，状态 ${status}`, {
+          previous,
+          next: { total, available, status },
+          assetId: item.assetId,
+        });
         saveStore();
         state.notice = "器材库存已保存";
       } catch (error) {
@@ -7609,15 +8244,82 @@
       render();
     }
 
-    function scrollAdminSection(key) {
-      const target = document.querySelector(`[data-admin-section="${CSS.escape(key)}"]`);
-      const scrollBox = target?.closest(".scroll");
-      if (!target || !scrollBox) return;
-      const offset = 62;
-      scrollBox.scrollTo({
-        top: target.offsetTop - offset,
-        behavior: "smooth",
-      });
+    function csvCell(value) {
+      const text = String(value ?? "").replace(/\r?\n/g, " ");
+      return /[",，\n]/.test(text) ? `"${text.replace(/"/g, '""')}"` : text;
+    }
+
+    function rowsToCsv(rows) {
+      if (!rows.length) return "";
+      const keys = Object.keys(rows[0]);
+      return [
+        keys.map(csvCell).join(","),
+        ...rows.map((row) => keys.map((key) => csvCell(row[key])).join(",")),
+      ].join("\n");
+    }
+
+    function downloadTextFile(filename, content, type = "text/csv;charset=utf-8") {
+      const blob = new Blob(["\ufeff", content], { type });
+      const url = URL.createObjectURL(blob);
+      const link = document.createElement("a");
+      link.href = url;
+      link.download = filename;
+      document.body.appendChild(link);
+      link.click();
+      link.remove();
+      URL.revokeObjectURL(url);
+    }
+
+    function exportAdminData(kind) {
+      const stamp = new Date().toISOString().slice(0, 10);
+      const datasets = {
+        equipment: {
+          filename: `sportloop-equipment-${stamp}.csv`,
+          label: "库存",
+          rows: store.equipment.map((item) => ({
+            器材编号: item.assetId,
+            名称: item.name,
+            分类: item.category,
+            场馆: item.venue,
+            总量: item.total,
+            可借: item.available,
+            状态: item.status,
+            芯片数: Array.isArray(item.nfcTags) ? item.nfcTags.length : 0,
+            最近同步: item.machineSyncedAt || "",
+          })),
+        },
+        sync: {
+          filename: `sportloop-machine-sync-${stamp}.csv`,
+          label: "机器同步记录",
+          rows: machineSyncLogList().map((log) => ({
+            时间: log.createdAt,
+            类型: log.mode,
+            摘要: log.summary,
+            器材类数: log.itemCount,
+            新增芯片: log.chipCount,
+            重复芯片: log.duplicateCount,
+            失败: log.failedCount,
+          })),
+        },
+        logs: {
+          filename: `sportloop-admin-logs-${stamp}.csv`,
+          label: "操作记录",
+          rows: adminOperationLogList().map((log) => ({
+            时间: log.createdAt,
+            动作: log.action,
+            对象类型: log.targetType,
+            对象ID: log.targetId,
+            摘要: log.summary,
+          })),
+        },
+      };
+      const data = datasets[kind];
+      if (!data) return;
+      const rows = data.rows.length ? data.rows : [{ 提示: `暂无${data.label}` }];
+      downloadTextFile(data.filename, rowsToCsv(rows));
+      createAdminOperationLog("导出数据", "export", kind, `已导出${data.label}`, { rows: data.rows.length });
+      state.notice = `${data.label}已导出`;
+      render();
     }
 
     function bind() {
@@ -7634,11 +8336,33 @@
       if (adminEquipmentForm) adminEquipmentForm.addEventListener("submit", submitAdminEquipmentForm);
       const adminMachineSyncForm = document.querySelector("#adminMachineSyncForm");
       if (adminMachineSyncForm) adminMachineSyncForm.addEventListener("submit", submitAdminMachineSync);
+      const adminEquipmentSearch = document.querySelector("#adminEquipmentSearch");
+      if (adminEquipmentSearch) {
+        adminEquipmentSearch.addEventListener("input", (event) => {
+          state.adminEquipmentQuery = event.target.value;
+          render();
+          const next = document.querySelector("#adminEquipmentSearch");
+          if (next) {
+            next.focus();
+            next.setSelectionRange(next.value.length, next.value.length);
+          }
+        });
+      }
+      const adminEquipmentStatusFilter = document.querySelector("#adminEquipmentStatusFilter");
+      if (adminEquipmentStatusFilter) {
+        adminEquipmentStatusFilter.addEventListener("change", (event) => {
+          state.adminEquipmentStatus = event.target.value;
+          render();
+        });
+      }
+      document.querySelectorAll("[data-admin-export]").forEach((node) =>
+        node.addEventListener("click", () => exportAdminData(node.dataset.adminExport))
+      );
       document.querySelectorAll("[data-admin-save-equipment]").forEach((node) =>
         node.addEventListener("click", () => saveAdminEquipmentEdit(node.dataset.adminSaveEquipment, node.closest("[data-admin-equipment-row]")))
       );
-      document.querySelectorAll("[data-admin-jump]").forEach((node) =>
-        node.addEventListener("click", () => scrollAdminSection(node.dataset.adminJump))
+      document.querySelectorAll("[data-admin-route]").forEach((node) =>
+        node.addEventListener("click", () => route(node.dataset.adminRoute))
       );
       const batchBorrowForm = document.querySelector("#batchBorrowForm");
       if (batchBorrowForm) batchBorrowForm.addEventListener("submit", submitBatchBorrowRequest);

@@ -122,6 +122,30 @@ create table if not exists public.work_orders (
   updated_at timestamptz not null default now()
 );
 
+create table if not exists public.machine_sync_logs (
+  id uuid primary key default gen_random_uuid(),
+  operator_id uuid references auth.users(id) on delete set null,
+  mode text not null default '入库同步',
+  item_count integer not null default 0 check (item_count >= 0),
+  chip_count integer not null default 0 check (chip_count >= 0),
+  duplicate_count integer not null default 0 check (duplicate_count >= 0),
+  failed_count integer not null default 0 check (failed_count >= 0),
+  summary text not null default '',
+  details jsonb not null default '{}'::jsonb,
+  created_at timestamptz not null default now()
+);
+
+create table if not exists public.admin_operation_logs (
+  id uuid primary key default gen_random_uuid(),
+  operator_id uuid references auth.users(id) on delete set null,
+  action text not null,
+  target_type text not null default '',
+  target_id text not null default '',
+  summary text not null default '',
+  details jsonb not null default '{}'::jsonb,
+  created_at timestamptz not null default now()
+);
+
 create index if not exists loans_user_id_idx on public.loans (user_id);
 create index if not exists loans_equipment_id_idx on public.loans (equipment_id);
 create index if not exists loans_batch_request_id_idx on public.loans (batch_request_id);
@@ -135,6 +159,8 @@ create index if not exists work_orders_user_id_idx on public.work_orders (user_i
 create index if not exists work_orders_equipment_id_idx on public.work_orders (equipment_id);
 create index if not exists work_orders_loan_id_idx on public.work_orders (loan_id);
 create index if not exists work_orders_status_idx on public.work_orders (status);
+create index if not exists machine_sync_logs_created_at_idx on public.machine_sync_logs (created_at desc);
+create index if not exists admin_operation_logs_created_at_idx on public.admin_operation_logs (created_at desc);
 
 create or replace function public.set_updated_at()
 returns trigger
@@ -200,6 +226,8 @@ grant select, insert, update on public.loans to authenticated;
 grant select, insert on public.student_messages to authenticated;
 grant select, insert, update on public.admin_contacts to authenticated;
 grant select, insert, update on public.work_orders to authenticated;
+grant select, insert on public.machine_sync_logs to authenticated;
+grant select, insert on public.admin_operation_logs to authenticated;
 
 alter table public.admin_users enable row level security;
 alter table public.student_profiles enable row level security;
@@ -209,6 +237,8 @@ alter table public.loans enable row level security;
 alter table public.student_messages enable row level security;
 alter table public.admin_contacts enable row level security;
 alter table public.work_orders enable row level security;
+alter table public.machine_sync_logs enable row level security;
+alter table public.admin_operation_logs enable row level security;
 
 drop policy if exists admin_users_select_self on public.admin_users;
 create policy admin_users_select_self on public.admin_users
@@ -325,4 +355,24 @@ drop policy if exists work_orders_update_admin on public.work_orders;
 create policy work_orders_update_admin on public.work_orders
 for update to authenticated
 using ((select public.is_admin()))
+with check ((select public.is_admin()));
+
+drop policy if exists machine_sync_logs_admin_select on public.machine_sync_logs;
+create policy machine_sync_logs_admin_select on public.machine_sync_logs
+for select to authenticated
+using ((select public.is_admin()));
+
+drop policy if exists machine_sync_logs_admin_insert on public.machine_sync_logs;
+create policy machine_sync_logs_admin_insert on public.machine_sync_logs
+for insert to authenticated
+with check ((select public.is_admin()));
+
+drop policy if exists admin_operation_logs_admin_select on public.admin_operation_logs;
+create policy admin_operation_logs_admin_select on public.admin_operation_logs
+for select to authenticated
+using ((select public.is_admin()));
+
+drop policy if exists admin_operation_logs_admin_insert on public.admin_operation_logs;
+create policy admin_operation_logs_admin_insert on public.admin_operation_logs
+for insert to authenticated
 with check ((select public.is_admin()));
