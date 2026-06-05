@@ -1922,132 +1922,199 @@
     .admin-quick-nav {
       position: relative;
       margin: 14px 0 22px;
-      padding: 18px 0 24px;
+      padding: 14px 12px 16px;
       overflow: hidden;
-      border: 1px solid rgba(159, 18, 57, 0.13);
-      border-radius: 34px;
+      border: 1px solid rgba(159, 18, 57, 0.12);
+      border-radius: 30px;
       background:
-        radial-gradient(circle at 16% 18%, rgba(255, 79, 139, 0.16), transparent 32%),
-        radial-gradient(circle at 82% 76%, rgba(35, 191, 165, 0.16), transparent 34%),
-        linear-gradient(145deg, rgba(255, 255, 255, 0.98), rgba(255, 245, 249, 0.9));
-      box-shadow: 0 20px 42px rgba(111, 11, 39, 0.12);
+        radial-gradient(circle at 18% 16%, rgba(255, 79, 139, 0.14), transparent 32%),
+        radial-gradient(circle at 88% 84%, rgba(35, 191, 165, 0.13), transparent 34%),
+        linear-gradient(145deg, rgba(255, 255, 255, 0.98), rgba(255, 246, 250, 0.9));
+      box-shadow: 0 18px 40px rgba(111, 11, 39, 0.12);
       backdrop-filter: blur(14px);
     }
 
-    .admin-quick-nav::before {
-      content: "";
-      position: absolute;
-      inset: 0;
-      background:
-        linear-gradient(115deg, transparent 0 18%, rgba(255, 255, 255, 0.58) 18% 20%, transparent 21% 100%);
-      pointer-events: none;
+    .admin-quick-head {
+      position: relative;
+      z-index: 2;
+      display: flex;
+      align-items: flex-end;
+      justify-content: space-between;
+      gap: 12px;
+      margin: 0 2px 10px;
     }
 
-    .admin-quick-nav::after {
+    .admin-quick-head strong {
+      display: block;
+      color: var(--ink);
+      font-size: clamp(18px, 5vw, 22px);
+      font-weight: 950;
+      line-height: 1.15;
+      white-space: nowrap;
+    }
+
+    .admin-quick-head span {
+      color: var(--muted);
+      font-size: clamp(11px, 3vw, 13px);
+      font-weight: 800;
+      line-height: 1.3;
+      white-space: nowrap;
+    }
+
+    .admin-quick-stage {
+      position: relative;
+      height: 238px;
+      overflow: hidden;
+      border-radius: 28px;
+      touch-action: pan-y;
+      background:
+        radial-gradient(circle at 50% 100%, rgba(176, 18, 79, 0.14), transparent 54%),
+        linear-gradient(180deg, rgba(255, 255, 255, 0.34), rgba(255, 244, 248, 0.34));
+    }
+
+    .admin-quick-stage::before {
       content: "";
       position: absolute;
       left: 50%;
-      bottom: 16px;
-      width: 92px;
-      height: 5px;
+      bottom: -178px;
+      width: min(126vw, 520px);
+      height: min(126vw, 520px);
+      transform: translateX(-50%);
+      border-radius: 50%;
+      border: 1px solid rgba(159, 18, 57, 0.12);
+      background:
+        radial-gradient(circle, transparent 0 47%, rgba(255, 255, 255, 0.66) 48% 58%, rgba(255, 225, 237, 0.48) 59% 64%, transparent 65%);
+      pointer-events: none;
+    }
+
+    .admin-quick-stage::after {
+      content: "";
+      position: absolute;
+      left: 50%;
+      bottom: 10px;
+      width: 72px;
+      height: 8px;
       transform: translateX(-50%);
       border-radius: 999px;
-      background: linear-gradient(90deg, rgba(255, 79, 139, 0.82), rgba(124, 109, 255, 0.76), rgba(35, 191, 165, 0.78));
-      box-shadow: 0 8px 18px rgba(173, 23, 71, 0.16);
+      background: rgba(176, 18, 79, 0.2);
+      box-shadow: 0 8px 22px rgba(176, 18, 79, 0.16);
       pointer-events: none;
     }
 
     .admin-quick-track {
-      position: relative;
-      z-index: 1;
-      display: flex;
-      gap: 18px;
-      min-height: 172px;
-      margin: 0;
-      padding: 22px 72px 32px;
-      overflow-x: auto;
-      overflow-y: hidden;
-      scroll-snap-type: x mandatory;
-      scrollbar-width: none;
-      -webkit-overflow-scrolling: touch;
-      perspective: 760px;
-    }
-
-    .admin-quick-track::-webkit-scrollbar {
-      display: none;
+      position: absolute;
+      inset: 0;
     }
 
     .admin-quick-button {
-      --fan-rotate: 0deg;
-      --fan-lift: 0px;
-      position: relative;
-      flex: 0 0 clamp(136px, 39vw, 168px);
-      min-height: 136px;
-      display: flex;
-      flex-direction: column;
-      justify-content: space-between;
-      align-items: flex-start;
+      position: absolute;
+      left: 50%;
+      bottom: 26px;
+      z-index: var(--fan-z);
+      width: clamp(96px, 27vw, 116px);
+      min-height: 118px;
+      display: grid;
+      align-content: space-between;
       gap: 10px;
       min-width: 0;
-      padding: 16px 14px 14px;
+      padding: 13px 12px;
       overflow: hidden;
       border: 1px solid var(--quick-border);
-      border-radius: 28px;
+      border-radius: 24px;
       color: var(--ink);
       background:
-        linear-gradient(160deg, var(--quick-bg), rgba(255, 255, 255, 0.9)),
-        radial-gradient(circle at 20% 12%, rgba(255, 255, 255, 0.82), transparent 34%);
+        linear-gradient(150deg, rgba(255, 255, 255, 0.96), var(--quick-bg)),
+        radial-gradient(circle at 78% 14%, var(--quick-glow), transparent 42%);
       box-shadow:
-        0 14px 26px rgba(111, 11, 39, 0.12),
-        inset 0 1px 0 rgba(255, 255, 255, 0.88);
+        0 16px 30px rgba(111, 11, 39, 0.14),
+        inset 0 1px 0 rgba(255, 255, 255, 0.9);
       text-align: left;
-      scroll-snap-align: center;
-      transform: translateY(var(--fan-lift)) rotate(var(--fan-rotate)) rotateX(4deg);
-      transform-origin: 50% 120%;
-      transition: transform 180ms ease, box-shadow 180ms ease;
+      cursor: pointer;
+      transform:
+        translateX(calc(-50% + var(--fan-x)))
+        translateY(var(--fan-y))
+        rotate(var(--fan-rotate))
+        scale(var(--fan-scale));
+      transform-origin: 50% 190%;
+      opacity: var(--fan-opacity);
+      pointer-events: var(--fan-pointer);
+      transition: transform 220ms ease, opacity 180ms ease, box-shadow 180ms ease;
+    }
+
+    .admin-quick-button.is-hidden {
+      opacity: 0;
+      pointer-events: none;
     }
 
     .admin-quick-button::before {
       content: "";
       position: absolute;
-      left: 10px;
-      right: 10px;
-      top: 7px;
+      left: 11px;
+      right: 11px;
+      top: 8px;
       height: 4px;
       border-radius: 999px;
       background: var(--quick-color);
-      opacity: 0.92;
+      opacity: 0.9;
+    }
+
+    .admin-quick-button::after {
+      content: "";
+      position: absolute;
+      right: -24px;
+      bottom: -24px;
+      width: 82px;
+      height: 82px;
+      border-radius: 24px;
+      background: var(--quick-color);
+      opacity: 0.1;
+      transform: rotate(18deg);
     }
 
     .admin-quick-button:active {
+      transform:
+        translateX(calc(-50% + var(--fan-x)))
+        translateY(calc(var(--fan-y) - 5px))
+        rotate(var(--fan-rotate))
+        scale(calc(var(--fan-scale) * 0.98));
       box-shadow:
-        0 8px 18px rgba(111, 11, 39, 0.13),
-        inset 0 1px 0 rgba(255, 255, 255, 0.88);
+        0 10px 22px rgba(111, 11, 39, 0.14),
+        inset 0 1px 0 rgba(255, 255, 255, 0.9);
     }
 
     .admin-quick-button i {
-      width: 30px;
-      height: 30px;
+      position: relative;
+      z-index: 1;
+      width: 32px;
+      height: 32px;
       display: grid;
       place-items: center;
-      margin-top: 7px;
+      margin-top: 4px;
       border-radius: 14px;
       color: var(--quick-color);
-      background: rgba(255, 255, 255, 0.78);
+      background: rgba(255, 255, 255, 0.8);
     }
 
     .admin-quick-button i svg {
-      width: 17px;
-      height: 17px;
-      stroke-width: 2.5;
+      width: 18px;
+      height: 18px;
+      stroke-width: 2.6;
+    }
+
+    .admin-quick-text {
+      position: relative;
+      z-index: 1;
+      display: grid;
+      gap: 4px;
+      min-width: 0;
     }
 
     .admin-quick-button span {
       min-width: 0;
       overflow: hidden;
       color: var(--ink);
-      font-size: clamp(16px, 4.8vw, 20px);
-      font-weight: 900;
+      font-size: clamp(14px, 4vw, 17px);
+      font-weight: 950;
       line-height: 1.2;
       text-overflow: ellipsis;
       white-space: nowrap;
@@ -2057,19 +2124,20 @@
       color: var(--muted);
       font-size: clamp(10px, 2.8vw, 12px);
       font-weight: 800;
-      line-height: 1.2;
+      line-height: 1.25;
       white-space: nowrap;
     }
 
     .admin-quick-button b {
       position: absolute;
-      top: 15px;
-      right: 9px;
-      min-width: 24px;
-      height: 24px;
+      top: 13px;
+      right: 10px;
+      z-index: 1;
+      min-width: 25px;
+      height: 25px;
       display: grid;
       place-items: center;
-      padding: 0 6px;
+      padding: 0 7px;
       border-radius: 999px;
       color: #ffffff;
       background: var(--quick-color);
@@ -2081,97 +2149,72 @@
     .admin-quick-button.is-batch {
       --quick-color: #7c6dff;
       --quick-bg: rgba(124, 109, 255, 0.14);
+      --quick-glow: rgba(124, 109, 255, 0.2);
       --quick-border: rgba(124, 109, 255, 0.28);
-      --fan-rotate: -10deg;
-      --fan-lift: 11px;
     }
 
     .admin-quick-button.is-messages {
       --quick-color: #ff4f8b;
       --quick-bg: rgba(255, 79, 139, 0.15);
+      --quick-glow: rgba(255, 79, 139, 0.22);
       --quick-border: rgba(255, 79, 139, 0.28);
-      --fan-rotate: -3deg;
-      --fan-lift: 1px;
     }
 
     .admin-quick-button.is-orders {
       --quick-color: #b0124f;
       --quick-bg: rgba(176, 18, 79, 0.13);
+      --quick-glow: rgba(176, 18, 79, 0.2);
       --quick-border: rgba(176, 18, 79, 0.25);
-      --fan-rotate: 3deg;
-      --fan-lift: 1px;
     }
 
     .admin-quick-button.is-equipment {
       --quick-color: #23bfa5;
       --quick-bg: rgba(35, 191, 165, 0.14);
+      --quick-glow: rgba(35, 191, 165, 0.2);
       --quick-border: rgba(35, 191, 165, 0.26);
-      --fan-rotate: 10deg;
-      --fan-lift: 11px;
     }
 
     .admin-quick-button.is-sync {
       --quick-color: #0f8fdb;
       --quick-bg: rgba(15, 143, 219, 0.13);
+      --quick-glow: rgba(15, 143, 219, 0.2);
       --quick-border: rgba(15, 143, 219, 0.24);
-      --fan-rotate: -8deg;
-      --fan-lift: 8px;
     }
 
     .admin-quick-button.is-logs {
       --quick-color: #7457d8;
       --quick-bg: rgba(116, 87, 216, 0.13);
+      --quick-glow: rgba(116, 87, 216, 0.2);
       --quick-border: rgba(116, 87, 216, 0.24);
-      --fan-rotate: 8deg;
-      --fan-lift: 8px;
     }
 
     .admin-quick-button.is-export {
       --quick-color: #ad1747;
       --quick-bg: rgba(173, 23, 71, 0.12);
+      --quick-glow: rgba(173, 23, 71, 0.18);
       --quick-border: rgba(173, 23, 71, 0.23);
-      --fan-rotate: -2deg;
-      --fan-lift: 0;
     }
 
     @media (max-width: 390px) {
       .admin-quick-nav {
-        padding: 16px 0 22px;
-        border-radius: 28px;
+        padding: 12px 9px 14px;
+        border-radius: 26px;
       }
 
-      .admin-quick-track {
-        min-height: 158px;
-        gap: 16px;
-        padding: 20px 58px 30px;
+      .admin-quick-stage {
+        height: 224px;
       }
 
       .admin-quick-button {
-        flex-basis: 128px;
-        min-height: 124px;
-        padding: 15px 12px 13px;
-        border-radius: 24px;
+        width: 104px;
+        min-height: 118px;
+        padding: 12px 10px;
+        border-radius: 21px;
       }
 
       .admin-quick-button i {
-        width: 28px;
-        height: 28px;
-      }
-
-      .admin-quick-button.is-batch {
-        --fan-rotate: -13deg;
-      }
-
-      .admin-quick-button.is-messages {
-        --fan-rotate: -4deg;
-      }
-
-      .admin-quick-button.is-orders {
-        --fan-rotate: 4deg;
-      }
-
-      .admin-quick-button.is-equipment {
-        --fan-rotate: 13deg;
+        width: 30px;
+        height: 30px;
       }
     }
 
@@ -4402,6 +4445,7 @@
       loading: false,
       adminEquipmentQuery: "",
       adminEquipmentStatus: "全部",
+      adminFanIndex: 3,
     };
 
     const appEl = document.querySelector("#app");
@@ -6602,20 +6646,40 @@
         export: ["file", "is-export"],
       };
       return `
-        <nav class="admin-quick-nav admin-quick-fan" aria-label="管理员端快捷目录">
-          <div class="admin-quick-track">
-            ${items.map(([key, label, count]) => {
-              const [iconName, className] = meta[key] || ["check", ""];
-              const targetRoute = adminModuleRoutes[key] || "admin";
-              return `
-              <button class="admin-quick-button ${className}" type="button" data-admin-route="${escapeAttr(targetRoute)}">
-                <i>${icon(iconName)}</i>
-                <span>${escapeHtml(label)}</span>
-                <small>点击进入</small>
-                <b>${count}</b>
-              </button>
-            `;
-            }).join("")}
+        <nav class="admin-quick-nav" aria-label="管理员端快捷目录">
+          <div class="admin-quick-head">
+            <strong>扇形入口</strong>
+            <span>点卡片进入模块</span>
+          </div>
+          <div class="admin-quick-stage" data-admin-fan-stage>
+            <div class="admin-quick-track">
+              ${items.map(([key, label, count], index) => {
+                const [iconName, className] = meta[key] || ["check", ""];
+                const targetRoute = adminModuleRoutes[key] || "admin";
+                const activeIndex = Math.max(0, Math.min(items.length - 1, Number(state.adminFanIndex) || 0));
+                const offset = index - activeIndex;
+                const slots = {
+                  "-2": ["clamp(-150px, -38vw, -122px)", "38px", "-30deg", 1, "0.82", "0.72"],
+                  "-1": ["clamp(-78px, -20vw, -62px)", "8px", "-15deg", 3, "0.92", "0.9"],
+                  "0": ["0px", "-12px", "0deg", 5, "1", "1"],
+                  "1": ["clamp(62px, 20vw, 78px)", "8px", "15deg", 3, "0.92", "0.9"],
+                  "2": ["clamp(122px, 38vw, 150px)", "38px", "30deg", 1, "0.82", "0.72"],
+                };
+                const [fanX, fanY, fanRotate, fanZ, fanScale, fanOpacity] = slots[String(offset)] || ["0px", "74px", "0deg", 0, "0.72", "0"];
+                const isActive = offset === 0;
+                const isHidden = Math.abs(offset) > 2;
+                return `
+                <button class="admin-quick-button ${className} ${isActive ? "is-active" : ""} ${isHidden ? "is-hidden" : ""}" type="button" data-admin-route="${escapeAttr(targetRoute)}" data-admin-fan-index="${index}" style="--fan-x:${fanX}; --fan-y:${fanY}; --fan-rotate:${fanRotate}; --fan-z:${fanZ}; --fan-scale:${fanScale}; --fan-opacity:${fanOpacity}; --fan-pointer:${isHidden ? "none" : "auto"};">
+                  <i>${icon(iconName)}</i>
+                  <span class="admin-quick-text">
+                    <span>${escapeHtml(label)}</span>
+                    <small>点击进入</small>
+                  </span>
+                  <b>${count}</b>
+                </button>
+              `;
+              }).join("")}
+            </div>
           </div>
         </nav>
       `;
@@ -8322,6 +8386,16 @@
       render();
     }
 
+    function setAdminFanIndex(index) {
+      const max = adminModuleCards(adminDashboardData()).length - 1;
+      state.adminFanIndex = Math.max(0, Math.min(max, Number(index) || 0));
+      render();
+    }
+
+    function shiftAdminFan(step) {
+      setAdminFanIndex((Number(state.adminFanIndex) || 0) + step);
+    }
+
     function bind() {
       document.querySelectorAll("[data-route]").forEach((node) => node.addEventListener("click", () => route(node.dataset.route)));
       document.querySelectorAll("[data-back]").forEach((node) => node.addEventListener("click", back));
@@ -8362,8 +8436,27 @@
         node.addEventListener("click", () => saveAdminEquipmentEdit(node.dataset.adminSaveEquipment, node.closest("[data-admin-equipment-row]")))
       );
       document.querySelectorAll("[data-admin-route]").forEach((node) =>
-        node.addEventListener("click", () => route(node.dataset.adminRoute))
+        node.addEventListener("click", () => {
+          const index = Number(node.dataset.adminFanIndex);
+          if (Number.isInteger(index) && index !== state.adminFanIndex) {
+            setAdminFanIndex(index);
+            return;
+          }
+          route(node.dataset.adminRoute);
+        })
       );
+      const adminFanStage = document.querySelector("[data-admin-fan-stage]");
+      if (adminFanStage) {
+        let startX = 0;
+        adminFanStage.addEventListener("pointerdown", (event) => {
+          startX = event.clientX;
+        });
+        adminFanStage.addEventListener("pointerup", (event) => {
+          const deltaX = event.clientX - startX;
+          if (Math.abs(deltaX) < 34) return;
+          shiftAdminFan(deltaX < 0 ? 1 : -1);
+        });
+      }
       const batchBorrowForm = document.querySelector("#batchBorrowForm");
       if (batchBorrowForm) batchBorrowForm.addEventListener("submit", submitBatchBorrowRequest);
       document.querySelectorAll("[data-sync-borrow]").forEach((node) => node.addEventListener("click", () => {
