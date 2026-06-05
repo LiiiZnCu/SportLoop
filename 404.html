@@ -4446,6 +4446,8 @@
       adminEquipmentQuery: "",
       adminEquipmentStatus: "全部",
       adminFanIndex: 3,
+      adminFanSuppressClick: false,
+      adminFanLastSwipeAt: 0,
     };
 
     const appEl = document.querySelector("#app");
@@ -6673,7 +6675,7 @@
                   <i>${icon(iconName)}</i>
                   <span class="admin-quick-text">
                     <span>${escapeHtml(label)}</span>
-                    <small>点击进入</small>
+                    <small>${isActive ? "点击进入" : "滑到中间"}</small>
                   </span>
                   <b>${count}</b>
                 </button>
@@ -8396,6 +8398,19 @@
       setAdminFanIndex((Number(state.adminFanIndex) || 0) + step);
     }
 
+    function handleAdminFanSwipe(deltaX) {
+      if (Math.abs(deltaX) < 34) return false;
+      const now = Date.now();
+      if (now - Number(state.adminFanLastSwipeAt || 0) < 220) return true;
+      state.adminFanLastSwipeAt = now;
+      state.adminFanSuppressClick = true;
+      window.setTimeout(() => {
+        state.adminFanSuppressClick = false;
+      }, 260);
+      shiftAdminFan(deltaX < 0 ? 1 : -1);
+      return true;
+    }
+
     function bind() {
       document.querySelectorAll("[data-route]").forEach((node) => node.addEventListener("click", () => route(node.dataset.route)));
       document.querySelectorAll("[data-back]").forEach((node) => node.addEventListener("click", back));
@@ -8437,6 +8452,10 @@
       );
       document.querySelectorAll("[data-admin-route]").forEach((node) =>
         node.addEventListener("click", () => {
+          if (state.adminFanSuppressClick) {
+            state.adminFanSuppressClick = false;
+            return;
+          }
           const index = Number(node.dataset.adminFanIndex);
           if (Number.isInteger(index) && index !== state.adminFanIndex) {
             setAdminFanIndex(index);
@@ -8452,9 +8471,13 @@
           startX = event.clientX;
         });
         adminFanStage.addEventListener("pointerup", (event) => {
-          const deltaX = event.clientX - startX;
-          if (Math.abs(deltaX) < 34) return;
-          shiftAdminFan(deltaX < 0 ? 1 : -1);
+          handleAdminFanSwipe(event.clientX - startX);
+        });
+        adminFanStage.addEventListener("touchstart", (event) => {
+          startX = event.changedTouches[0]?.clientX || 0;
+        }, { passive: true });
+        adminFanStage.addEventListener("touchend", (event) => {
+          handleAdminFanSwipe((event.changedTouches[0]?.clientX || 0) - startX);
         });
       }
       const batchBorrowForm = document.querySelector("#batchBorrowForm");
