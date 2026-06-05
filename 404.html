@@ -1963,27 +1963,34 @@
 
     .admin-quick-stage {
       position: relative;
-      height: 238px;
+      height: 268px;
       overflow: hidden;
       border-radius: 28px;
       touch-action: pan-y;
+      cursor: grab;
+      user-select: none;
+      -webkit-user-select: none;
       background:
         radial-gradient(circle at 50% 100%, rgba(176, 18, 79, 0.14), transparent 54%),
         linear-gradient(180deg, rgba(255, 255, 255, 0.34), rgba(255, 244, 248, 0.34));
+    }
+
+    .admin-quick-stage.is-dragging {
+      cursor: grabbing;
     }
 
     .admin-quick-stage::before {
       content: "";
       position: absolute;
       left: 50%;
-      bottom: -178px;
-      width: min(126vw, 520px);
-      height: min(126vw, 520px);
+      bottom: -220px;
+      width: min(138vw, 560px);
+      height: min(138vw, 560px);
       transform: translateX(-50%);
       border-radius: 50%;
       border: 1px solid rgba(159, 18, 57, 0.12);
       background:
-        radial-gradient(circle, transparent 0 47%, rgba(255, 255, 255, 0.66) 48% 58%, rgba(255, 225, 237, 0.48) 59% 64%, transparent 65%);
+        radial-gradient(circle, transparent 0 46%, rgba(255, 255, 255, 0.72) 47% 58%, rgba(255, 225, 237, 0.5) 59% 65%, transparent 66%);
       pointer-events: none;
     }
 
@@ -1991,7 +1998,7 @@
       content: "";
       position: absolute;
       left: 50%;
-      bottom: 10px;
+      bottom: 18px;
       width: 72px;
       height: 8px;
       transform: translateX(-50%);
@@ -2004,15 +2011,16 @@
     .admin-quick-track {
       position: absolute;
       inset: 0;
+      isolation: isolate;
     }
 
     .admin-quick-button {
       position: absolute;
       left: 50%;
-      bottom: 26px;
+      bottom: 42px;
       z-index: var(--fan-z);
-      width: clamp(96px, 27vw, 116px);
-      min-height: 118px;
+      width: clamp(116px, 32vw, 144px);
+      min-height: 138px;
       display: grid;
       align-content: space-between;
       gap: 10px;
@@ -2035,10 +2043,24 @@
         translateY(var(--fan-y))
         rotate(var(--fan-rotate))
         scale(var(--fan-scale));
-      transform-origin: 50% 190%;
+      transform-origin: 50% 255%;
       opacity: var(--fan-opacity);
       pointer-events: var(--fan-pointer);
-      transition: transform 220ms ease, opacity 180ms ease, box-shadow 180ms ease;
+      will-change: transform, opacity;
+      transition:
+        transform 320ms cubic-bezier(0.2, 0.85, 0.18, 1),
+        opacity 180ms ease,
+        box-shadow 180ms ease;
+    }
+
+    .admin-quick-stage.is-dragging .admin-quick-button {
+      transition: none;
+    }
+
+    .admin-quick-button.is-active {
+      box-shadow:
+        0 22px 42px rgba(111, 11, 39, 0.18),
+        inset 0 1px 0 rgba(255, 255, 255, 0.95);
     }
 
     .admin-quick-button.is-hidden {
@@ -2202,12 +2224,12 @@
       }
 
       .admin-quick-stage {
-        height: 224px;
+        height: 252px;
       }
 
       .admin-quick-button {
-        width: 104px;
-        min-height: 118px;
+        width: 118px;
+        min-height: 132px;
         padding: 12px 10px;
         border-radius: 21px;
       }
@@ -6637,6 +6659,48 @@
       `;
     }
 
+    function adminFanFallbackWidth() {
+      return Math.min(420, Math.max(300, window.innerWidth - 54));
+    }
+
+    function adminFanActiveIndex(total) {
+      const max = Math.max(0, Number(total) - 1);
+      return Math.max(0, Math.min(max, Number(state.adminFanIndex) || 0));
+    }
+
+    function adminFanSwipeDistance(stage) {
+      const width = stage?.clientWidth || adminFanFallbackWidth();
+      return Math.max(92, Math.min(138, width * 0.32));
+    }
+
+    function adminFanCardView(index, activeIndex, dragProgress = 0, stageWidth = adminFanFallbackWidth()) {
+      const rawOffset = index - activeIndex + dragProgress;
+      const offset = Math.max(-3, Math.min(3, rawOffset));
+      const abs = Math.abs(rawOffset);
+      const angle = offset * 18 * Math.PI / 180;
+      const radius = Math.max(250, Math.min(340, stageWidth * 0.78));
+      const x = Math.sin(angle) * radius;
+      const y = (1 - Math.cos(angle)) * radius * 0.72 - 20;
+      const rotate = offset * 14;
+      const scale = Math.max(0.72, 1 - Math.min(abs, 3) * 0.09);
+      const opacity = abs > 2.72 ? 0 : Math.max(0, 1 - Math.max(0, abs - 1.64) * 0.78);
+      return {
+        fanX: `${x.toFixed(1)}px`,
+        fanY: `${y.toFixed(1)}px`,
+        fanRotate: `${rotate.toFixed(2)}deg`,
+        fanZ: String(Math.max(1, Math.round(100 - abs * 16))),
+        fanScale: scale.toFixed(3),
+        fanOpacity: opacity.toFixed(3),
+        fanPointer: abs > 2.38 ? "none" : "auto",
+        isActive: abs < 0.52,
+        isHidden: abs > 2.72,
+      };
+    }
+
+    function adminFanStyle(view) {
+      return `--fan-x:${view.fanX}; --fan-y:${view.fanY}; --fan-rotate:${view.fanRotate}; --fan-z:${view.fanZ}; --fan-scale:${view.fanScale}; --fan-opacity:${view.fanOpacity}; --fan-pointer:${view.fanPointer};`;
+    }
+
     function adminQuickNav(items) {
       const meta = {
         batch: ["check", "is-batch"],
@@ -6647,35 +6711,25 @@
         logs: ["file", "is-logs"],
         export: ["file", "is-export"],
       };
+      const activeIndex = adminFanActiveIndex(items.length);
       return `
         <nav class="admin-quick-nav" aria-label="管理员端快捷目录">
           <div class="admin-quick-head">
             <strong>扇形入口</strong>
-            <span>点卡片进入模块</span>
+            <span>左右滑动切换</span>
           </div>
           <div class="admin-quick-stage" data-admin-fan-stage>
             <div class="admin-quick-track">
               ${items.map(([key, label, count], index) => {
                 const [iconName, className] = meta[key] || ["check", ""];
                 const targetRoute = adminModuleRoutes[key] || "admin";
-                const activeIndex = Math.max(0, Math.min(items.length - 1, Number(state.adminFanIndex) || 0));
-                const offset = index - activeIndex;
-                const slots = {
-                  "-2": ["clamp(-150px, -38vw, -122px)", "38px", "-30deg", 1, "0.82", "0.72"],
-                  "-1": ["clamp(-78px, -20vw, -62px)", "8px", "-15deg", 3, "0.92", "0.9"],
-                  "0": ["0px", "-12px", "0deg", 5, "1", "1"],
-                  "1": ["clamp(62px, 20vw, 78px)", "8px", "15deg", 3, "0.92", "0.9"],
-                  "2": ["clamp(122px, 38vw, 150px)", "38px", "30deg", 1, "0.82", "0.72"],
-                };
-                const [fanX, fanY, fanRotate, fanZ, fanScale, fanOpacity] = slots[String(offset)] || ["0px", "74px", "0deg", 0, "0.72", "0"];
-                const isActive = offset === 0;
-                const isHidden = Math.abs(offset) > 2;
+                const view = adminFanCardView(index, activeIndex);
                 return `
-                <button class="admin-quick-button ${className} ${isActive ? "is-active" : ""} ${isHidden ? "is-hidden" : ""}" type="button" data-admin-route="${escapeAttr(targetRoute)}" data-admin-fan-index="${index}" style="--fan-x:${fanX}; --fan-y:${fanY}; --fan-rotate:${fanRotate}; --fan-z:${fanZ}; --fan-scale:${fanScale}; --fan-opacity:${fanOpacity}; --fan-pointer:${isHidden ? "none" : "auto"};">
+                <button class="admin-quick-button ${className} ${view.isActive ? "is-active" : ""} ${view.isHidden ? "is-hidden" : ""}" type="button" data-admin-route="${escapeAttr(targetRoute)}" data-admin-fan-index="${index}" style="${adminFanStyle(view)}">
                   <i>${icon(iconName)}</i>
                   <span class="admin-quick-text">
                     <span>${escapeHtml(label)}</span>
-                    <small>${isActive ? "点击进入" : "滑到中间"}</small>
+                    <small data-admin-fan-hint>${view.isActive ? "点击进入" : "滑到中间"}</small>
                   </span>
                   <b>${count}</b>
                 </button>
@@ -8391,23 +8445,60 @@
     function setAdminFanIndex(index) {
       const max = adminModuleCards(adminDashboardData()).length - 1;
       state.adminFanIndex = Math.max(0, Math.min(max, Number(index) || 0));
-      render();
+      updateAdminFanView(0, false);
     }
 
     function shiftAdminFan(step) {
       setAdminFanIndex((Number(state.adminFanIndex) || 0) + step);
     }
 
-    function handleAdminFanSwipe(deltaX) {
-      if (Math.abs(deltaX) < 34) return false;
+    function updateAdminFanView(progress = 0, dragging = false) {
+      const stage = document.querySelector("[data-admin-fan-stage]");
+      const cards = Array.from(document.querySelectorAll("[data-admin-fan-index]"));
+      if (!stage || !cards.length) return;
+      const activeIndex = adminFanActiveIndex(cards.length);
+      const width = stage.clientWidth || adminFanFallbackWidth();
+      state.adminFanIndex = activeIndex;
+      stage.classList.toggle("is-dragging", dragging);
+      cards.forEach((card) => {
+        const index = Number(card.dataset.adminFanIndex);
+        if (!Number.isInteger(index)) return;
+        const view = adminFanCardView(index, activeIndex, progress, width);
+        card.classList.toggle("is-active", view.isActive);
+        card.classList.toggle("is-hidden", view.isHidden);
+        card.style.setProperty("--fan-x", view.fanX);
+        card.style.setProperty("--fan-y", view.fanY);
+        card.style.setProperty("--fan-rotate", view.fanRotate);
+        card.style.setProperty("--fan-z", view.fanZ);
+        card.style.setProperty("--fan-scale", view.fanScale);
+        card.style.setProperty("--fan-opacity", view.fanOpacity);
+        card.style.setProperty("--fan-pointer", view.fanPointer);
+        const hint = card.querySelector("[data-admin-fan-hint]");
+        if (hint) hint.textContent = view.isActive ? "点击进入" : "滑到中间";
+      });
+    }
+
+    function handleAdminFanDrag(stage, deltaX) {
+      const distance = adminFanSwipeDistance(stage);
+      const progress = Math.max(-1.15, Math.min(1.15, deltaX / distance));
+      updateAdminFanView(progress, true);
+    }
+
+    function finishAdminFanDrag(stage, deltaX, moved) {
+      const distance = adminFanSwipeDistance(stage);
+      const threshold = Math.max(38, distance * 0.34);
+      if (moved && Math.abs(deltaX) >= threshold) {
+        shiftAdminFan(deltaX < 0 ? 1 : -1);
+      } else {
+        updateAdminFanView(0, false);
+      }
+      if (!moved) return false;
       const now = Date.now();
-      if (now - Number(state.adminFanLastSwipeAt || 0) < 220) return true;
       state.adminFanLastSwipeAt = now;
       state.adminFanSuppressClick = true;
       window.setTimeout(() => {
         state.adminFanSuppressClick = false;
       }, 260);
-      shiftAdminFan(deltaX < 0 ? 1 : -1);
       return true;
     }
 
@@ -8466,19 +8557,70 @@
       );
       const adminFanStage = document.querySelector("[data-admin-fan-stage]");
       if (adminFanStage) {
+        updateAdminFanView(0, false);
         let startX = 0;
-        adminFanStage.addEventListener("pointerdown", (event) => {
-          startX = event.clientX;
-        });
-        adminFanStage.addEventListener("pointerup", (event) => {
-          handleAdminFanSwipe(event.clientX - startX);
-        });
-        adminFanStage.addEventListener("touchstart", (event) => {
-          startX = event.changedTouches[0]?.clientX || 0;
-        }, { passive: true });
-        adminFanStage.addEventListener("touchend", (event) => {
-          handleAdminFanSwipe((event.changedTouches[0]?.clientX || 0) - startX);
-        });
+        let startY = 0;
+        let currentDeltaX = 0;
+        let fanDragging = false;
+        let fanGestureActive = false;
+        const startFanGesture = (x, y) => {
+          startX = x;
+          startY = y;
+          currentDeltaX = 0;
+          fanDragging = false;
+          fanGestureActive = true;
+        };
+        const moveFanGesture = (x, y, event) => {
+          if (!fanGestureActive) return;
+          const deltaX = x - startX;
+          const deltaY = y - startY;
+          const isHorizontal = Math.abs(deltaX) > 8 && Math.abs(deltaX) > Math.abs(deltaY);
+          if (!isHorizontal && !fanDragging) return;
+          fanDragging = true;
+          currentDeltaX = deltaX;
+          if (event?.cancelable) event.preventDefault();
+          handleAdminFanDrag(adminFanStage, currentDeltaX);
+        };
+        const endFanGesture = (x) => {
+          if (!fanGestureActive) return;
+          const deltaX = Number.isFinite(x) ? x - startX : currentDeltaX;
+          fanGestureActive = false;
+          finishAdminFanDrag(adminFanStage, deltaX, fanDragging || Math.abs(deltaX) > 12);
+        };
+        if (window.PointerEvent) {
+          adminFanStage.addEventListener("pointerdown", (event) => {
+            if (event.pointerType === "mouse" && event.button !== 0) return;
+            startFanGesture(event.clientX, event.clientY);
+            adminFanStage.setPointerCapture?.(event.pointerId);
+          });
+          adminFanStage.addEventListener("pointermove", (event) => {
+            moveFanGesture(event.clientX, event.clientY, event);
+          });
+          adminFanStage.addEventListener("pointerup", (event) => {
+            endFanGesture(event.clientX);
+            adminFanStage.releasePointerCapture?.(event.pointerId);
+          });
+          adminFanStage.addEventListener("pointercancel", () => {
+            fanGestureActive = false;
+            updateAdminFanView(0, false);
+          });
+        } else {
+          adminFanStage.addEventListener("touchstart", (event) => {
+            const touch = event.changedTouches[0];
+            if (touch) startFanGesture(touch.clientX, touch.clientY);
+          }, { passive: true });
+          adminFanStage.addEventListener("touchmove", (event) => {
+            const touch = event.changedTouches[0];
+            if (touch) moveFanGesture(touch.clientX, touch.clientY, event);
+          }, { passive: false });
+          adminFanStage.addEventListener("touchend", (event) => {
+            endFanGesture(event.changedTouches[0]?.clientX);
+          });
+          adminFanStage.addEventListener("touchcancel", () => {
+            fanGestureActive = false;
+            updateAdminFanView(0, false);
+          });
+        }
       }
       const batchBorrowForm = document.querySelector("#batchBorrowForm");
       if (batchBorrowForm) batchBorrowForm.addEventListener("submit", submitBatchBorrowRequest);
