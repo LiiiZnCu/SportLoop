@@ -138,6 +138,13 @@
       padding-top: calc(18px + env(safe-area-inset-top));
     }
 
+    .app.is-admin-view {
+      background:
+        radial-gradient(circle at 12% 12%, rgba(122, 103, 168, 0.18), transparent 28%),
+        radial-gradient(circle at 86% 70%, rgba(196, 107, 130, 0.08), transparent 32%),
+        linear-gradient(180deg, #181620 0%, #211c2b 54%, #17151e 100%);
+    }
+
     .screen {
       position: relative;
       height: 100%;
@@ -8002,12 +8009,14 @@
 
     function render() {
       if (!state.loggedIn) {
+        appEl.classList.remove("is-admin-view");
         const loginPages = { login: loginPage, roleSelect: roleSelectPage, credentials: credentialsPage, register: registerPage };
         appEl.innerHTML = (loginPages[state.route] || loginPage)();
         bindLogin();
         return;
       }
       state.route = normalizeRouteForRole(state.route);
+      appEl.classList.toggle("is-admin-view", state.route.startsWith("admin"));
 
       const pages = {
         home: homePage,
