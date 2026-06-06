@@ -76,6 +76,9 @@ create table if not exists public.loans (
   duration_minutes integer not null check (duration_minutes > 0),
   status text not null,
   detect_result text not null default '',
+  before_photo_data_url text not null default '',
+  return_photo_data_url text not null default '',
+  return_machine_allowed boolean not null default false,
   returned_at timestamptz,
   returned_on_time boolean,
   renewed_times integer not null default 0,
@@ -86,6 +89,11 @@ create table if not exists public.loans (
 
 alter table public.loans
 add column if not exists batch_request_id uuid references public.batch_borrow_requests(id) on delete set null;
+
+alter table public.loans
+add column if not exists before_photo_data_url text not null default '',
+add column if not exists return_photo_data_url text not null default '',
+add column if not exists return_machine_allowed boolean not null default false;
 
 create table if not exists public.student_messages (
   id uuid primary key default gen_random_uuid(),
@@ -297,7 +305,7 @@ drop policy if exists batch_borrow_requests_update_student_sync on public.batch_
 create policy batch_borrow_requests_update_student_sync on public.batch_borrow_requests
 for update to authenticated
 using (user_id = (select auth.uid()))
-with check (user_id = (select auth.uid()) and status in ('已借出', '已归还'));
+with check (user_id = (select auth.uid()) and status in ('待补照片', '已借出', '已归还'));
 
 drop policy if exists loans_access on public.loans;
 create policy loans_access on public.loans

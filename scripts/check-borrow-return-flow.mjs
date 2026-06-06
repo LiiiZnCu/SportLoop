@@ -1,0 +1,29 @@
+import fs from "node:fs";
+
+const html = fs.readFileSync(new URL("../index.html", import.meta.url), "utf8");
+const fallbackHtml = fs.readFileSync(new URL("../404.html", import.meta.url), "utf8");
+const sql = fs.readFileSync(new URL("../supabase_sportloop.sql", import.meta.url), "utf8");
+
+const checks = [
+  ["借出同步后必须进入待补照片状态", html.includes('status: "待补借出照片"')],
+  ["当前借用列表包含待补借出照片状态", html.includes('"待补借出照片", "使用中", "待归还", "异常待归还"')],
+  ["借出确认页有借出前照片上传入口", html.includes('id="borrowBeforePhotoInput"')],
+  ["借出前照片上传后才完成借用", html.includes("finishBorrowWithBeforePhoto")],
+  ["归还检测页不再要求重新上传借出前照片", !html.includes('id="beforePhotoInput"')],
+  ["归还检测调用已保存的借出前照片", html.includes("beforeImageDataUrl: loan.beforePhotoDataUrl")],
+  ["检测正常后才允许机器归还", html.includes("returnMachineAllowed") && html.includes("loan.returnMachineAllowed = result.status === \"正常\"")],
+  ["机器归还前检查后端允许标记", html.includes("请先完成归还检测，检测正常后机器才允许扫码归还")],
+  ["数据库保存借出前照片", sql.includes("before_photo_data_url text not null default ''")],
+  ["数据库保存归还后照片", sql.includes("return_photo_data_url text not null default ''")],
+  ["数据库保存机器归还允许标记", sql.includes("return_machine_allowed boolean not null default false")],
+  ["404 与首页保持一致", html === fallbackHtml],
+];
+
+const failed = checks.filter(([, ok]) => !ok);
+if (failed.length) {
+  console.error(`借还流程检查失败：${failed.length}/${checks.length}`);
+  for (const [name] of failed) console.error(`- ${name}`);
+  process.exit(1);
+}
+
+console.log(`借还流程检查通过：${checks.length}/${checks.length}`);
