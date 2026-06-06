@@ -20,6 +20,7 @@ const checks = [
   ["检测正常后才允许机器归还", html.includes("returnMachineAllowed") && html.includes("loan.returnMachineAllowed = result.status === \"正常\"")],
   ["机器归还前检查后端允许标记", html.includes("请先完成归还检测，检测正常后机器才允许扫码归还")],
   ["MiniMax 余额不足要显示短提示", html.includes("function friendlyFunctionError") && html.includes("MiniMax 余额不足") && damageFunction.includes("MiniMax 余额不足")],
+  ["MiniMax 图片请求使用官方 image_url 格式", damageFunction.includes("{ url: beforeImageDataUrl }") && damageFunction.includes("{ url: afterImageDataUrl }") && !damageFunction.includes("max_long_side_pixel") && !damageFunction.includes("detail: \"default\"")],
   ["数据库保存借出前照片", sql.includes("before_photo_data_url text not null default ''")],
   ["数据库保存归还后照片", sql.includes("return_photo_data_url text not null default ''")],
   ["数据库保存机器归还允许标记", sql.includes("return_machine_allowed boolean not null default false")],

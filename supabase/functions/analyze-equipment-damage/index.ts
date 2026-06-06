@@ -156,7 +156,7 @@ Deno.serve(async (req) => {
       },
       body: JSON.stringify({
         model,
-        thinking: { type: "disabled" },
+        thinking: { type: "adaptive" },
         temperature: 0.1,
         max_completion_tokens: 900,
         messages: [
@@ -164,8 +164,8 @@ Deno.serve(async (req) => {
             role: "user",
             content: [
               { type: "text", text: prompt },
-              { type: "image_url", image_url: { url: beforeImageDataUrl, detail: "default", max_long_side_pixel: 1280 } },
-              { type: "image_url", image_url: { url: afterImageDataUrl, detail: "default", max_long_side_pixel: 1280 } },
+              { type: "image_url", image_url: { url: beforeImageDataUrl } },
+              { type: "image_url", image_url: { url: afterImageDataUrl } },
             ],
           },
         ],
