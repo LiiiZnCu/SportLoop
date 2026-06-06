@@ -4868,7 +4868,11 @@
     }
 
     function loanCanMachineReturn(loan) {
-      return !!loan && loan.status === "待归还" && loan.returnMachineAllowed === true && !detectionIsAbnormal(loan);
+      return !!loan
+        && !loanNeedsBeforePhoto(loan)
+        && loan.status === "待归还"
+        && loan.returnMachineAllowed === true
+        && !detectionIsAbnormal(loan);
     }
 
     function confidenceText(value) {
@@ -5667,12 +5671,26 @@
       return store.loans.find((loan) => loan.id === id);
     }
 
+    function loanNeedsBeforePhoto(loan) {
+      return !!loan
+        && ["待补借出照片", "使用中", "待归还", "异常待归还"].includes(loan.status)
+        && !loan.beforePhotoDataUrl;
+    }
+
+    function loanDisplayStatus(loan) {
+      return loanNeedsBeforePhoto(loan) ? "待补借出照片" : loan.status;
+    }
+
     function activeBorrowLoans() {
       return store.loans.filter((loan) => ["待补借出照片", "使用中", "待归还", "异常待归还"].includes(loan.status));
     }
 
+    function confirmedBorrowLoans() {
+      return activeBorrowLoans().filter((loan) => !loanNeedsBeforePhoto(loan));
+    }
+
     function canRenewLoan(loan) {
-      return !!loan && loan.status === "使用中";
+      return !!loan && !loanNeedsBeforePhoto(loan) && loan.status === "使用中";
     }
 
     function renewedDueAtMs(loan, periods = selectedBorrowPeriods()) {
@@ -6023,7 +6041,7 @@
     function currentLoanCard(loan) {
       const item = byId(loan.equipmentId);
       if (!item) return "";
-      const pendingBeforePhoto = loan.status === "待补借出照片";
+      const pendingBeforePhoto = loanNeedsBeforePhoto(loan);
       const action = pendingBeforePhoto
         ? `<button class="primary-button" style="min-height:36px; border-radius:10px; font-size:12px;" data-borrow-confirm="${loan.id}">${icon("camera")} 上传借出前照片</button>`
         : `<button class="primary-button" style="min-height:36px; border-radius:10px; font-size:12px;" data-loan-detect="${loan.id}" data-detect-mode="photo">${icon("camera")} 归还前检测</button>`;
@@ -6033,7 +6051,7 @@
           <div>
             <p class="eyebrow">当前借用</p>
             <h2>${item.name}</h2>
-            <p style="font-size: 11px; margin-top: 2px;">${item.assetId} · ${loan.status}</p>
+            <p style="font-size: 11px; margin-top: 2px;">${item.assetId} · ${loanDisplayStatus(loan)}</p>
             <div class="button-row" style="margin-top: 8px;">
               <button class="secondary-button" style="min-height:36px; border-radius:10px; font-size:12px;" data-report-loan="${loan.id}">${icon("wrench")} 报损</button>
               ${action}
@@ -6199,7 +6217,7 @@
       }
       const item = byId(loan.equipmentId);
       if (!item) return shell("借用确认", `<main class="scroll"><div class="empty">未找到对应器材。</div></main>`, { tabs: false });
-      const needsBeforePhoto = loan.status === "待补借出照片";
+      const needsBeforePhoto = loanNeedsBeforePhoto(loan);
       const body = `
         <main class="scroll">
           <section class="result-card">
@@ -6214,7 +6232,7 @@
                 <h1 style="font-size:24px;">${item.name}</h1>
                 <p>${item.assetId}</p>
               </div>
-              ${tag(loan.status)}
+              ${tag(loanDisplayStatus(loan))}
             </div>
             <div class="info-list" style="margin-top:14px;">
               <div><span>借出时间</span><strong>${loan.borrowedAt}</strong></div>
@@ -6378,7 +6396,7 @@
     }
 
     function renewPage() {
-      const active = activeBorrowLoans();
+      const active = confirmedBorrowLoans().filter(canRenewLoan);
       const body = `
         <main class="scroll">
           <section class="action-panel">
@@ -6406,7 +6424,7 @@
               <h2>${item.name}</h2>
               <p style="font-size: 11px; margin-top:2px;">${item.assetId} · ${loan.borrowedAt}</p>
               <p style="font-size: 11px; margin-top:2px;">当前截止 ${loan.dueAt || "未设置"}</p>
-              ${tag(loan.status)}
+              ${tag(loanDisplayStatus(loan))}
             </div>
           </div>
           <div class="button-row" style="margin-top: 14px;">
@@ -6438,7 +6456,7 @@
                 <h1 style="font-size:24px;">${item.name}</h1>
                 <p>${item.assetId}</p>
               </div>
-              ${tag(loan.status)}
+              ${tag(loanDisplayStatus(loan))}
             </div>
             <div class="info-list" style="margin-top:14px;">
               <div><span>借出时间</span><strong>${loan.borrowedAt}</strong></div>
@@ -6465,7 +6483,7 @@
     function loanCard(loan) {
       const item = byId(loan.equipmentId);
       if (!item) return "";
-      const pendingBeforePhoto = loan.status === "待补借出照片";
+      const pendingBeforePhoto = loanNeedsBeforePhoto(loan);
       const canReturn = loanCanMachineReturn(loan);
       const primaryAction = pendingBeforePhoto
         ? `<button class="primary-button" data-borrow-confirm="${loan.id}">${icon("camera")} 上传借出前照片</button>`
@@ -6482,7 +6500,7 @@
               <h2>${item.name}</h2>
               <p style="font-size: 11px; margin-top:2px;">${item.assetId} · ${loan.borrowedAt}</p>
               <p style="font-size: 11px; margin-top:2px;">${loan.durationLabel || "未设置时长"} · 截止 ${loan.dueAt || "未设置"}</p>
-              ${tag(loan.status)}
+              ${tag(loanDisplayStatus(loan))}
             </div>
           </div>
           <div class="button-row ${canRenewLoan(loan) ? "loan-action-row" : ""}" style="margin-top: 14px;">
@@ -6556,7 +6574,7 @@
                 <h1>${abnormal ? "检测异常" : "检测正常"}</h1>
                 <p>${escapeHtml(result.summary)}</p>
               </div>
-              ${tag(loan.status)}
+              ${tag(loanDisplayStatus(loan))}
             </div>
             <div class="metric-row">
               ${metric(confidenceText(result.confidence), "可信度")}
@@ -7313,7 +7331,7 @@
     }
 
     function creditSummary() {
-      const active = activeBorrowLoans();
+      const active = confirmedBorrowLoans();
       const returned = store.loans.filter((loan) => ["已归还", "异常已归还"].includes(loan.status));
       const onTimeReturned = returned.filter((loan) => loan.returnedOnTime === true && loan.status === "已归还").length;
       const lateReturned = returned.filter((loan) => loan.returnedOnTime === false).length;
@@ -7343,18 +7361,25 @@
     }
 
     function profilePage() {
-      const active = activeBorrowLoans();
+      const archiveActive = activeBorrowLoans();
+      const active = confirmedBorrowLoans();
       const returned = store.loans.filter((loan) => ["已归还", "异常已归还"].includes(loan.status) && typeof loan.returnedOnTime === "boolean");
-      const currentCount = active.length;
-      const weekCount = store.loans.length;
-      const ratePoints = profileRateData(store.loans);
+      const currentCount = archiveActive.length;
+      const pendingPhotoCount = archiveActive.filter(loanNeedsBeforePhoto).length;
+      const completedLoans = store.loans.filter((loan) => !loanNeedsBeforePhoto(loan));
+      const weekCount = completedLoans.length;
+      const ratePoints = profileRateData(completedLoans);
       const latestRate = ratePoints[ratePoints.length - 1];
       const rateText = ratePoints.length ? String(latestRate) : "--";
       const nearestDue = active
         .map((loan) => Number(loan.dueAtMs))
         .filter(Number.isFinite)
         .sort((a, b) => a - b)[0];
-      const dueText = Number.isFinite(nearestDue) ? formatDueTime(nearestDue) : (currentCount ? "待归还" : "暂无");
+      const dueText = pendingPhotoCount === currentCount && currentCount
+        ? "待补照片"
+        : Number.isFinite(nearestDue)
+          ? formatDueTime(nearestDue)
+          : (currentCount ? "待归还" : "暂无");
       const rateChart = profileRateChart(ratePoints);
       const nickname = profileNickname();
       const credit = creditSummary();
@@ -7505,12 +7530,13 @@
       if (!loan) return;
       const item = byId(loan.equipmentId);
       if (!item) return;
-      if (loan.status !== "待补借出照片") {
+      if (!loanNeedsBeforePhoto(loan)) {
         state.notice = "这条借用已经完成借出前照片";
         render();
         return;
       }
-      if (item.available <= 0 || item.status === "维修中") {
+      const shouldReserveInventory = loan.status === "待补借出照片";
+      if (shouldReserveInventory && (item.available <= 0 || item.status === "维修中")) {
         state.notice = "场馆暂无可用库存，请确认机器借出是否有效";
         render();
         return;
@@ -7523,13 +7549,16 @@
       try {
         loan.beforePhotoDataUrl = await readImageDataUrl("borrowBeforePhotoInput", "借出前照片");
         loan.status = "使用中";
+        loan.detectResult = "";
         loan.returnPhotoDataUrl = "";
         loan.returnMachineAllowed = false;
-        item.available -= 1;
-        item.status = item.available > 0 ? "可借" : "补充中";
+        if (shouldReserveInventory) {
+          item.available -= 1;
+          item.status = item.available > 0 ? "可借" : "补充中";
+        }
 
         if (request) {
-          const pending = store.loans.some((row) => row.batchRequestId === request.id && row.status === "待补借出照片");
+          const pending = store.loans.some((row) => row.batchRequestId === request.id && loanNeedsBeforePhoto(row));
           if (!pending) {
             request.status = "已借出";
             request.adminNote = "已补齐借出前照片";
@@ -7539,7 +7568,7 @@
         }
 
         await Promise.all([
-          updateRemoteEquipment(item),
+          shouldReserveInventory ? updateRemoteEquipment(item) : Promise.resolve(),
           updateRemoteLoan(loan),
           request ? saveRemoteBatchRequest(request) : Promise.resolve(),
         ]);

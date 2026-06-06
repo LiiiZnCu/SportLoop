@@ -6,6 +6,10 @@ const sql = fs.readFileSync(new URL("../supabase_sportloop.sql", import.meta.url
 
 const checks = [
   ["借出同步后必须进入待补照片状态", html.includes('status: "待补借出照片"')],
+  ["旧借用缺照片也必须拦回待补照片", html.includes("function loanNeedsBeforePhoto") && html.includes("loanNeedsBeforePhoto(loan)")],
+  ["档案当前借用要显示待补照片记录", html.includes("const archiveActive = activeBorrowLoans();") && html.includes("const currentCount = archiveActive.length;")],
+  ["未补借出前照片不能算正式信用记录", html.includes("function confirmedBorrowLoans") && html.includes("const active = confirmedBorrowLoans();")],
+  ["旧记录补照片不重复扣库存", html.includes("const shouldReserveInventory = loan.status === \"待补借出照片\"") && html.includes("shouldReserveInventory ? updateRemoteEquipment(item) : Promise.resolve()")],
   ["当前借用列表包含待补借出照片状态", html.includes('"待补借出照片", "使用中", "待归还", "异常待归还"')],
   ["借出确认页有借出前照片上传入口", html.includes('id="borrowBeforePhotoInput"')],
   ["借出前照片上传后才完成借用", html.includes("finishBorrowWithBeforePhoto")],
