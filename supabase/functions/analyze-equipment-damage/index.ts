@@ -101,6 +101,17 @@ function normalizeResult(raw: Record<string, unknown>): DamageResult {
   };
 }
 
+function minimaxErrorMessage(status: number, text: string) {
+  const lower = text.toLowerCase();
+  if (status === 402 || lower.includes("insufficient_balance") || lower.includes("insufficient balance")) {
+    return "MiniMax 余额不足或密钥配置异常，请检查 Supabase 里的 API Key、接口区域和可用额度。";
+  }
+  if (status === 401 || status === 403 || lower.includes("invalid api key") || lower.includes("unauthorized")) {
+    return "MiniMax API Key 无效，请检查 Supabase 里的密钥配置。";
+  }
+  return `MiniMax 检测服务请求失败（${status}），请稍后重试。`;
+}
+
 Deno.serve(async (req) => {
   if (req.method === "OPTIONS") return new Response("ok", { headers: corsHeaders });
   if (req.method !== "POST") return jsonResponse({ error: "只支持 POST 请求" }, 405);
@@ -163,7 +174,7 @@ Deno.serve(async (req) => {
 
     const minimaxText = await minimaxResponse.text();
     if (!minimaxResponse.ok) {
-      throw new Error(`MiniMax 请求失败：${minimaxResponse.status} ${minimaxText}`);
+      throw new Error(minimaxErrorMessage(minimaxResponse.status, minimaxText));
     }
 
     const minimaxJson = JSON.parse(minimaxText);

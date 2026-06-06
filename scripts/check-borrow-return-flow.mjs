@@ -3,6 +3,7 @@ import fs from "node:fs";
 const html = fs.readFileSync(new URL("../index.html", import.meta.url), "utf8");
 const fallbackHtml = fs.readFileSync(new URL("../404.html", import.meta.url), "utf8");
 const sql = fs.readFileSync(new URL("../supabase_sportloop.sql", import.meta.url), "utf8");
+const damageFunction = fs.readFileSync(new URL("../supabase/functions/analyze-equipment-damage/index.ts", import.meta.url), "utf8");
 
 const checks = [
   ["借出同步后必须进入待补照片状态", html.includes('status: "待补借出照片"')],
@@ -18,6 +19,7 @@ const checks = [
   ["归还检测调用已保存的借出前照片", html.includes("beforeImageDataUrl: loan.beforePhotoDataUrl")],
   ["检测正常后才允许机器归还", html.includes("returnMachineAllowed") && html.includes("loan.returnMachineAllowed = result.status === \"正常\"")],
   ["机器归还前检查后端允许标记", html.includes("请先完成归还检测，检测正常后机器才允许扫码归还")],
+  ["MiniMax 余额不足要显示短提示", html.includes("function friendlyFunctionError") && html.includes("MiniMax 余额不足") && damageFunction.includes("MiniMax 余额不足")],
   ["数据库保存借出前照片", sql.includes("before_photo_data_url text not null default ''")],
   ["数据库保存归还后照片", sql.includes("return_photo_data_url text not null default ''")],
   ["数据库保存机器归还允许标记", sql.includes("return_machine_allowed boolean not null default false")],

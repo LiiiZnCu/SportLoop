@@ -280,6 +280,9 @@
       background: rgba(18, 16, 22, 0.88);
       box-shadow: var(--shadow);
       font-size: 13px;
+      line-height: 1.45;
+      white-space: normal;
+      overflow-wrap: anywhere;
     }
 
     .hero-card {
@@ -4796,8 +4799,20 @@
         body: JSON.stringify(body),
       });
       const data = await response.json().catch(() => ({}));
-      if (!response.ok) throw new Error(data?.error || data?.message || "云函数请求失败");
+      if (!response.ok) throw new Error(friendlyFunctionError(data?.error || data?.message || "云函数请求失败"));
       return data;
+    }
+
+    function friendlyFunctionError(message) {
+      const text = String(message || "");
+      const lower = text.toLowerCase();
+      const isMiniMaxBalance =
+        lower.includes("insufficient_balance") ||
+        lower.includes("insufficient balance") ||
+        (lower.includes("minimax") && lower.includes("402"));
+      if (isMiniMaxBalance) return "MiniMax 余额不足或密钥配置异常，请检查 Supabase 里的 API Key、接口区域和可用额度。";
+      if (lower.includes("invalid api key") || lower.includes("unauthorized")) return "MiniMax API Key 无效，请检查 Supabase 里的密钥配置。";
+      return text || "云函数请求失败";
     }
 
     function normalizeLoginEmail(account) {
