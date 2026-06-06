@@ -10,6 +10,7 @@ const checks = [
   ["档案当前借用要显示待补照片记录", html.includes("const archiveActive = activeBorrowLoans();") && html.includes("const currentCount = archiveActive.length;")],
   ["未补借出前照片不能算正式信用记录", html.includes("function confirmedBorrowLoans") && html.includes("const active = confirmedBorrowLoans();")],
   ["旧记录补照片不重复扣库存", html.includes("const shouldReserveInventory = loan.status === \"待补借出照片\"") && html.includes("shouldReserveInventory ? updateRemoteEquipment(item) : Promise.resolve()")],
+  ["照片上传前必须压缩", html.includes("function compressImageFile") && html.includes("PHOTO_MAX_SIDE") && html.includes("canvas.toDataURL(\"image/jpeg\"")],
   ["当前借用列表包含待补借出照片状态", html.includes('"待补借出照片", "使用中", "待归还", "异常待归还"')],
   ["借出确认页有借出前照片上传入口", html.includes('id="borrowBeforePhotoInput"')],
   ["借出前照片上传后才完成借用", html.includes("finishBorrowWithBeforePhoto")],

@@ -4474,6 +4474,9 @@
     const ASSET_VERSION = "12";
     const CLASS_PERIOD_MINUTES = 90;
     const BORROW_PERIOD_OPTIONS = [1, 2, 3];
+    const PHOTO_MAX_SIDE = 1280;
+    const PHOTO_JPEG_QUALITY = 0.78;
+    const PHOTO_MAX_DATA_URL_LENGTH = 1800000;
 
     const reportIssueTypes = {
       "乒乓球拍": ["胶皮脱落", "拍柄松动", "表面磨损", "底板开裂"],
@@ -7588,18 +7591,47 @@
       route("borrowConfirm", { loanId: loan.id });
     }
 
-    function readImageDataUrl(inputId, label) {
+    function loadImageFromFile(file, label) {
+      const objectUrl = URL.createObjectURL(file);
+      return new Promise((resolve, reject) => {
+        const img = new Image();
+        img.onload = () => {
+          URL.revokeObjectURL(objectUrl);
+          resolve(img);
+        };
+        img.onerror = () => {
+          URL.revokeObjectURL(objectUrl);
+          reject(new Error(`${label}读取失败`));
+        };
+        img.src = objectUrl;
+      });
+    }
+
+    async function compressImageFile(file, label) {
+      const img = await loadImageFromFile(file, label);
+      const ratio = Math.min(1, PHOTO_MAX_SIDE / Math.max(img.naturalWidth, img.naturalHeight));
+      const width = Math.max(1, Math.round(img.naturalWidth * ratio));
+      const height = Math.max(1, Math.round(img.naturalHeight * ratio));
+      const canvas = document.createElement("canvas");
+      canvas.width = width;
+      canvas.height = height;
+      const ctx = canvas.getContext("2d");
+      if (!ctx) throw new Error(`${label}压缩失败`);
+      ctx.fillStyle = "#fff";
+      ctx.fillRect(0, 0, width, height);
+      ctx.drawImage(img, 0, 0, width, height);
+      const dataUrl = canvas.toDataURL("image/jpeg", PHOTO_JPEG_QUALITY);
+      if (!dataUrl || dataUrl.length > PHOTO_MAX_DATA_URL_LENGTH) throw new Error(`${label}太大，请重新拍摄近一点的照片`);
+      return dataUrl;
+    }
+
+    async function readImageDataUrl(inputId, label) {
       const input = document.querySelector(`#${inputId}`);
       const file = input?.files?.[0];
       if (!file) throw new Error(`请先上传${label}`);
       if (!file.type.startsWith("image/")) throw new Error(`${label}必须是图片`);
       if (file.size > 10 * 1024 * 1024) throw new Error(`${label}不能超过 10MB`);
-      return new Promise((resolve, reject) => {
-        const reader = new FileReader();
-        reader.onload = () => resolve(String(reader.result || ""));
-        reader.onerror = () => reject(new Error(`${label}读取失败`));
-        reader.readAsDataURL(file);
-      });
+      return compressImageFile(file, label);
     }
 
     async function runAiDetection(loanId) {
