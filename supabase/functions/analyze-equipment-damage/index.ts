@@ -103,7 +103,13 @@ function normalizeResult(raw: Record<string, unknown>): DamageResult {
 
 function minimaxErrorMessage(status: number, text: string) {
   const lower = text.toLowerCase();
-  if (status === 402 || lower.includes("insufficient_balance") || lower.includes("insufficient balance")) {
+  if (
+    status === 402 ||
+    lower.includes("insufficient_balance") ||
+    lower.includes("insufficient balance") ||
+    lower.includes("quota has been exceeded") ||
+    lower.includes("quota exceeded")
+  ) {
     return "MiniMax 余额不足或密钥配置异常，请检查 Supabase 里的 API Key、接口区域和可用额度。";
   }
   if (status === 401 || status === 403 || lower.includes("invalid api key") || lower.includes("unauthorized")) {

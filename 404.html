@@ -4809,6 +4809,8 @@
       const isMiniMaxBalance =
         lower.includes("insufficient_balance") ||
         lower.includes("insufficient balance") ||
+        lower.includes("quota has been exceeded") ||
+        lower.includes("quota exceeded") ||
         (lower.includes("minimax") && lower.includes("402"));
       if (isMiniMaxBalance) return "MiniMax 余额不足或密钥配置异常，请检查 Supabase 里的 API Key、接口区域和可用额度。";
       if (lower.includes("invalid api key") || lower.includes("unauthorized")) return "MiniMax API Key 无效，请检查 Supabase 里的密钥配置。";
