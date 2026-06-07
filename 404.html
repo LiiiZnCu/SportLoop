@@ -4479,6 +4479,7 @@
     const BORROW_PERIOD_OPTIONS = [1, 2, 3];
     const PHOTO_MAX_SIDE = 1280;
     const PHOTO_JPEG_QUALITY = 0.78;
+    const DETECTION_PASS_CONFIDENCE = 0.7;
     const PHOTO_MAX_DATA_URL_LENGTH = 1800000;
 
     const reportIssueTypes = {
@@ -4841,29 +4842,43 @@
 
     function parseDetectionResult(value) {
       if (!value) {
-        return { status: "", damageLevel: "", confidence: 0, riskLabel: "低", issueCount: 0, summary: "暂无检测结果。", issues: [] };
+        return { status: "", damageLevel: "", confidence: 0, riskLabel: "低", issueCount: 0, summary: "暂无检测结果。", issues: [], targetMatched: false, comparable: false, needsAdminReview: false };
       }
       if (value === "正常") {
-        return { status: "正常", damageLevel: "normal", confidence: 0.97, riskLabel: "低", issueCount: 0, summary: "未发现明显破损，请到场馆机器完成归还扫码。", issues: [] };
+        return { status: "正常", damageLevel: "normal", confidence: 0.97, riskLabel: "低", issueCount: 0, summary: "未发现明显破损，请到场馆机器完成归还扫码。", issues: [], targetMatched: true, comparable: true, needsAdminReview: false };
       }
       if (value === "异常") {
-        return { status: "异常", damageLevel: "obvious", confidence: 0.86, riskLabel: "中", issueCount: 2, summary: "疑似新增损耗，已生成异常记录。", issues: ["疑似胶皮翘边", "疑似拍柄松动"] };
+        return { status: "异常", damageLevel: "obvious", confidence: 0.86, riskLabel: "中", issueCount: 2, summary: "疑似新增损耗，已生成异常记录。", issues: ["疑似胶皮翘边", "疑似拍柄松动"], targetMatched: false, comparable: false, needsAdminReview: true };
       }
       try {
         const data = JSON.parse(value);
         const status = data.status === "异常" ? "异常" : "正常";
+        const targetMatched = data.target_matched === true;
+        const comparable = data.comparable === true;
+        const confidence = Math.max(0, Math.min(1, Number(data.confidence) || 0));
+        const passed = status === "正常" && confidence >= DETECTION_PASS_CONFIDENCE && targetMatched && comparable;
         return {
-          status,
+          status: passed ? "正常" : "异常",
           damageLevel: data.damage_level || (status === "异常" ? "obvious" : "normal"),
-          confidence: Math.max(0, Math.min(1, Number(data.confidence) || 0)),
-          riskLabel: data.risk_label || (status === "异常" ? "中" : "低"),
-          issueCount: Math.max(0, Number(data.issue_count) || 0),
-          summary: data.summary || (status === "异常" ? "疑似新增损耗，建议管理员复核。" : "未发现明显新增损耗。"),
+          confidence,
+          riskLabel: passed ? (data.risk_label || "低") : (data.risk_label === "高" ? "高" : "中"),
+          issueCount: passed ? 0 : Math.max(1, Number(data.issue_count) || 0),
+          summary: passed ? (data.summary || "未发现明显新增损耗。") : invalidDetectionSummary(data),
           issues: Array.isArray(data.issues) ? data.issues.filter(Boolean) : [],
+          targetMatched,
+          comparable,
+          needsAdminReview: !passed || Boolean(data.needs_admin_review),
         };
       } catch {
-        return { status: String(value), damageLevel: "", confidence: 0, riskLabel: "低", issueCount: 0, summary: String(value), issues: [] };
+        return { status: String(value), damageLevel: "", confidence: 0, riskLabel: "低", issueCount: 0, summary: String(value), issues: [], targetMatched: false, comparable: false, needsAdminReview: true };
       }
+    }
+
+    function invalidDetectionSummary(data) {
+      if (data.target_matched !== true) return "照片中未清楚显示目标器材，无法完成归还质检对比。";
+      if (data.comparable !== true) return "两张照片无法有效对比目标器材，请重新上传清晰照片或反馈给管理员。";
+      if ((Number(data.confidence) || 0) < DETECTION_PASS_CONFIDENCE) return "检测可信度过低，请重新上传清晰照片或反馈给管理员。";
+      return data.summary || "检测未通过，请重新上传照片或反馈给管理员。";
     }
 
     function serializeDetectionResult(result) {
@@ -4876,11 +4891,21 @@
         summary: String(result.summary || "").trim(),
         issues: Array.isArray(result.issues) ? result.issues.map(String).filter(Boolean).slice(0, 5) : [],
         needs_admin_review: Boolean(result.needs_admin_review),
+        target_matched: result.target_matched === true,
+        comparable: result.comparable === true,
       });
     }
 
+    function detectionCanPass(result) {
+      return !!result
+        && result.status === "正常"
+        && result.confidence >= DETECTION_PASS_CONFIDENCE
+        && result.targetMatched === true
+        && result.comparable === true;
+    }
+
     function detectionIsAbnormal(loan) {
-      return parseDetectionResult(loan?.detectResult).status === "异常";
+      return !detectionCanPass(parseDetectionResult(loan?.detectResult));
     }
 
     function detectionLabel(loan) {
@@ -6641,7 +6666,10 @@
             <p class="machine-hint">${canReturn ? "检测正常，系统已允许机器扫码归还。请到场馆机器完成归还后，再同步状态。" : "检测未通过，暂不允许机器扫码归还，请等待管理员复核。"}</p>
             ${canReturn
               ? `<button class="primary-button" data-sync-return="${loan.id}">${icon("bag")} 同步机器归还</button>`
-              : `<button class="secondary-button" data-report-loan="${loan.id}">${icon("wrench")} 补充报损说明</button>`}
+              : `<div class="button-row">
+                  <button class="secondary-button" data-loan-detect="${loan.id}">${icon("camera")} 重新上传照片</button>
+                  <button class="primary-button" data-report-loan="${loan.id}">${icon("wrench")} 反馈给管理员</button>
+                </div>`}
           </section>
         </main>
       `;
@@ -7707,14 +7735,27 @@
           beforeImageDataUrl: loan.beforePhotoDataUrl,
           afterImageDataUrl,
         });
-        loan.detectResult = serializeDetectionResult(result);
+        const normalizedResult = parseDetectionResult(serializeDetectionResult(result));
+        loan.detectResult = serializeDetectionResult({
+          status: normalizedResult.status,
+          damage_level: normalizedResult.damageLevel,
+          confidence: normalizedResult.confidence,
+          risk_label: normalizedResult.riskLabel,
+          issue_count: normalizedResult.issueCount,
+          summary: normalizedResult.summary,
+          issues: normalizedResult.issues,
+          needs_admin_review: normalizedResult.needsAdminReview,
+          target_matched: normalizedResult.targetMatched,
+          comparable: normalizedResult.comparable,
+        });
         loan.returnPhotoDataUrl = afterImageDataUrl;
-        loan.returnMachineAllowed = result.status === "正常";
-        loan.status = result.status === "异常" ? "异常待归还" : "待归还";
-        if (result.status === "异常") {
-          createOrder(item.id, "MiniMax 归还检测异常", result.summary || "检测到疑似新增损耗", loan.id);
+        const passed = detectionCanPass(normalizedResult);
+        loan.returnMachineAllowed = passed;
+        loan.status = passed ? "待归还" : "异常待归还";
+        if (!passed) {
+          createOrder(item.id, "MiniMax 归还检测异常", normalizedResult.summary || "检测未通过", loan.id);
         }
-        pushMessage("归还检测完成", result.status === "正常"
+        pushMessage("归还检测完成", passed
           ? `${item.name} 检测正常，机器端已允许扫码归还。`
           : `${item.name} 检测异常，暂不允许机器扫码归还，已生成复核记录。`);
         saveStore();

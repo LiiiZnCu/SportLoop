@@ -15,6 +15,8 @@ type DamageResult = {
   summary: string;
   issues: string[];
   needs_admin_review: boolean;
+  target_matched: boolean;
+  comparable: boolean;
 };
 
 function jsonResponse(body: unknown, status = 200) {
@@ -78,26 +80,37 @@ function normalizeResult(raw: Record<string, unknown>): DamageResult {
   const issues = Array.isArray(raw.issues)
     ? raw.issues.map((item) => String(item).trim()).filter(Boolean).slice(0, 5)
     : [];
-  const abnormal = damageLevel !== "normal";
   const confidence = clampConfidence(raw.confidence);
+  const targetMatched = raw.target_matched === true;
+  const comparable = raw.comparable === true;
+  const forcedInvalid = confidence < 0.7 || targetMatched !== true || comparable !== true;
+  const invalidReason = !targetMatched
+    ? "照片中未清楚显示目标器材，无法完成归还质检对比。"
+    : !comparable
+      ? "两张照片无法有效对比目标器材，无法完成归还质检。"
+      : "检测可信度过低，无法完成归还质检。";
+  const abnormal = forcedInvalid || damageLevel !== "normal";
   const issueCount = Number.isFinite(Number(raw.issue_count))
     ? Math.max(0, Math.min(9, Number(raw.issue_count)))
     : issues.length;
   const riskLabel = damageLevel === "severe" || damageLevel === "obvious"
     ? "高"
-    : damageLevel === "minor"
+    : damageLevel === "minor" || forcedInvalid
       ? "中"
       : "低";
+  const normalizedIssues = forcedInvalid && !issues.length ? [invalidReason] : issues;
 
   return {
     status: abnormal ? "异常" : "正常",
-    damage_level: damageLevel,
+    damage_level: forcedInvalid && damageLevel === "normal" ? "obvious" : damageLevel,
     risk_label: riskLabel,
     confidence,
-    issue_count: abnormal ? Math.max(1, issueCount || issues.length || 1) : 0,
-    summary: String(raw.summary || (abnormal ? "检测到疑似新增损耗，建议管理员复核。" : "未发现明显新增损耗。")).trim(),
-    issues,
+    issue_count: abnormal ? Math.max(1, issueCount || normalizedIssues.length || 1) : 0,
+    summary: String(forcedInvalid ? invalidReason : (raw.summary || (abnormal ? "检测到疑似新增损耗，建议管理员复核。" : "未发现明显新增损耗。"))).trim(),
+    issues: normalizedIssues,
     needs_admin_review: abnormal || Boolean(raw.needs_admin_review),
+    target_matched: targetMatched,
+    comparable,
   };
 }
 
@@ -141,12 +154,17 @@ Deno.serve(async (req) => {
       "你是校园体育器材归还质检助手。",
       "第一张图片是借出前照片，第二张图片是归还后照片。",
       `器材：${equipmentName}，编号：${assetId}。`,
-      "请只判断归还后是否出现新增损耗，不要因为拍摄角度、光线、轻微阴影直接判异常。",
+      "先确认两张图片是否都清楚显示同一类目标器材；如果任一图片不是该器材、目标器材不清楚、被遮挡严重、无法和另一张图对比，必须判为异常。",
+      "只有两张图片都能确认是目标器材，才继续对比归还后是否出现新增破损、变形、开裂、漏气、明显污损、部件脱落等新增损耗。",
+      "不要只识别器材类别后就判正常；正常必须建立在两张目标器材照片可对比且没有新增损耗的基础上。",
+      "不要因为拍摄角度、光线、轻微阴影直接判异常。",
       "必须只返回 JSON，不要 Markdown，不要解释。",
       "JSON 字段固定为：",
       "{",
       '  "damage_level": "normal | minor | obvious | severe",',
       '  "confidence": 0.0 到 1.0,',
+      '  "target_matched": true 或 false,',
+      '  "comparable": true 或 false,',
       '  "issue_count": 数字,',
       '  "summary": "一句中文结论",',
       '  "issues": ["新增损耗点1", "新增损耗点2"],',

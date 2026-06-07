@@ -57,7 +57,7 @@ cd /Users/liiizncu/Documents/GitHub/SportLoop
 supabase functions deploy analyze-equipment-damage --project-ref jwylvubakymfkdncuwhp
 ```
 
-检测逻辑：学生借出成功前先上传“借出前照片”；归还检测页只上传“归还照片”。网页把已保存的借出前照片和归还照片交给 Supabase Edge Function，函数再调用 MiniMax-M3 返回“正常/异常、可信度、风险、问题点和说明”。正常结果会写入机器归还允许标记；异常结果会生成管理员待复核工单。
+检测逻辑：学生借出成功前先上传“借出前照片”；归还检测页只上传“归还照片”。网页把已保存的借出前照片和归还照片交给 Supabase Edge Function，函数再调用 MiniMax-M3 返回“正常/异常、可信度、是否为目标器材、是否可对比、风险、问题点和说明”。只有两张图都清楚显示目标器材、可对比、可信度达标且没有新增损耗时，才会写入机器归还允许标记；否则显示异常，学生可重新上传或反馈给管理员。
 
 ## GitHub Pages 设置
 
