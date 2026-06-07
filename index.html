@@ -5611,8 +5611,44 @@
     });
     saveStore();
 
+    function stripLoanPhotosForLocalCache(loan = {}) {
+      const cached = { ...loan };
+      if (typeof cached.beforePhotoDataUrl === "string" && cached.beforePhotoDataUrl.startsWith("data:image/")) {
+        cached.beforePhotoDataUrl = "";
+      }
+      if (typeof cached.returnPhotoDataUrl === "string" && cached.returnPhotoDataUrl.startsWith("data:image/")) {
+        cached.returnPhotoDataUrl = "";
+      }
+      return cached;
+    }
+
+    function localStoreSnapshot() {
+      return {
+        ...store,
+        loans: (store.loans || []).map(stripLoanPhotosForLocalCache),
+      };
+    }
+
+    function isStorageQuotaError(error) {
+      const message = String(error?.message || "").toLowerCase();
+      return error?.name === "QuotaExceededError"
+        || error?.code === 22
+        || message.includes("quota");
+    }
+
     function saveStore() {
-      localStorage.setItem(STORAGE_KEY, JSON.stringify(store));
+      const payload = JSON.stringify(localStoreSnapshot());
+      try {
+        localStorage.setItem(STORAGE_KEY, payload);
+      } catch (error) {
+        if (!isStorageQuotaError(error)) throw error;
+        localStorage.removeItem(STORAGE_KEY);
+        try {
+          localStorage.setItem(STORAGE_KEY, payload);
+        } catch {
+          throw new Error("浏览器缓存空间不足，请点清空数据缓存后重试");
+        }
+      }
     }
 
     function profileData() {

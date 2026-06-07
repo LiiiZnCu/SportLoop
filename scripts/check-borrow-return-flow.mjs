@@ -13,6 +13,7 @@ const checks = [
   ["旧记录补照片不重复扣库存", html.includes("const shouldReserveInventory = loan.status === \"待补借出照片\"") && html.includes("shouldReserveInventory ? updateRemoteEquipment(item) : Promise.resolve()")],
   ["照片上传前必须压缩", html.includes("function compressImageFile") && html.includes("PHOTO_MAX_SIDE") && html.includes("canvas.toDataURL(\"image/jpeg\"")],
   ["当前借用列表包含待补借出照片状态", html.includes('"待补借出照片", "使用中", "待归还", "异常待归还"')],
+  ["本地缓存不能保存照片大字段", html.includes("function localStoreSnapshot") && html.includes("stripLoanPhotosForLocalCache") && html.includes('cached.beforePhotoDataUrl = ""') && html.includes('cached.returnPhotoDataUrl = ""')],
   ["借出确认页有借出前照片上传入口", html.includes('id="borrowBeforePhotoInput"')],
   ["借出前照片上传后才完成借用", html.includes("finishBorrowWithBeforePhoto")],
   ["归还检测页不再要求重新上传借出前照片", !html.includes('id="beforePhotoInput"')],
