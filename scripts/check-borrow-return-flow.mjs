@@ -21,6 +21,7 @@ const checks = [
   ["检测放行必须经过统一硬规则", html.includes("function detectionCanPass") && html.includes("result.confidence >= DETECTION_PASS_CONFIDENCE") && html.includes("result.targetMatched === true")],
   ["低可信度或非目标器材必须转异常", damageFunction.includes("const forcedInvalid = confidence < 0.7 || targetMatched !== true || comparable !== true")],
   ["无法识别目标器材必须提示重传或反馈管理员", html.includes("重新上传照片") && html.includes("反馈给管理员")],
+  ["异常检测结果必须能直接返回首页", html.includes('反馈给管理员</button>\n                </div>\n                <button class="secondary-button" data-route="home"')],
   ["检测正常后才允许机器归还", html.includes("returnMachineAllowed") && html.includes("const passed = detectionCanPass(normalizedResult)") && html.includes("loan.returnMachineAllowed = passed")],
   ["机器归还前检查后端允许标记", html.includes("请先完成归还检测，检测正常后机器才允许扫码归还")],
   ["MiniMax 额度问题要显示短提示", html.includes("function friendlyFunctionError") && html.includes("quota has been exceeded") && html.includes("MiniMax 余额不足") && damageFunction.includes("quota has been exceeded") && damageFunction.includes("MiniMax 余额不足")],
