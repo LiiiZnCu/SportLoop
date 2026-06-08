@@ -7661,6 +7661,42 @@
       `;
     }
 
+    function adminVenueManager() {
+      const venues = Array.isArray(store.venues) ? store.venues : [];
+      return `
+        <form class="admin-machine-sync-card" id="adminVenueForm">
+          <div class="admin-machine-sync-head">
+            <div>
+              <h3>添加场馆</h3>
+              <p>输入场馆名称后点击添加。</p>
+            </div>
+          </div>
+          <div style="display:grid;gap:12px;">
+            <label class="field" style="margin:0;">
+              <span>场馆名称</span>
+              <input id="adminVenueInput" placeholder="例如：游泳馆" style="color:#fff;background:#1a1a2e;border:1px solid rgba(255,255,255,0.3);border-radius:12px;padding:12px;font-size:16px;width:100%;min-height:48px;box-sizing:border-box;" />
+            </label>
+            <button class="primary-button" type="submit">${icon("bag")} 添加场馆</button>
+          </div>
+        </form>
+        <div class="list-stack">
+          ${venues.length ? venues.map(adminVenueRow).join("") : '<div class="empty">暂无场馆，请添加。</div>'}
+        </div>
+      `;
+    }
+
+    function adminVenueRow(venue) {
+      return `
+        <article class="admin-equipment-row" data-admin-venue="${escapeAttr(venue.id)}">
+          <div class="admin-equipment-main" style="grid-column:1/-1;">
+            <strong>${escapeHtml(venue.name)}</strong>
+            <small>${venue.open ? "开放中" : "已关闭"}</small>
+          </div>
+          <button class="${venue.open ? "secondary-button" : "primary-button"}" data-admin-venue-toggle="${escapeAttr(venue.id)}" style="grid-column:1/-1;margin-top:6px;">${venue.open ? icon("shield") + " 关闭场地" : icon("check") + " 开放场地"}</button>
+        </article>
+      `;
+    }
+
     function adminEquipmentFilterPanel() {
       const statuses = ["全部", "可借", "补充中", "维修中", "异常待确认"];
       return `
@@ -10010,6 +10046,29 @@
       render();
     }
 
+    function handleAdminVenueAdd(event) {
+      event.preventDefault();
+      const input = document.querySelector("#adminVenueInput");
+      const name = (input ? input.value : "").trim();
+      if (!name) { state.notice = "请输入场馆名称"; render(); return; }
+      if (!Array.isArray(store.venues)) store.venues = [];
+      if (store.venues.some((v) => v.name === name)) { state.notice = "场馆已存在"; render(); return; }
+      const maxId = store.venues.reduce((max, v) => Math.max(max, Number(v.id.replace(/\D/g, "")) || 0), 0);
+      store.venues.push({ id: "v" + String(maxId + 1), name, open: true });
+      saveStore();
+      state.notice = "已添加场馆：" + name;
+      render();
+    }
+
+    function handleAdminVenueToggle(venueId) {
+      const venue = (store.venues || []).find((v) => v.id === venueId);
+      if (!venue) return;
+      venue.open = !venue.open;
+      saveStore();
+      state.notice = venue.open ? "已开放：" + venue.name : "已关闭：" + venue.name;
+      render();
+    }
+
     async function handleAdminNfcScan(event) {
       event.preventDefault();
       const select = document.querySelector("#adminNfcEquipment");
@@ -10093,6 +10152,8 @@
         state.notice = err.message || "删除失败";
       }
       render();
+    }
+
     }
 
     function csvCell(value) {
