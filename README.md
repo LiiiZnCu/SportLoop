@@ -30,11 +30,11 @@ https://jwylvubakymfkdncuwhp.supabase.co
 4. 如果管理员端提示“管理员未授权”，复制页面显示的 UID，插入 `admin_users` 表。
 5. 管理员授权后，在管理员端录入器材；脚本不会再自动生成演示器材。
 
-这次新增了 `batch_borrow_requests`、`machine_sync_logs`、`admin_operation_logs` 表，新增了 `loans.batch_request_id`、`loans.before_photo_data_url`、`loans.return_photo_data_url`、`loans.return_machine_allowed` 字段，以及 `equipment.nfc_tags`、`equipment.machine_synced_at` 字段。线上数据库要重新运行一遍 `supabase_sportloop.sql`，批量申请、机器入库同步记录、归还检测闭环和管理员操作记录才能生效。
+这次新增了 `batch_borrow_requests`、`machine_sync_logs`、`admin_operation_logs` 表，新增了 `loans.batch_request_id`、`loans.before_photo_data_url`、`loans.return_photo_data_url`、`loans.return_machine_allowed`、`loans.nfc_serial`、`loans.nfc_verified_at`、`loans.verification_code`、`loans.verification_code_expires_at`、`loans.student_name`、`loans.student_id` 字段，以及 `equipment.nfc_tags`、`equipment.machine_synced_at` 字段。线上数据库要重新运行一遍 `supabase_sportloop.sql`，批量申请、NFC 验证借用、机器入库同步记录、归还检测闭环和管理员操作记录才能生效。
 
-登录和注册是分开的：未注册账号不能直接登录，必须先在网页注册页创建账号。账号不能重复；校园认证里只有学号不能重复，姓名和院系可以相同。批量借出申请由学生提交，管理员审批通过后，学生先在机器扫码，再在学生端逐件上传借出前照片，全部补齐后才算借出成功。
+登录和注册是分开的：未注册账号不能直接登录，必须先在网页注册页创建账号。账号不能重复；校园认证里只有学号不能重复，姓名和院系可以相同。批量借出申请由学生提交，管理员审批通过后，学生先获取验证码，到 NFC 机器验证标签，再在学生端逐件上传借出前照片，全部补齐后才算借出成功。
 
-单件借还流程：机器端先扫码，学生端同步后上传借出前照片，保存后借用才生效；归还时学生上传归还照片，MiniMax 对比借出前照片，只有检测正常时才把“允许机器扫码归还”的标记写回后端。
+单件借还流程：学生先在手机端发起借用并获取 6 位验证码，再到场馆 NFC 机器输入验证码并贴器材标签；验证通过后，学生上传借出前照片，保存后借用才生效。归还时学生上传归还照片，MiniMax 对比借出前照片，只有检测正常时才把“允许机器扫码归还”的标记写回后端。
 
 机器端是独立系统：机器进入“入库模式”后扫描器材 NFC，网页管理员端只接收机器同步结果。新芯片会增加库存，重复芯片不会重复增加数量，并会写入机器入库同步记录。管理员端还可以搜索筛选器材、手动修改库存状态、导出库存/同步/操作记录。
 
