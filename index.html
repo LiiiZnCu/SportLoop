@@ -5003,6 +5003,7 @@
       logout: `<svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M10 5H5v14h5" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/><path d="M14 8l4 4-4 4M18 12H9" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>`,
       grid: `<svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><rect x="3" y="3" width="18" height="18" rx="2" ry="2" stroke="currentColor" stroke-width="2"/><line x1="9" y1="3" x2="9" y2="21" stroke="currentColor" stroke-width="2"/><line x1="15" y1="3" x2="15" y2="21" stroke="currentColor" stroke-width="2"/><line x1="3" y1="9" x2="21" y2="9" stroke="currentColor" stroke-width="2"/><line x1="3" y1="15" x2="21" y2="15" stroke="currentColor" stroke-width="2"/></svg>`,
     };
+      grid: `<svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><rect x="3" y="3" width="18" height="18" rx="2" ry="2" stroke="currentColor" stroke-width="2"/><line x1="9" y1="3" x2="9" y2="21" stroke="currentColor" stroke-width="2"/><line x1="15" y1="3" x2="15" y2="21" stroke="currentColor" stroke-width="2"/><line x1="3" y1="9" x2="21" y2="9" stroke="currentColor" stroke-width="2"/><line x1="3" y1="15" x2="21" y2="15" stroke="currentColor" stroke-width="2"/></svg>`,
 
     const seed = {
       profile: {
@@ -5820,6 +5821,7 @@
       syncLogs: "adminSyncLogs",
       logs: "adminLogs",
       export: "adminExport",
+      venues: "adminVenues",
     };
 
     function shouldRefreshOnRoute(to) {
@@ -6132,7 +6134,13 @@
 
     if (!Array.isArray(store.venues) || !store.venues.length) {
       const unique = [...new Set(store.equipment.map((item) => cleanVenue(item.venue)).filter(Boolean))];
+<<<<<<< Updated upstream
       store.venues = unique.length ? unique.map((name, i) => ({ id: "v" + String(i + 1), name, open: true })) : clone(seed.venues || []);
+=======
+      store.venues = unique.length
+        ? unique.map((name, i) => ({ id: "v" + String(i + 1), name, open: true }))
+        : clone(seed.venues || []);
+>>>>>>> Stashed changes
       saveStore();
     }
 
@@ -6589,6 +6597,29 @@
                       <span class="new-stat-val">${totalAvailable} <small>件</small></span>
                     </div>
                   </div>
+<<<<<<< Updated upstream
+=======
+
+                  <div class="new-stat-card">
+                    <div class="new-stat-icon-wrapper blue-theme">
+                      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"></path><polyline points="9 11 11 13 15 9"></polyline></svg>
+                    </div>
+                    <div class="new-stat-text">
+                      <span class="new-stat-label">状态良好</span>
+                      <span class="new-stat-val">${health}%</span>
+                    </div>
+                  </div>
+
+                  <div class="new-stat-card">
+                    <div class="new-stat-icon-wrapper purple-theme">
+                      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="18" height="18" rx="2" ry="2"></rect><line x1="9" y1="3" x2="9" y2="21"></line><line x1="15" y1="3" x2="15" y2="21"></line><line x1="3" y1="9" x2="21" y2="9"></line><line x1="3" y1="15" x2="21" y2="15"></line></svg>
+                    </div>
+                    <div class="new-stat-text">
+                      <span class="new-stat-label">开放场地</span>
+                      <span class="new-stat-val">${openVenues} <small>个</small></span>
+                    </div>
+                  </div>
+>>>>>>> Stashed changes
                   </div>
                 </div>
               </div>
@@ -7376,6 +7407,7 @@
         ["equipment", "器材档案", store.equipment.length],
         ["syncLogs", "同步记录", data.syncLogs.length],
         ["logs", "操作记录", data.operationLogs.length],
+        ["venues", "场馆管理", (store.venues || []).length],
         ["export", "数据导出", 3],
       ];
     }
@@ -7383,6 +7415,12 @@
     function adminModuleDetails(data) {
       return {
         export: {
+        venues: {
+          title: "场馆管理",
+          desc: "添加体育场馆，并控制开放/关闭状态。",
+          status: `${(store.venues || []).filter((v) => v.open).length} 开放`,
+          content: adminVenueManager(),
+        },
           title: "数据导出",
           desc: "导出库存、机器同步和管理员操作，方便盘点交接。",
           status: "CSV",
@@ -7594,6 +7632,42 @@
         </article>
       `;
     }
+    function adminVenueManager() {
+      const venues = Array.isArray(store.venues) ? store.venues : [];
+      return `
+        <form class="admin-machine-sync-card" id="adminVenueForm">
+          <div class="admin-machine-sync-head">
+            <div>
+              <h3>添加场馆</h3>
+              <p>输入场馆名称后点击添加。</p>
+            </div>
+          </div>
+          <div style="display:grid;gap:12px;">
+            <label class="field" style="margin:0;">
+              <span>场馆名称</span>
+              <input id="adminVenueInput" placeholder="例如：游泳馆" style="color:#fff;background:#1a1a2e;border:1px solid rgba(255,255,255,0.3);border-radius:12px;padding:12px;font-size:16px;width:100%;min-height:48px;box-sizing:border-box;" />
+            </label>
+            <button class="primary-button" type="submit">${icon("bag")} 添加场馆</button>
+          </div>
+        </form>
+        <div class="list-stack">
+          ${venues.length ? venues.map(adminVenueRow).join("") : '<div class="empty">暂无场馆，请添加。</div>'}
+        </div>
+      `;
+    }
+
+    function adminVenueRow(venue) {
+      return `
+        <article class="admin-equipment-row" data-admin-venue="${escapeAttr(venue.id)}">
+          <div class="admin-equipment-main" style="grid-column:1/-1;">
+            <strong>${escapeHtml(venue.name)}</strong>
+            <small>${venue.open ? "开放中" : "已关闭"}</small>
+          </div>
+          <button class="${venue.open ? "secondary-button" : "primary-button"}" data-admin-venue-toggle="${escapeAttr(venue.id)}" style="grid-column:1/-1;margin-top:6px;">${venue.open ? icon("shield") + " 关闭场地" : icon("check") + " 开放场地"}</button>
+        </article>
+      `;
+    }
+
 
     function adminEquipmentFilterPanel() {
       const statuses = ["全部", "可借", "补充中", "维修中", "异常待确认"];
@@ -7714,6 +7788,7 @@
     function adminQuickNav(items) {
       const meta = {
         batch: ["check", "is-batch"],
+        venues: ["grid", "is-venues"],
         messages: ["message", "is-messages"],
         orders: ["wrench", "is-orders"],
         equipment: ["bag", "is-equipment"],
@@ -8996,6 +9071,7 @@
         adminSyncLogs: () => adminModulePage("syncLogs"),
         adminLogs: () => adminModulePage("logs"),
         adminExport: () => adminModulePage("export"),
+        adminVenues: () => adminModulePage("venues"),
         profile: profilePage,
         profileInfo: profileInfoPage,
         creditRules: creditRulesPage,
@@ -9919,6 +9995,29 @@
       return { items, addedChipCount, duplicateCount, duplicateTags, syncedAt };
     }
 
+    function handleAdminVenueAdd(event) {
+      event.preventDefault();
+      const input = document.querySelector("#adminVenueInput");
+      const name = (input ? input.value : "").trim();
+      if (!name) { state.notice = "请输入场馆名称"; render(); return; }
+      if (!Array.isArray(store.venues)) store.venues = [];
+      if (store.venues.some((v) => v.name === name)) { state.notice = "场馆已存在"; render(); return; }
+      const maxId = store.venues.reduce((max, v) => Math.max(max, Number(v.id.replace(/\D/g, "")) || 0), 0);
+      store.venues.push({ id: "v" + String(maxId + 1), name, open: true });
+      saveStore();
+      state.notice = "已添加场馆：" + name;
+      render();
+    }
+
+    function handleAdminVenueToggle(venueId) {
+      const venue = (store.venues || []).find((v) => v.id === venueId);
+      if (!venue) return;
+      venue.open = !venue.open;
+      saveStore();
+      state.notice = venue.open ? "已开放：" + venue.name : "已关闭：" + venue.name;
+      render();
+    }
+
     async function handleAdminNfcScan(event) {
       event.preventDefault();
       const select = document.querySelector("#adminNfcEquipment");
@@ -10165,6 +10264,11 @@
       if (adminContactForm) adminContactForm.addEventListener("submit", submitAdminContactForm);
       const adminNfcScanForm = document.querySelector("#adminNfcScanForm");
       if (adminNfcScanForm) adminNfcScanForm.addEventListener("submit", handleAdminNfcScan);
+      const adminVenueForm = document.querySelector("#adminVenueForm");
+      if (adminVenueForm) adminVenueForm.addEventListener("submit", handleAdminVenueAdd);
+      document.querySelectorAll("[data-admin-venue-toggle]").forEach((node) =>
+        node.addEventListener("click", () => handleAdminVenueToggle(node.dataset.adminVenueToggle))
+      );
       document.querySelectorAll("[data-admin-delete-tag]").forEach((node) =>
         node.addEventListener("click", () => handleAdminDeleteTag(node.dataset.adminDeleteTag, node.dataset.tagValue))
       );
