@@ -6569,25 +6569,22 @@
       const openVenues = new Set(store.equipment.filter((item) => item.available > 0).map((item) => cleanVenue(item.venue))).size;
       const health = store.equipment.length ? Math.round(store.equipment.reduce((sum, item) => sum + item.health, 0) / store.equipment.length) : 0;
       const currentLoan = activeLoan();
-      const popularEquipment = store.equipment.slice(0, 4);
+      const popularEquipment = store.equipment.slice(0, 5);
 
       return `
         <section class="screen home-screen">
           <header class="home-top">
             <button class="icon-button" data-route="messages" aria-label="消息通知">${icon("bell")}</button>
-            <div class="brand"><img class="logo-mark app-icon" src="${escapeAttr(assetUrl(APP_ICON_SRC))}" alt="SportLoop" decoding="async" /><!-- [IMAGE-10] --><span>SportLoop</span></div>
+            <div class="brand"><img class="logo-mark app-icon" src="${escapeAttr(assetUrl(APP_ICON_SRC))}" alt="SportLoop" decoding="async" /><span>SportLoop</span></div>
             <button class="icon-button" data-route="list" aria-label="器材列表">${icon("search")}</button>
           </header>
           ${notice()}
           <main class="scroll">
-            
-            <!-- 📷 完美像素级还原参考图样式的头部卡片组 -->
             <section class="new-hero-container">
               <div class="new-hero-left">
-                <h1 class="new-hero-title">今天</h1>
-                <h1 class="new-hero-title">想打什么球？</h1>
+                <h1 class="new-hero-title">Sports</h1>
+                <h1 class="new-hero-title">器材借用</h1>
                 <p class="new-hero-subtitle">先看状态，再去借用</p>
-
                 <div class="new-stats-stack">
                   <!-- 1. 今日可借 -->
                   <div class="new-stat-card">
@@ -6623,6 +6620,29 @@
                   </div>
                 </div>
               </div>
+            </section>
+
+            <!-- 🔧 首页重磅加入：无缝联动报修系统的“反馈入口” -->
+            <section class="home-feedback-card" data-route="report" style="cursor: pointer; margin-bottom: 16px;">
+              <div class="feedback-card-content">
+                <div class="feedback-card-text">
+                  <h3>💬 反馈器材与场馆问题</h3>
+                  <p>球拍磨损、没气、场地受阻？点击一键快速反馈报损</p>
+                </div>
+              </div>
+            </section>
+
+            ${currentLoan ? currentLoanCard(currentLoan) : flowCard()}
+
+            <section class="home-feedback-card" data-route="report" style="cursor: pointer; margin-bottom: 16px;">
+              <div class="feedback-card-content">
+                <div class="feedback-card-text">
+                  <h3>💬 反馈器材问题</h3>
+                  <p>球拍磨损、没气？点击快速反馈报损</p>
+                </div>
+                <div class="feedback-arrow">${icon("chevron")}</div>
+              </div>
+            </section>
 
             <div class="section-head">
               <h2>器材种类</h2>
