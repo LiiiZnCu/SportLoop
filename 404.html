@@ -5743,6 +5743,7 @@
       if (store.authUserId !== user.id || isSeedDemoProfile(store.profile)) resetAccountScopedStore(user.id);
       try {
         await loadRemoteStore();
+        await fetchRemoteVenues();
       } catch (error) {
         reportRemoteSyncError(error);
       }
@@ -7659,42 +7660,192 @@
       `;
     }
 
+
+    // ===== 场馆 Supabase CRUD =====
+    async function fetchRemoteVenues() {
+      if (!authSession?.accessToken) return;
+      try {
+        const data = await supabaseRequest("venues?select=*&user_id=eq." + encodeURIComponent(authSession.userId));
+        if (Array.isArray(data)) {
+          store.venues = data.map((row) => ({
+            id: row.id,
+            name: row.name,
+            location: row.location || "",
+            openTime: row.open_time || "全天",
+            status: row.status || "open",
+          }));
+          saveStore();
+        }
+      } catch (error) {
+        reportRemoteSyncError(error);
+      }
+    }
+
+    async function saveRemoteVenue(venue) {
+      if (!authSession?.accessToken) return;
+      try {
+        const payload = {
+          id: venue.id,
+          user_id: authSession.userId,
+          name: venue.name,
+          location: venue.location || "",
+          open_time: venue.openTime || "全天",
+          status: venue.status || "open",
+          updated_at: new Date().toISOString(),
+        };
+        const exists = await supabaseRequest("venues?id=eq." + encodeURIComponent(venue.id) + "&select=id");
+        if (Array.isArray(exists) && exists.length > 0) {
+          await supabaseRequest("venues?id=eq." + encodeURIComponent(venue.id), { method: "PATCH", body: payload });
+        } else {
+          payload.created_at = new Date().toISOString();
+          await supabaseRequest("venues", { method: "POST", body: payload });
+        }
+      } catch (error) {
+        reportRemoteSyncError(error);
+      }
+    }
+
+    async function deleteRemoteVenue(venueId) {
+      if (!authSession?.accessToken) return;
+      try {
+        await supabaseRequest("venues?id=eq." + encodeURIComponent(venueId), { method: "DELETE" });
+      } catch (error) {
+        reportRemoteSyncError(error);
+      }
+    }
+
+    // ===== 场馆管理 UI =====
     function adminVenueManager() {
       const venues = Array.isArray(store.venues) ? store.venues : [];
-      return `
-        <form class="admin-machine-sync-card" id="adminVenueForm">
-          <div class="admin-machine-sync-head">
+      const openCount = venues.filter((v) => v.status === "open").length;
+      return /* html */`
+        <div class="admin-section">
+          <div class="admin-section-head">
             <div>
-              <h3>添加场馆</h3>
-              <p>输入场馆名称后点击添加。</p>
+              <h2>场馆管理</h2>
+              <p class="admin-section-summary">当前 ${openCount}/${venues.length} 个场馆开放</p>
             </div>
+            <button class="primary-button" id="adminVenueAddBtn" type="button">${icon("bag")} 新增场馆</button>
           </div>
-          <div style="display:grid;gap:12px;">
-            <label class="field" style="margin:0;">
-              <span>场馆名称</span>
-              <input id="adminVenueInput" placeholder="例如：游泳馆" class="admin-field-input" />
-            </label>
-            <button class="primary-button" type="submit">${icon("bag")} 添加场馆</button>
+          <form class="admin-machine-sync-card" id="adminVenueForm" style="display:none;">
+            <div class="admin-machine-sync-head">
+              <div><h3 id="adminVenueFormTitle">新增场馆</h3></div>
+            </div>
+            <div style="display:grid;gap:12px;">
+              <input type="hidden" id="adminVenueId" />
+              <label class="field" style="margin:0;">
+                <span>场馆名称</span>
+                <input id="adminVenueName" placeholder="例如：游泳馆" />
+              </label>
+              <label class="field" style="margin:0;">
+                <span>场馆位置</span>
+                <input id="adminVenueLocation" placeholder="例如：东区体育馆一楼" />
+              </label>
+              <label class="field" style="margin:0;">
+                <span>开放时间</span>
+                <input id="adminVenueOpenTime" placeholder="例如：08:00 - 22:00" />
+              </label>
+              <label class="field" style="margin:0;">
+                <span>状态</span>
+                <select id="adminVenueStatus">
+                  <option value="open">正常开放</option>
+                  <option value="closed">暂停开放</option>
+                </select>
+              </label>
+              <div style="display:flex;gap:8px;">
+                <button class="primary-button" type="submit">${icon("check")} 保存</button>
+                <button class="secondary-button" type="button" id="adminVenueCancelBtn">${icon("back")} 取消</button>
+              </div>
+            </div>
+          </form>
+          <div class="list-stack">
+            ${venues.length ? venues.map(adminVenueRow).join("") : '<div class="empty">暂无场馆信息。</div>'}
           </div>
-        </form>
-        <div class="list-stack">
-          ${venues.length ? venues.map(adminVenueRow).join("") : '<div class="empty">暂无场馆，请添加。</div>'}
         </div>
       `;
     }
 
     function adminVenueRow(venue) {
-      return `
+      const statusLabel = venue.status === "open" ? "正常开放" : "暂停开放";
+      const statusColor = venue.status === "open" ? "#22c55e" : "#f59e0b";
+      return /* html */`
         <article class="admin-equipment-row" data-admin-venue="${escapeAttr(venue.id)}">
-          <div class="admin-equipment-main" style="grid-column:1/-1;">
-            <strong>${escapeHtml(venue.name)}</strong>
-            <small>${venue.open ? "开放中" : "已关闭"}</small>
+          <div class="admin-equipment-main" style="grid-column:1/-1;display:flex;justify-content:space-between;align-items:center;">
+            <div>
+              <strong>${escapeHtml(venue.name)}</strong>
+              <small>${escapeHtml(venue.location || "未设置位置")} · ${escapeHtml(venue.openTime || "全天")}</small>
+            </div>
+            <span style="display:inline-block;padding:2px 10px;border-radius:12px;font-size:12px;color:#fff;background:${statusColor};">${statusLabel}</span>
           </div>
-          <button class="${venue.open ? "secondary-button" : "primary-button"}" data-admin-venue-toggle="${escapeAttr(venue.id)}" style="grid-column:1/-1;margin-top:6px;">${venue.open ? icon("shield") + " 关闭场地" : icon("check") + " 开放场地"}</button>
+          <div style="display:flex;gap:8px;grid-column:1/-1;">
+            <button class="secondary-button" data-admin-venue-edit="${escapeAttr(venue.id)}">${icon("wrench")} 编辑</button>
+            <button class="secondary-button" style="color:#ef4444;border-color:rgba(239,68,68,0.4);" data-admin-venue-delete="${escapeAttr(venue.id)}">${icon("logout")} 删除</button>
+          </div>
         </article>
       `;
     }
 
+    // ===== 场馆操作 Handlers =====
+    function handleAdminVenueAdd(event) {
+      event.preventDefault();
+      const id = document.querySelector("#adminVenueId").value.trim();
+      const name = document.querySelector("#adminVenueName").value.trim();
+      const location = document.querySelector("#adminVenueLocation").value.trim();
+      const openTime = document.querySelector("#adminVenueOpenTime").value.trim();
+      const status = document.querySelector("#adminVenueStatus").value;
+      if (!name) { state.notice = "请输入场馆名称"; render(); return; }
+      if (!Array.isArray(store.venues)) store.venues = [];
+      const venue = { id: id || "v" + makeUuid().slice(0, 8), name, location, openTime, status };
+      if (id) {
+        const idx = store.venues.findIndex((v) => v.id === id);
+        if (idx >= 0) { store.venues[idx] = venue; }
+      } else {
+        store.venues.push(venue);
+      }
+      saveStore();
+      saveRemoteVenue(venue);
+      state.notice = id ? "已更新场馆：" + name : "已添加场馆：" + name;
+      document.querySelector("#adminVenueForm").style.display = "none";
+      render();
+    }
+
+    function handleAdminVenueEdit(venueId) {
+      const venue = (store.venues || []).find((v) => v.id === venueId);
+      if (!venue) return;
+      const form = document.querySelector("#adminVenueForm");
+      document.querySelector("#adminVenueFormTitle").textContent = "编辑场馆";
+      document.querySelector("#adminVenueId").value = venue.id;
+      document.querySelector("#adminVenueName").value = venue.name;
+      document.querySelector("#adminVenueLocation").value = venue.location || "";
+      document.querySelector("#adminVenueOpenTime").value = venue.openTime || "";
+      document.querySelector("#adminVenueStatus").value = venue.status || "open";
+      form.style.display = "block";
+    }
+
+    function handleAdminVenueDelete(venueId) {
+      const venue = (store.venues || []).find((v) => v.id === venueId);
+      if (!venue) return;
+      showConfirm("确定要删除场馆「" + venue.name + "」吗？此操作不可撤销。", () => {
+        store.venues = store.venues.filter((v) => v.id !== venueId);
+        saveStore();
+        deleteRemoteVenue(venueId);
+        state.notice = "已删除场馆：" + venue.name;
+        render();
+      }, "删除");
+    }
+
+    function resetAdminVenueForm() {
+      const form = document.querySelector("#adminVenueForm");
+      if (form) {
+        form.style.display = "none";
+        document.querySelector("#adminVenueFormTitle").textContent = "新增场馆";
+        document.querySelector("#adminVenueId").value = "";
+        document.querySelector("#adminVenueName").value = "";
+        document.querySelector("#adminVenueLocation").value = "";
+        document.querySelector("#adminVenueOpenTime").value = "";
+        document.querySelector("#adminVenueStatus").value = "open";
+      }
+    }
 
     function filteredAdminEquipmentList() {
       const query = normalizeIdentityText(state.adminEquipmentQuery).toLowerCase();
@@ -10013,19 +10164,6 @@
       render();
     }
 
-    function handleAdminVenueAdd(event) {
-      event.preventDefault();
-      const input = document.querySelector("#adminVenueInput");
-      const name = (input ? input.value : "").trim();
-      if (!name) { state.notice = "请输入场馆名称"; render(); return; }
-      if (!Array.isArray(store.venues)) store.venues = [];
-      if (store.venues.some((v) => v.name === name)) { state.notice = "场馆已存在"; render(); return; }
-      const maxId = store.venues.reduce((max, v) => Math.max(max, Number(v.id.replace(/\D/g, "")) || 0), 0);
-      store.venues.push({ id: "v" + String(maxId + 1), name, open: true });
-      saveStore();
-      state.notice = "已添加场馆：" + name;
-      render();
-    }
 
     async function handleAdminNfcScan(event) {
       event.preventDefault();
@@ -10273,10 +10411,21 @@
       if (adminContactForm) adminContactForm.addEventListener("submit", submitAdminContactForm);
       const adminNfcScanForm = document.querySelector("#adminNfcScanForm");
       if (adminNfcScanForm) adminNfcScanForm.addEventListener("submit", handleAdminNfcScan);
+      const adminVenueAddBtn = document.querySelector("#adminVenueAddBtn");
+      if (adminVenueAddBtn) adminVenueAddBtn.addEventListener("click", () => {
+        const form = document.querySelector("#adminVenueForm");
+        if (form) form.style.display = "block";
+        resetAdminVenueForm();
+      });
       const adminVenueForm = document.querySelector("#adminVenueForm");
       if (adminVenueForm) adminVenueForm.addEventListener("submit", handleAdminVenueAdd);
-      document.querySelectorAll("[data-admin-venue-toggle]").forEach((node) =>
-        node.addEventListener("click", () => handleAdminVenueToggle(node.dataset.adminVenueToggle))
+      const adminVenueCancelBtn = document.querySelector("#adminVenueCancelBtn");
+      if (adminVenueCancelBtn) adminVenueCancelBtn.addEventListener("click", resetAdminVenueForm);
+      document.querySelectorAll("[data-admin-venue-edit]").forEach((node) =>
+        node.addEventListener("click", () => handleAdminVenueEdit(node.dataset.adminVenueEdit))
+      );
+      document.querySelectorAll("[data-admin-venue-delete]").forEach((node) =>
+        node.addEventListener("click", () => handleAdminVenueDelete(node.dataset.adminVenueDelete))
       );
       document.querySelectorAll("[data-admin-delete-tag]").forEach((node) =>
         node.addEventListener("click", () => handleAdminDeleteTag(node.dataset.adminDeleteTag, node.dataset.tagValue))

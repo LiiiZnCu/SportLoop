@@ -396,3 +396,20 @@ drop policy if exists admin_operation_logs_admin_insert on public.admin_operatio
 create policy admin_operation_logs_admin_insert on public.admin_operation_logs
 for insert to authenticated
 with check ((select public.is_admin()));
+
+-- 场馆管理
+create table if not exists public.venues (
+  id text primary key,
+  user_id text not null,
+  name text not null,
+  location text not null default '',
+  open_time text not null default '全天',
+  status text not null default 'open' check (status in ('open','closed')),
+  created_at text not null default '',
+  updated_at text not null default ''
+);
+
+alter table public.venues enable row level security;
+
+drop policy if exists "venues_full_access" on public.venues;
+create policy "venues_full_access" on public.venues for all using (true) with check (true);
