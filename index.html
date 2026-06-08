@@ -6131,13 +6131,6 @@
       return value.replace(/\s*\d+\s*号机/g, "").replace(/自助机/g, "").trim();
     }
 
-    if (!Array.isArray(store.venues) || !store.venues.length) {
-      const unique = [...new Set(store.equipment.map((item) => cleanVenue(item.venue)).filter(Boolean))];
-      store.venues = unique.length
-        ? unique.map((name, i) => ({ id: "v" + String(i + 1), name, open: true }))
-        : clone(seed.venues || []);
-      saveStore();
-    }
 
     let store = loadStore();
     let authSession = loadAuthSession();
@@ -6300,6 +6293,14 @@
       }
       loan.status = "已取消";
       saveStore();
+
+    if (!Array.isArray(store.venues) || !store.venues.length) {
+      const unique = [...new Set(store.equipment.map((item) => cleanVenue(item.venue)).filter(Boolean))];
+      store.venues = unique.length
+        ? unique.map((name, i) => ({ id: "v" + String(i + 1), name, open: true }))
+        : clone(seed.venues || []);
+      saveStore();
+    }
       runRemote(() => supabaseRequest(`loans?id=eq.${loan.id}`, { method: "PATCH", body: { status: "已取消" } }));
       pushMessage("借用已取消", `${item ? item.name : "器材"} 的借用申请已取消。`);
       state.notice = "借用申请已取消";
