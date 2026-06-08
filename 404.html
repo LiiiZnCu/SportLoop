@@ -5822,7 +5822,6 @@
       logs: "adminLogs",
       export: "adminExport",
       venues: "adminVenues",
-      venues: "adminVenues",
     };
 
     function shouldRefreshOnRoute(to) {
@@ -7424,16 +7423,16 @@
     function adminModuleDetails(data) {
       return {
         export: {
-        venues: {
-          title: "场馆管理",
-          desc: "添加体育场馆，并控制开放/关闭状态。",
-          status: `${(store.venues || []).filter((v) => v.open).length} 开放`,
-          content: adminVenueManager(),
-        },
           title: "数据导出",
           desc: "导出库存、机器同步和管理员操作，方便盘点交接。",
           status: "CSV",
           content: adminExportTools(),
+        },
+        venues: {
+          title: "场馆管理",
+          desc: "添加体育场馆，并控制开放/关闭状态。",
+          status: `${(store.venues || []).filter((v) => v.status === "open").length} 开放`,
+          content: adminVenueManager(),
         },
         batch: {
           title: "批量申请",
