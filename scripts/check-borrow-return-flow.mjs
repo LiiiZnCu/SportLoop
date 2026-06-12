@@ -21,6 +21,7 @@ const checks = [
   ["检测放行必须经过统一硬规则", html.includes("function detectionCanPass") && html.includes("result.confidence >= DETECTION_PASS_CONFIDENCE") && html.includes("result.targetMatched === true")],
   ["低可信度或非目标器材必须转异常", damageFunction.includes("const forcedInvalid = confidence < 0.7 || targetMatched !== true || comparable !== true")],
   ["乒乓球拍正反面不能当作可对比照片", damageFunction.includes("正反面") && damageFunction.includes("不同可见面") && damageFunction.includes("comparable")],
+  ["不可比时仍要输出单张可见破损", damageFunction.includes("单张可见破损") && damageFunction.includes("边缘缺口") && damageFunction.includes("不能因为不可比而省略")],
   ["无法识别目标器材必须提示重传或反馈管理员", html.includes("重新上传照片") && html.includes("反馈给管理员")],
   ["异常检测结果必须能直接返回首页", html.includes('反馈给管理员</button>\n                </div>\n                <button class="secondary-button" data-route="home"')],
   ["检测正常后才允许机器归还", html.includes("returnMachineAllowed") && html.includes("const passed = detectionCanPass(normalizedResult)") && html.includes("loan.returnMachineAllowed = passed")],
