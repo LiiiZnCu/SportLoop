@@ -75,6 +75,10 @@ function clampConfidence(value: unknown) {
   return Math.min(1, Math.max(0, num));
 }
 
+function mentionsDifferentVisibleSide(text: string) {
+  return /正反面|正反两面|正面和反面|正面与反面|反面和正面|反面与正面|不同可见面|不同拍面|黑色胶面和红色胶面|红色胶面和黑色胶面/.test(text);
+}
+
 function normalizeResult(raw: Record<string, unknown>): DamageResult {
   const damageLevel = normalizeLevel(raw.damage_level);
   const issues = Array.isArray(raw.issues)
@@ -83,12 +87,15 @@ function normalizeResult(raw: Record<string, unknown>): DamageResult {
   const confidence = clampConfidence(raw.confidence);
   const targetMatched = raw.target_matched === true;
   const comparable = raw.comparable === true;
-  const forcedInvalid = confidence < 0.7 || targetMatched !== true || comparable !== true;
+  const sideMismatch = mentionsDifferentVisibleSide([raw.summary, ...issues].map((item) => String(item || "")).join(" "));
+  const forcedInvalid = confidence < 0.7 || targetMatched !== true || comparable !== true || sideMismatch;
   const invalidReason = !targetMatched
     ? "照片中未清楚显示目标器材，无法完成归还质检对比。"
-    : !comparable
-      ? "两张照片无法有效对比目标器材，无法完成归还质检。"
-      : "检测可信度过低，无法完成归还质检。";
+    : sideMismatch
+      ? "两张照片是正反面或不同可见面，无法判断新增损耗，请按同一面同角度重拍。"
+      : !comparable
+        ? "两张照片无法有效对比目标器材，无法完成归还质检。"
+        : "检测可信度过低，无法完成归还质检。";
   const abnormal = forcedInvalid || damageLevel !== "normal";
   const issueCount = Number.isFinite(Number(raw.issue_count))
     ? Math.max(0, Math.min(9, Number(raw.issue_count)))
@@ -110,7 +117,7 @@ function normalizeResult(raw: Record<string, unknown>): DamageResult {
     issues: normalizedIssues,
     needs_admin_review: abnormal || Boolean(raw.needs_admin_review),
     target_matched: targetMatched,
-    comparable,
+    comparable: comparable && !sideMismatch,
   };
 }
 
@@ -155,9 +162,11 @@ Deno.serve(async (req) => {
       "第一张图片是借出前照片，第二张图片是归还后照片。",
       `器材：${equipmentName}，编号：${assetId}。`,
       "先确认两张图片是否都清楚显示同一类目标器材；如果任一图片不是该器材、目标器材不清楚、被遮挡严重、无法和另一张图对比，必须判为异常。",
-      "只有两张图片都能确认是目标器材，才继续对比归还后是否出现新增破损、变形、开裂、漏气、明显污损、部件脱落等新增损耗。",
-      "不要只识别器材类别后就判正常；正常必须建立在两张目标器材照片可对比且没有新增损耗的基础上。",
-      "不要因为拍摄角度、光线、轻微阴影直接判异常。",
+      "归还质检必须比较同一可见面、同一关键区域；乒乓球拍黑色胶面和红色胶面、正面和反面、拍柄正反两侧都属于不同可见面，必须判为异常，comparable=false。",
+      "即使编号、品牌、器材外形一致，只要两张图片是正反面或不同可见面，也不能判正常，summary 必须提示按同一面同角度重拍。",
+      "只有两张图片都能确认是目标器材，并且同一面同一区域可对比，才继续对比归还后是否出现新增破损、变形、开裂、漏气、明显污损、部件脱落等新增损耗。",
+      "不要只识别器材类别后就判正常；正常必须建立在两张目标器材照片同一可见面可对比且没有新增损耗的基础上。",
+      "不要因为轻微拍摄角度、光线、阴影差异直接判异常，但角度差异不能掩盖同一面同一区域的最低对比要求。",
       "必须只返回 JSON，不要 Markdown，不要解释。",
       "JSON 字段固定为：",
       "{",
