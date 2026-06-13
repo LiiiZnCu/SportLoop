@@ -155,6 +155,15 @@
       flex-direction: column;
     }
 
+    .screen.is-route-entering {
+      animation: screenEnter 220ms cubic-bezier(0.2, 0.85, 0.18, 1) both;
+    }
+
+    @keyframes screenEnter {
+      0% { transform: translateY(4px); opacity: 0.72; }
+      100% { transform: translateY(0); opacity: 1; }
+    }
+
     .screen.admin-shell {
       color: rgba(255, 255, 255, 0.92);
       background:
@@ -667,6 +676,46 @@
       gap: 10px;
     }
 
+    .list-stack > *,
+    .timeline > *,
+    .message-list > *,
+    .equipment-grid > * {
+      animation: listItemIn 260ms ease both;
+    }
+
+    .list-stack > *:nth-child(2),
+    .timeline > *:nth-child(2),
+    .message-list > *:nth-child(2),
+    .equipment-grid > *:nth-child(2) {
+      animation-delay: 35ms;
+    }
+
+    .list-stack > *:nth-child(3),
+    .timeline > *:nth-child(3),
+    .message-list > *:nth-child(3),
+    .equipment-grid > *:nth-child(3) {
+      animation-delay: 70ms;
+    }
+
+    .list-stack > *:nth-child(4),
+    .timeline > *:nth-child(4),
+    .message-list > *:nth-child(4),
+    .equipment-grid > *:nth-child(4) {
+      animation-delay: 105ms;
+    }
+
+    .list-stack > *:nth-child(n + 5),
+    .timeline > *:nth-child(n + 5),
+    .message-list > *:nth-child(n + 5),
+    .equipment-grid > *:nth-child(n + 5) {
+      animation-delay: 140ms;
+    }
+
+    @keyframes listItemIn {
+      0% { transform: translateY(5px); opacity: 0; }
+      100% { transform: translateY(0); opacity: 1; }
+    }
+
     .list-card {
       width: 100%;
       min-height: 116px;
@@ -1069,6 +1118,11 @@
       transition: transform 180ms ease, opacity 180ms ease;
     }
 
+    .primary-button.is-action-done,
+    .secondary-button.is-action-done {
+      animation: actionDonePulse 260ms cubic-bezier(0.2, 0.85, 0.18, 1) both;
+    }
+
     .primary-button {
       color: #ffffff;
       background: linear-gradient(145deg, #c91946, #8c102e);
@@ -1079,6 +1133,12 @@
       color: var(--brand);
       border: 1px solid rgba(159, 18, 57, 0.18);
       background: rgba(255, 255, 255, 0.8);
+    }
+
+    @keyframes actionDonePulse {
+      0% { transform: scale(0.98); }
+      60% { transform: scale(1.018); }
+      100% { transform: scale(1); }
     }
 
     .primary-button:disabled,
@@ -1156,6 +1216,19 @@
       border-radius: 15px;
       color: var(--ink);
       background: rgba(255, 255, 255, 0.82);
+      transition: border-color 180ms ease, box-shadow 180ms ease, background 180ms ease;
+    }
+
+    .field:focus-within > span {
+      color: var(--brand);
+    }
+
+    .field input:focus,
+    .field select:focus,
+    .field textarea:focus {
+      border-color: rgba(159, 18, 57, 0.36);
+      background: rgba(255, 255, 255, 0.94);
+      box-shadow: 0 0 0 4px rgba(159, 18, 57, 0.08);
     }
 
     .field textarea {
@@ -1244,8 +1317,13 @@
       right: 14px;
       top: 50%;
       height: 2px;
-      background: #ffffff;
+      background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.96), transparent);
       box-shadow: 0 0 18px rgba(255, 255, 255, 0.78);
+      opacity: 0.58;
+    }
+
+    .camera-box.is-ai-scanning .scan-line {
+      animation: scanSweep 1.7s ease-in-out infinite;
     }
 
     @keyframes scanSweep {
@@ -1564,6 +1642,93 @@
       border: 1px solid rgba(159, 18, 57, 0.14);
     }
 
+    .ai-progress {
+      display: none;
+      margin-top: 12px;
+      padding: 12px;
+      border-radius: 16px;
+      color: rgba(255, 255, 255, 0.82);
+      background: rgba(255, 255, 255, 0.1);
+      border: 1px solid rgba(255, 255, 255, 0.16);
+    }
+
+    .ai-progress.is-active {
+      display: grid;
+      gap: 8px;
+      animation: listItemIn 220ms ease both;
+    }
+
+    .ai-progress-step {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      font-size: 12px;
+      font-weight: 800;
+      line-height: 1.35;
+      opacity: 0.48;
+      transition: opacity 180ms ease, transform 180ms ease;
+    }
+
+    .ai-progress-step::before {
+      content: "";
+      width: 7px;
+      height: 7px;
+      flex: 0 0 auto;
+      border-radius: 999px;
+      background: rgba(255, 255, 255, 0.48);
+      transition: background 180ms ease, border 180ms ease, transform 180ms ease;
+    }
+
+    .ai-progress-step.is-done::before {
+      width: 6px;
+      height: 10px;
+      border-right: 2px solid rgba(255, 255, 255, 0.92);
+      border-bottom: 2px solid rgba(255, 255, 255, 0.92);
+      border-radius: 0;
+      background: transparent;
+      transform: rotate(45deg) translateY(-1px);
+    }
+
+    .ai-progress-step.is-active {
+      opacity: 1;
+      transform: translateX(1px);
+    }
+
+    .ai-progress-step.is-active::before {
+      background: #ffffff;
+      box-shadow: 0 0 14px rgba(255, 255, 255, 0.62);
+    }
+
+    .issue-list {
+      display: grid;
+      gap: 8px;
+      margin: 0 0 14px;
+      padding: 0;
+      list-style: none;
+    }
+
+    .issue-list li {
+      position: relative;
+      padding: 10px 12px;
+      border-radius: 13px;
+      color: var(--muted);
+      background: var(--brand-soft);
+      border: 1px solid rgba(159, 18, 57, 0.13);
+      font-size: 13px;
+      font-weight: 800;
+      line-height: 1.45;
+      animation: issueReveal 260ms cubic-bezier(0.2, 0.85, 0.18, 1) both;
+    }
+
+    .issue-list li:nth-child(2) { animation-delay: 45ms; }
+    .issue-list li:nth-child(3) { animation-delay: 90ms; }
+    .issue-list li:nth-child(n + 4) { animation-delay: 135ms; }
+
+    @keyframes issueReveal {
+      0% { transform: translateY(5px); opacity: 0; }
+      100% { transform: translateY(0); opacity: 1; }
+    }
+
     .upload-real {
       min-height: 52px;
       display: flex;
@@ -1593,10 +1758,51 @@
     }
 
     .photo-name {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 6px;
       margin-top: 9px;
       color: rgba(255, 255, 255, 0.7);
       font-size: 13px;
       text-align: center;
+    }
+
+    .photo-name.is-selected {
+      color: rgba(255, 255, 255, 0.92);
+      animation: photoPicked 240ms cubic-bezier(0.2, 0.85, 0.18, 1) both;
+    }
+
+    .form-card .photo-name {
+      color: var(--muted);
+    }
+
+    .form-card .photo-name.is-selected {
+      color: var(--brand);
+    }
+
+    .photo-name.is-selected::before {
+      content: "";
+      width: 6px;
+      height: 10px;
+      border-right: 2px solid currentColor;
+      border-bottom: 2px solid currentColor;
+      transform: rotate(45deg) translateY(-1px);
+    }
+
+    .upload-real.is-selected {
+      border-color: rgba(255, 255, 255, 0.42);
+      box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.12), 0 12px 24px rgba(159, 18, 57, 0.14);
+    }
+
+    .form-card .upload-real.is-selected {
+      border-color: rgba(159, 18, 57, 0.34);
+      box-shadow: inset 0 0 0 1px rgba(159, 18, 57, 0.08), 0 12px 24px rgba(159, 18, 57, 0.12);
+    }
+
+    @keyframes photoPicked {
+      0% { transform: translateY(3px); opacity: 0.5; }
+      100% { transform: translateY(0); opacity: 1; }
     }
 
     .form-card {
@@ -2029,6 +2235,7 @@
 
     .admin-dashboard-scroll .admin-task-card {
       appearance: none;
+      isolation: isolate;
       min-height: 58px;
       grid-template-columns: 24px minmax(0, 1fr);
       gap: 6px;
@@ -2037,7 +2244,36 @@
       font: inherit;
       text-align: left;
       cursor: pointer;
-      transition: transform 180ms ease, box-shadow 180ms ease;
+      transition: transform 180ms ease, border-color 180ms ease, box-shadow 180ms ease;
+    }
+
+    .admin-dashboard-scroll .admin-task-card::after {
+      content: "";
+      position: absolute;
+      inset: 1px;
+      z-index: 0;
+      border-radius: inherit;
+      background: radial-gradient(circle at 50% 0%, var(--kpi-border), transparent 58%);
+      opacity: 0;
+      transition: opacity 180ms ease;
+      pointer-events: none;
+    }
+
+    .admin-dashboard-scroll .admin-task-card > * {
+      position: relative;
+      z-index: 1;
+    }
+
+    .admin-dashboard-scroll .admin-task-card:hover,
+    .admin-dashboard-scroll .admin-task-card:focus-visible {
+      border-color: var(--kpi-border);
+      box-shadow: 0 10px 20px rgba(9, 7, 10, 0.22), 0 0 0 1px var(--kpi-border);
+    }
+
+    .admin-dashboard-scroll .admin-task-card:hover::after,
+    .admin-dashboard-scroll .admin-task-card:focus-visible::after,
+    .admin-dashboard-scroll .admin-task-card:active::after {
+      opacity: 1;
     }
 
     .admin-dashboard-scroll .admin-task-card .admin-kpi-icon {
@@ -2053,6 +2289,23 @@
     .admin-dashboard-scroll .admin-task-card strong {
       margin-top: 2px;
       font-size: clamp(16px, 4.4vw, 20px);
+    }
+
+    .admin-dashboard-scroll .admin-task-number {
+      display: inline-block;
+      min-width: 0.75em;
+      transform-origin: 50% 70%;
+      font-variant-numeric: tabular-nums;
+    }
+
+    .admin-dashboard-scroll .admin-task-number.is-count-changing {
+      animation: adminCountPulse 260ms cubic-bezier(0.2, 0.85, 0.18, 1) both;
+    }
+
+    @keyframes adminCountPulse {
+      0% { transform: scale(0.96); opacity: 0.78; }
+      62% { transform: scale(1.055); opacity: 1; }
+      100% { transform: scale(1); opacity: 1; }
     }
 
     .admin-dashboard-scroll .admin-task-card:active {
@@ -2117,6 +2370,12 @@
       flex-shrink: 0;
       margin-left: 0;
       font-size: clamp(10px, 2.5vw, 12px);
+    }
+
+    .admin-dashboard-scroll .admin-task-card .admin-task-number {
+      color: #ffffff;
+      font-size: inherit;
+      font-family: inherit;
     }
 
     @media (max-width: 390px) {
@@ -2204,6 +2463,10 @@
 
     .admin-quick-stage.is-dragging {
       cursor: grabbing;
+    }
+
+    .admin-quick-stage.is-settling .admin-quick-button.is-active i {
+      animation: fanDockPulse 240ms cubic-bezier(0.2, 0.85, 0.18, 1) both;
     }
 
     .admin-quick-stage::before {
@@ -2308,6 +2571,14 @@
       filter: drop-shadow(0 18px 24px rgba(36, 26, 31, 0.3));
     }
 
+    .admin-quick-button.is-active .admin-quick-text {
+      animation: fanTextRise 360ms cubic-bezier(0.2, 0.85, 0.18, 1) both;
+    }
+
+    .admin-quick-button.is-active b {
+      animation: fanBadgePop 320ms cubic-bezier(0.2, 0.85, 0.18, 1) both;
+    }
+
     .admin-quick-button.is-hidden {
       opacity: 0;
       pointer-events: none;
@@ -2375,6 +2646,22 @@
     .admin-quick-button.is-active i::after {
       background: rgba(255, 255, 255, 0.72);
       box-shadow: 0 0 16px rgba(255, 255, 255, 0.24);
+    }
+
+    @keyframes fanTextRise {
+      0% { transform: translateY(3px); opacity: 0.72; }
+      100% { transform: translateY(0); opacity: 1; }
+    }
+
+    @keyframes fanBadgePop {
+      0% { transform: scale(0.86); opacity: 0.2; }
+      100% { transform: scale(1); opacity: 1; }
+    }
+
+    @keyframes fanDockPulse {
+      0% { transform: scale(0.98); }
+      64% { transform: scale(1.035); }
+      100% { transform: scale(1); }
     }
 
     .admin-quick-button i svg {
@@ -3594,8 +3881,10 @@
       min-height: 0;
       display: grid;
       align-content: center;
+      justify-items: center;
       padding: clamp(6px, 2.2vw, 14px) clamp(4px, 2vw, 10px);
       border-right: 1px solid rgba(159, 18, 57, 0.18);
+      text-align: center;
     }
 
     .profile-file-metric:last-child {
@@ -3605,7 +3894,9 @@
     .profile-file-metric span {
       display: flex;
       align-items: center;
+      justify-content: center;
       gap: clamp(3px, 1.2vw, 6px);
+      max-width: 100%;
       color: var(--ink);
       font-size: clamp(8px, 2.6vw, 12px);
       font-weight: 700;
@@ -3621,9 +3912,11 @@
     .profile-file-metric strong {
       display: block;
       margin-top: clamp(8px, 2.8vw, 14px);
-      font-size: clamp(17px, 5.2vw, 26px);
+      max-width: 100%;
+      font-size: clamp(16px, 4.4vw, 24px);
       line-height: 1;
       font-weight: 900;
+      text-align: center;
       white-space: nowrap;
     }
 
@@ -3858,10 +4151,16 @@
     }
 
     .empty {
+      animation: emptyStateIn 240ms cubic-bezier(0.2, 0.85, 0.18, 1) both;
       padding: 18px;
       border: 1px solid var(--line);
       border-radius: var(--radius-md);
       background: rgba(255, 255, 255, 0.72);
+    }
+
+    @keyframes emptyStateIn {
+      0% { transform: translateY(4px); opacity: 0; }
+      100% { transform: translateY(0); opacity: 1; }
     }
 
     .tabbar {
@@ -3882,7 +4181,25 @@
       backdrop-filter: blur(16px);
     }
 
+    .tabbar::before {
+      content: "";
+      position: absolute;
+      left: 5px;
+      top: 5px;
+      bottom: 5px;
+      z-index: 0;
+      width: calc((100% - 10px) / 5);
+      border-radius: 19px;
+      background: var(--brand-soft);
+      opacity: var(--tab-indicator-opacity, 1);
+      transform: translateX(calc(var(--tab-index, 0) * 100%));
+      transition: transform 240ms cubic-bezier(0.2, 0.85, 0.18, 1), opacity 160ms ease;
+      pointer-events: none;
+    }
+
     .tab-button {
+      position: relative;
+      z-index: 1;
       min-height: 52px;
       display: grid;
       place-items: center;
@@ -3890,12 +4207,12 @@
       color: var(--muted);
       border-radius: 19px;
       background: transparent;
-      transition: transform 180ms ease, color 180ms ease, background 180ms ease;
+      transition: color 180ms ease, background 180ms ease;
     }
 
     .tab-button.active {
       color: var(--brand);
-      background: var(--brand-soft);
+      background: transparent;
       font-weight: 850;
     }
 
@@ -3906,6 +4223,20 @@
     .tab-button svg {
       width: 21px;
       height: 21px;
+      transition: transform 220ms cubic-bezier(0.2, 0.85, 0.18, 1), stroke-width 180ms ease;
+    }
+
+    .tab-button.active svg {
+      transform: scale(1.04);
+      stroke-width: 2.7;
+    }
+
+    .tab-button:active svg {
+      transform: scale(0.96);
+    }
+
+    .tab-button.active:active svg {
+      transform: scale(1);
     }
 
     .brand-lockup {
@@ -4129,6 +4460,33 @@
     @media (prefers-reduced-motion: reduce) {
       .loading-spinner {
         animation: none;
+      }
+
+      .screen.is-route-entering,
+      .list-stack > *,
+      .timeline > *,
+      .message-list > *,
+      .equipment-grid > *,
+      .issue-list li,
+      .empty,
+      .camera-box.is-ai-scanning .scan-line,
+      .admin-quick-stage.is-settling .admin-quick-button.is-active i,
+      .admin-dashboard-scroll .admin-task-number.is-count-changing,
+      .primary-button.is-action-done,
+      .secondary-button.is-action-done,
+      .photo-name.is-selected {
+        animation: none !important;
+      }
+
+      .tabbar::before,
+      .tab-button svg,
+      .admin-quick-button,
+      .ai-progress-step,
+      .ai-progress-step::before,
+      .field input,
+      .field select,
+      .field textarea {
+        transition: none !important;
       }
     }
 
@@ -5309,12 +5667,14 @@
       isAdmin: false,
       remoteLoading: false,
       loading: false,
+      renderedRoute: "",
       adminEquipmentQuery: "",
       adminEquipmentStatus: "全部",
       adminFanIndex: 0,
       adminFanSuppressClick: false,
       adminFanSuppressUntil: 0,
       adminFanLastSwipeAt: 0,
+      adminTaskCounts: {},
     };
 
     const appEl = document.querySelector("#app");
@@ -6677,6 +7037,41 @@
       return html;
     }
 
+    function applyRouteMotion(routeKey) {
+      const routeChanged = state.renderedRoute !== routeKey;
+      state.renderedRoute = routeKey;
+      if (!routeChanged || window.matchMedia?.("(prefers-reduced-motion: reduce)")?.matches) return;
+      document.querySelector(".screen")?.classList.add("is-route-entering");
+    }
+
+    function markPhotoSelected(input, statusSelector, label) {
+      const file = input?.files?.[0];
+      if (!file) return;
+      const status = document.querySelector(statusSelector);
+      const upload = input.closest(".upload-real");
+      if (status) {
+        status.textContent = `已选择${label}：${file.name}`;
+        status.classList.add("is-selected");
+      }
+      upload?.classList.add("is-selected");
+    }
+
+    function markActionDone(button, label = "已完成") {
+      if (!button) return;
+      button.classList.add("is-action-done");
+      button.disabled = true;
+      button.innerHTML = `${icon("check")} ${label}`;
+    }
+
+    function finishWithButtonFeedback(button, label, done) {
+      if (!button) {
+        done();
+        return;
+      }
+      markActionDone(button, label);
+      window.setTimeout(done, 220);
+    }
+
     function tabbar() {
       const tabs = [
         ["home", "首页", "home"],
@@ -6685,8 +7080,10 @@
         ["messages", "消息", "bell"],
         ["profile", "我的", "user"],
       ];
+      const activeIndex = tabs.findIndex(([name]) => state.route === name);
+      const indicatorIndex = Math.max(0, activeIndex);
       return `
-        <nav class="tabbar" aria-label="底部导航">
+        <nav class="tabbar" aria-label="底部导航" style="--tab-index:${indicatorIndex}; --tab-indicator-opacity:${activeIndex >= 0 ? 1 : 0};">
           ${tabs.map(([name, label, svg]) => `
             <button class="tab-button ${state.route === name ? "active" : ""}" data-route="${name}" aria-label="${label}">
               ${icon(svg)}<span>${label}</span>
@@ -7465,6 +7862,12 @@
               <input id="photoInput" type="file" accept="image/*" capture="environment" /><!-- [IMAGE-13] 用户拍摄/选择的归还检测照片（非静态资源） -->
             </label>
             <div id="photoName" class="photo-name">未选择归还照片</div>
+            <div class="ai-progress" id="aiDetectProgress" aria-live="polite">
+              <span class="ai-progress-step is-active">扫描借出前和归还照片</span>
+              <span class="ai-progress-step">对齐器材可见面与关键区域</span>
+              <span class="ai-progress-step">识别边缘缺口、撕裂和露底</span>
+              <span class="ai-progress-step">生成归还质检结论</span>
+            </div>
           </section>
           <div class="button-row">
             <button class="primary-button" data-ai-detect="${loan.id}">${icon("camera")} 开始损耗检测</button>
@@ -7498,7 +7901,7 @@
               ${metric(result.riskLabel, "风险")}
               ${metric(String(result.issueCount), "问题点")}
             </div>
-            ${result.issues.length ? `<p class="machine-hint">疑似问题：${result.issues.map(escapeHtml).join("、")}</p>` : ""}
+            ${result.issues.length ? `<ul class="issue-list">${result.issues.map((issue) => `<li>${escapeHtml(issue)}</li>`).join("")}</ul>` : ""}
             <p class="machine-hint">${canReturn ? "检测正常，系统已允许机器扫码归还。请到场馆机器完成归还后，再同步状态。" : "检测未通过，暂不允许机器扫码归还，请等待管理员复核。"}</p>
             ${canReturn
               ? `<button class="primary-button" data-sync-return="${loan.id}">${icon("bag")} 同步机器归还</button>`
@@ -7785,13 +8188,21 @@
       `;
     }
 
+    function adminTaskCountClass(key, value) {
+      if (!state.adminTaskCounts) state.adminTaskCounts = {};
+      const previous = state.adminTaskCounts[key];
+      state.adminTaskCounts[key] = value;
+      return previous !== undefined && previous !== value ? " is-count-changing" : "";
+    }
+
     function adminTaskCard(label, value, unit, iconName, routeName) {
+      const countClass = adminTaskCountClass(routeName, value);
       return `
         <button class="admin-kpi-card is-compact admin-task-card" type="button" data-admin-route="${escapeAttr(routeName)}">
           <i class="admin-kpi-icon">${icon(iconName)}</i>
           <div>
             <small>${escapeHtml(label)}</small>
-            <strong>${value}<span>${escapeHtml(unit)}</span></strong>
+            <strong><span class="admin-task-number${countClass}">${value}</span><span>${escapeHtml(unit)}</span></strong>
           </div>
         </button>
       `;
@@ -8620,7 +9031,7 @@
       return loan;
     }
 
-    async function finishBorrowWithBeforePhoto(loanId) {
+    async function finishBorrowWithBeforePhoto(loanId, button) {
       const loan = loanById(loanId);
       if (!loan) return;
       const item = byId(loan.equipmentId);
@@ -8680,7 +9091,7 @@
       pushMessage("借用成功", `${item.name} ${item.assetId} 已保存借出前照片，归还截止 ${loan.dueAt}。`);
       saveStore();
       state.notice = "借用成功";
-      route("borrowConfirm", { loanId: loan.id });
+      finishWithButtonFeedback(button, "已保存", () => route("borrowConfirm", { loanId: loan.id }));
     }
 
     function loadImageFromFile(file, label) {
@@ -8726,6 +9137,30 @@
       return compressImageFile(file, label);
     }
 
+    function startAiDetectionProgress() {
+      const panel = document.querySelector("#aiDetectProgress");
+      document.querySelector(".camera-box")?.classList.add("is-ai-scanning");
+      if (!panel) return null;
+      const steps = [...panel.querySelectorAll(".ai-progress-step")];
+      if (!steps.length) return null;
+      let activeIndex = 0;
+      panel.classList.add("is-active");
+      const update = () => {
+        steps.forEach((step, index) => {
+          step.classList.toggle("is-active", index === activeIndex);
+          step.classList.toggle("is-done", index < activeIndex);
+        });
+        activeIndex = Math.min(steps.length - 1, activeIndex + 1);
+      };
+      update();
+      return window.setInterval(update, 950);
+    }
+
+    function stopAiDetectionProgress(timer) {
+      if (timer) window.clearInterval(timer);
+      document.querySelector(".camera-box")?.classList.remove("is-ai-scanning");
+    }
+
     async function runAiDetection(loanId) {
       const loan = loanById(loanId);
       if (!loan) return;
@@ -8733,6 +9168,7 @@
       if (!item) return;
       const button = document.querySelector(`[data-ai-detect="${loanId}"]`);
       const originalHtml = button?.innerHTML || "";
+      const progressTimer = startAiDetectionProgress();
       try {
         if (button) {
           button.disabled = true;
@@ -8771,8 +9207,10 @@
           : `${item.name} 检测异常，暂不允许机器扫码归还，已生成复核记录。`);
         saveStore();
         saveRemoteLoan(loan);
+        stopAiDetectionProgress(progressTimer);
         route("result", { loanId });
       } catch (error) {
+        stopAiDetectionProgress(progressTimer);
         state.notice = error instanceof Error ? error.message : "检测失败";
         if (button) {
           button.disabled = false;
@@ -8889,7 +9327,7 @@
       batchRequestList().unshift(request);
       saveStore();
       state.notice = "";
-      render();
+      finishWithButtonFeedback(event.submitter, "已提交", render);
     }
 
     async function notifyBatchRequestUser(request, title, body) {
@@ -9068,7 +9506,7 @@
       route("borrow");
     }
 
-    function submitRenewLoan(loanId) {
+    function submitRenewLoan(loanId, button) {
       const loan = loanById(loanId);
       if (!canRenewLoan(loan)) {
         state.notice = "这条记录当前不可续借";
@@ -9101,7 +9539,7 @@
       saveStore();
       saveRemoteLoan(loan);
       state.notice = "续借申请已通过";
-      route("borrow", { loanId });
+      finishWithButtonFeedback(button, "已提交", () => route("borrow", { loanId }));
     }
 
     function createOrder(equipmentId, source, title, loanId = "") {
@@ -9398,12 +9836,15 @@
       if (!state.loggedIn) {
         appEl.classList.remove("is-admin-view");
         const loginPages = { login: loginPage, roleSelect: roleSelectPage, credentials: credentialsPage, register: registerPage };
+        const routeKey = `login:${state.route || "login"}`;
         appEl.innerHTML = (loginPages[state.route] || loginPage)();
+        applyRouteMotion(routeKey);
         bindLogin();
         return;
       }
       state.route = normalizeRouteForRole(state.route);
       appEl.classList.toggle("is-admin-view", state.route.startsWith("admin"));
+      const routeKey = `app:${state.route}`;
 
       const pages = {
         home: homePage,
@@ -9436,6 +9877,7 @@
         identity: identityPage,
       };
       appEl.innerHTML = (pages[state.route] || homePage)();
+      applyRouteMotion(routeKey);
       bind();
     }
 
@@ -10170,7 +10612,7 @@
       store.profile = nextProfile;
       saveStore();
       state.notice = "校园身份认证已保存";
-      route("profileInfo");
+      finishWithButtonFeedback(event.submitter, "已保存", () => route("profileInfo"));
     }
 
     function setContactStatus(message, isError = true) {
@@ -10217,7 +10659,7 @@
       pushMessage("已发送给管理员", "你的留言已同步到管理员端，管理员回复后会出现在消息和联系记录里。");
       saveStore();
       state.notice = "已发送给管理员";
-      render();
+      finishWithButtonFeedback(event.submitter, "已发送", render);
     }
 
     async function replyAdminMessage(messageId, card) {
@@ -10537,6 +10979,15 @@
       setAdminFanIndex((Number(state.adminFanIndex) || 0) + step);
     }
 
+    function markAdminFanSettling(stage) {
+      if (!stage) return;
+      window.clearTimeout(window.__adminFanSettleTimer);
+      stage.classList.add("is-settling");
+      window.__adminFanSettleTimer = window.setTimeout(() => {
+        stage.classList.remove("is-settling");
+      }, 260);
+    }
+
     function updateAdminFanView(progress = 0, dragging = false) {
       const stage = document.querySelector("[data-admin-fan-stage]");
       const cards = Array.from(document.querySelectorAll("[data-admin-fan-index]"));
@@ -10578,6 +11029,7 @@
       } else {
         updateAdminFanView(0, false);
       }
+      markAdminFanSettling(stage);
       if (!didSwitch) {
         state.adminFanSuppressClick = false;
         state.adminFanSuppressUntil = 0;
@@ -10835,11 +11287,11 @@
       }));
       document.querySelectorAll("[data-submit-renew]").forEach((node) => node.addEventListener("click", () => {
         if (node.disabled) return;
-        submitRenewLoan(node.dataset.submitRenew);
+        submitRenewLoan(node.dataset.submitRenew, node);
       }));
       document.querySelectorAll("[data-save-borrow-before]").forEach((node) => node.addEventListener("click", () => {
         if (node.disabled) return;
-        finishBorrowWithBeforePhoto(node.dataset.saveBorrowBefore);
+        finishBorrowWithBeforePhoto(node.dataset.saveBorrowBefore, node);
       }));
       document.querySelectorAll("[data-ai-detect]").forEach((node) => node.addEventListener("click", () => runAiDetection(node.dataset.aiDetect)));
       document.querySelectorAll("[data-admin-pause]").forEach((node) => node.addEventListener("click", () => updateOrder(node.dataset.adminPause, "暂停借出")));
@@ -10881,7 +11333,7 @@
       if (borrowBeforePhotoInput) {
         borrowBeforePhotoInput.addEventListener("change", (e) => {
           if (e.target.files && e.target.files[0]) {
-            document.querySelector("#borrowBeforePhotoName").innerText = "已选择借出前照片：" + e.target.files[0].name;
+            markPhotoSelected(e.target, "#borrowBeforePhotoName", "借出前照片");
           }
         });
       }
@@ -10889,7 +11341,16 @@
       if (photoInput) {
         photoInput.addEventListener("change", (e) => {
           if (e.target.files && e.target.files[0]) {
-            document.querySelector("#photoName").innerText = "已选择归还照片：" + e.target.files[0].name;
+            markPhotoSelected(e.target, "#photoName", "归还照片");
+            const progress = document.querySelector("#aiDetectProgress");
+            if (progress) {
+              progress.classList.remove("is-active");
+              progress.querySelectorAll(".ai-progress-step").forEach((step, index) => {
+                step.classList.toggle("is-active", index === 0);
+                step.classList.remove("is-done");
+              });
+            }
+            document.querySelector(".camera-box")?.classList.remove("is-ai-scanning");
           }
         });
       }
@@ -10913,7 +11374,7 @@
           const repDesc = document.querySelector("#reportDesc").value;
           createOrder(eqId, "手机端自主报备", repType + " (" + repDesc + ")");
           state.notice = "故障工单已同步到管理员端！";
-          route("home");
+          finishWithButtonFeedback(e.submitter, "已提交", () => route("home"));
         });
       }
     }
