@@ -10932,7 +10932,7 @@
         const name = parts[1];
         const category = parts[2];
         const venue = parts[3];
-        const tagId = parts[4].toUpperCase();
+        const tagId = normalizeNfcSerial(parts[4]);
         if (!assetId || !name || !category || !venue || !tagId) throw new Error(`第 ${index + 1} 行有空字段`);
         if (seenTags.has(tagId)) {
           duplicateTags.push(tagId);
@@ -10959,7 +10959,11 @@
       const index = new Map();
       store.equipment.forEach((item) => {
         (Array.isArray(item.nfcTags) ? item.nfcTags : []).forEach((tag) => {
-          index.set(String(tag).toUpperCase(), item.assetId);
+          const tagId = normalizeNfcSerial(tag);
+          if (!tagId) return;
+          const boundAsset = index.get(tagId);
+          if (boundAsset) throw new Error(`芯片号 ${tagId} 已重复绑定到 ${boundAsset}`);
+          index.set(tagId, item.assetId);
         });
       });
       return index;
@@ -10973,10 +10977,10 @@
       const duplicateTags = [];
       const items = groups.map((group) => {
         const current = store.equipment.find((item) => item.assetId === group.assetId);
-        const currentTags = new Set((Array.isArray(current?.nfcTags) ? current.nfcTags : []).map((tag) => String(tag).toUpperCase()));
+        const currentTags = new Set((Array.isArray(current?.nfcTags) ? current.nfcTags : []).map(normalizeNfcSerial).filter(Boolean));
         const newTags = [];
         group.nfcTags.forEach((tag) => {
-          const tagId = String(tag).toUpperCase();
+          const tagId = normalizeNfcSerial(tag);
           const boundAsset = tagIndex.get(tagId);
           if (boundAsset && boundAsset !== group.assetId) throw new Error(`芯片号 ${tagId} 已绑定到 ${boundAsset}`);
           if (currentTags.has(tagId)) {
@@ -11050,7 +11054,10 @@
         const existingIndex = new Map();
         store.equipment.forEach((eq) => {
           (Array.isArray(eq.nfcTags) ? eq.nfcTags : []).forEach((tag) => {
-            existingIndex.set(normalizeNfcSerial(tag), eq.id);
+            const existingTagId = normalizeNfcSerial(tag);
+            if (!existingTagId) return;
+            if (existingIndex.has(existingTagId)) throw new Error(`芯片号 ${existingTagId} 已重复绑定，请先清理库存`);
+            existingIndex.set(existingTagId, eq.id);
           });
         });
 
@@ -11085,7 +11092,8 @@
       const item = byId(equipmentId);
       if (!item) return;
       const tags = Array.isArray(item.nfcTags) ? item.nfcTags : [];
-      const idx = tags.findIndex((tag) => String(tag) === String(tagValue));
+      const targetTag = normalizeNfcSerial(tagValue);
+      const idx = tags.findIndex((tag) => normalizeNfcSerial(tag) === targetTag);
       if (idx < 0) return;
       const previousItem = { total: item.total, available: item.available, status: item.status, nfcTags: [...tags] };
       tags.splice(idx, 1);
