@@ -7001,6 +7001,10 @@
       return store.equipment.filter(isListedEquipment);
     }
 
+    function canBorrowEquipment(item) {
+      return isListedEquipment(item) && item.status === "可借" && Number(item.available) > 0;
+    }
+
     function loanById(id) {
       return store.loans.find((loan) => loan.id === id);
     }
@@ -7569,6 +7573,7 @@
     function detailPage() {
       const item = byId(state.selectedId);
       if (!item) return shell("器材详情", `<main class="scroll"><div class="empty">暂无这个器材，请先回到器材列表。</div></main>`);
+      const canBorrow = canBorrowEquipment(item);
       const periods = selectedBorrowPeriods();
       const durationText = borrowDurationLabel(periods);
       const body = `
@@ -7578,7 +7583,7 @@
             <div class="detail-title">
               <div>
                 <h1>${item.name}</h1>
-                <p>可借 ${item.available} 件</p>
+                <p>${canBorrow ? `可借 ${item.available} 件` : "暂无可借库存"}</p>
               </div>
             </div>
             <div class="info-list">
@@ -7592,7 +7597,7 @@
               <div class="duration-options">${borrowDurationOptions()}</div>
               <p class="machine-hint" style="margin:0;">当前选择：${durationText}</p>
             </div>
-            <button class="primary-button" data-sync-borrow="${item.id}" ${item.available <= 0 ? "disabled" : ""}>${icon("bag")} 借用</button>
+            <button class="primary-button" data-sync-borrow="${item.id}" ${canBorrow ? "" : "disabled"}>${icon("bag")} 借用</button>
             <p class="machine-hint" style="margin-top:12px;">点击借用后将生成 6 位验证码，请前往场馆 NFC 识别机器输入验证码并贴 NFC 标签完成验证。</p>
           </section>
         </main>
@@ -7792,7 +7797,7 @@
     }
 
     function batchBorrowPage() {
-      const available = listedEquipment().filter((item) => item.status === "可借" && item.available > 0);
+      const available = listedEquipment().filter(canBorrowEquipment);
       const ownRequests = batchRequestList().filter((request) => request.userId === state.currentUserId);
       const formContent = available.length ? `
         <form class="batch-apply-panel" id="batchBorrowForm">
@@ -9196,7 +9201,7 @@
         if (!options.skipNavigate) render();
         return existing;
       }
-      if (item.available <= 0 || item.status === "维修中") {
+      if (!canBorrowEquipment(item)) {
         state.notice = "场馆暂无可用库存";
         if (!options.skipNavigate) render();
         return null;
@@ -9249,7 +9254,7 @@
         return;
       }
       const shouldReserveInventory = loan.status === "待补借出照片";
-      if (shouldReserveInventory && (item.available <= 0 || item.status === "维修中")) {
+      if (shouldReserveInventory && !canBorrowEquipment(item)) {
         state.notice = "场馆暂无可用库存，请确认机器借出是否有效";
         render();
         return;
@@ -11082,20 +11087,22 @@
       const tags = Array.isArray(item.nfcTags) ? item.nfcTags : [];
       const idx = tags.findIndex((tag) => String(tag) === String(tagValue));
       if (idx < 0) return;
+      const previousItem = { total: item.total, available: item.available, status: item.status, nfcTags: [...tags] };
       tags.splice(idx, 1);
       item.nfcTags = tags;
       item.total = Math.max(0, item.total - 1);
       item.available = Math.max(0, Math.min(item.available, item.total));
-      if (item.total === 0) item.status = "补充中";
+      item.status = item.available > 0 ? "可借" : "补充中";
       try {
         await updateRemoteEquipment(item);
         createAdminOperationLog("删除NFC标签", "equipment", item.id, `${item.name} 删除 NFC 标签 ${tagValue}`);
         saveStore();
         state.notice = "NFC 标签已删除";
       } catch (err) {
-        item.total += 1;
-        item.available += 1;
-        tags.push(tagValue);
+        item.total = previousItem.total;
+        item.available = previousItem.available;
+        item.status = previousItem.status;
+        item.nfcTags = previousItem.nfcTags;
         state.notice = err.message || "删除失败";
       }
       render();
