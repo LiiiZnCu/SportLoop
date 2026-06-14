@@ -7,8 +7,8 @@
   <meta name="apple-mobile-web-app-capable" content="yes">
   <meta name="apple-mobile-web-app-title" content="SportLoop">
   <link rel="manifest" href="manifest.webmanifest">
-  <link rel="preload" as="image" href="assets/hero.png?v=12">
-  <link rel="apple-touch-icon" href="assets/app-icon.png?v=12">
+  <link rel="preload" as="image" href="assets/hero.webp?v=13">
+  <link rel="apple-touch-icon" href="assets/app-icon.png?v=13">
   <title>SportLoop</title>
   <style>
     /* ==================== 1. 用户的 STYLES.CSS 原样导入 ==================== */
@@ -5674,7 +5674,7 @@
     .new-hero-container {
       background:
         linear-gradient(rgba(0, 0, 0, 0.10), rgba(0, 0, 0, 0.10)),
-        url("assets/hero.png?v=12") center/cover no-repeat;
+        url("assets/hero.webp?v=13") center/cover no-repeat;
       padding: 22px 18px;
       border-radius: 28px;
       border: 1px solid rgba(255, 255, 255, 0.15);
@@ -5908,7 +5908,7 @@
     const SUPABASE_PUBLIC_KEY = "sb_publishable_LQqefYrKcOKLIqqFqNTjgQ_qFjyZOB8";
 
     // 替换 assets 下同名图片后，把此数字 +1，可避免浏览器继续显示旧图缓存
-    const ASSET_VERSION = "12";
+    const ASSET_VERSION = "13";
     const CLASS_PERIOD_MINUTES = 90;
     const BORROW_PERIOD_OPTIONS = [1, 2, 3];
     const PHOTO_MAX_SIDE = 1280;
@@ -5936,8 +5936,8 @@
     }
 
     const APP_ICON_SRC = "assets/app-icon.png";
-    const HERO_EQUIPMENT_SRC = "assets/hero.png";
-    const PROFILE_FOLDER_SRC = "assets/profile-folder-from-upload.png";
+    const HERO_EQUIPMENT_SRC = "assets/hero.webp";
+    const PROFILE_FOLDER_SRC = "assets/profile-folder-from-upload.webp";
 
     /*
     ═══════════════════════════════════════════════════════════════════════════
@@ -6029,7 +6029,7 @@
           assetId: "PP-ZP",
           name: "乒乓球拍（直拍）",
           category: "乒乓球拍",
-          image: "assets/paddle-red.png",
+          image: "assets/paddle-red.webp",
           total: 0,
           available: 0,
           status: "补充中",
@@ -6042,7 +6042,7 @@
           assetId: "PP-HP",
           name: "乒乓球拍（横拍）",
           category: "乒乓球拍",
-          image: "assets/paddle-black.png",
+          image: "assets/paddle-black.webp",
           total: 0,
           available: 0,
           status: "补充中",
@@ -6055,7 +6055,7 @@
           assetId: "BK",
           name: "篮球",
           category: "篮球",
-          image: "assets/basketball.png",
+          image: "assets/basketball.webp",
           total: 0,
           available: 0,
           status: "补充中",
@@ -6068,7 +6068,7 @@
           assetId: "FB",
           name: "足球",
           category: "足球",
-          image: "assets/football.png",
+          image: "assets/football.webp",
           total: 0,
           available: 0,
           status: "补充中",
@@ -6081,7 +6081,7 @@
           assetId: "BD",
           name: "羽毛球拍",
           category: "羽毛球拍",
-          image: "assets/racket.png",
+          image: "assets/racket.webp",
           total: 0,
           available: 0,
           status: "补充中",
@@ -9621,7 +9621,7 @@
           </section>
 
           <section class="profile-file">
-            <img class="profile-folder-img" src="${escapeAttr(assetUrl(PROFILE_FOLDER_SRC))}" alt="" aria-hidden="true" loading="eager" decoding="async" fetchpriority="high" />
+            <img class="profile-folder-img" src="${escapeAttr(assetUrl(PROFILE_FOLDER_SRC))}" alt="" aria-hidden="true" loading="lazy" decoding="async" />
             <div class="profile-file-card">
               <div class="profile-file-title">
                 <h2>我的借用档案</h2>
