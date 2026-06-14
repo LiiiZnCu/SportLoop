@@ -1769,6 +1769,53 @@
       opacity: 0.62;
     }
 
+    .photo-pair-grid {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 10px;
+      margin-top: 18px;
+    }
+
+    .photo-pair-slot {
+      min-width: 0;
+      display: grid;
+      gap: 6px;
+    }
+
+    .photo-pair-slot .upload-real {
+      min-height: 50px;
+      margin-top: 0;
+      padding: 0 10px;
+      font-size: clamp(12px, 3.4vw, 14px);
+      text-align: center;
+    }
+
+    .photo-pair-slot .photo-name {
+      width: 100%;
+      margin-top: 0;
+      line-height: 1.35;
+      overflow-wrap: anywhere;
+    }
+
+    .photo-pair-helper {
+      grid-column: 1 / -1;
+      margin: 0;
+      color: rgba(255, 255, 255, 0.72);
+      font-size: 12px;
+      line-height: 1.45;
+      text-align: center;
+    }
+
+    .result-card .photo-pair-helper {
+      color: var(--muted);
+    }
+
+    @media (max-width: 360px) {
+      .photo-pair-grid {
+        grid-template-columns: 1fr;
+      }
+    }
+
     .photo-name {
       display: inline-flex;
       align-items: center;
@@ -5668,7 +5715,7 @@
       IMAGE-12  顶栏/个人中心头像 .avatar
 
     用户上传（运行时选择，非静态路径）:
-      IMAGE-13  归还前检测 #photoInput
+      IMAGE-13  归还前检测 #returnFrontPhotoInput/#returnBackPhotoInput
       IMAGE-14  报损反馈 #reportPhoto
 
     兜底:
@@ -5798,7 +5845,7 @@
         { id: "v4", name: "室外篮球场", open: true },
       ],
       messages: [
-        { id: "m1", title: "欢迎使用 SportLoop", text: "选择器材 → 获取验证码 → 场馆 NFC 机器扫描验证 → 上传借出前照片完成借用。", time: "刚刚" },
+        { id: "m1", title: "欢迎使用 SportLoop", text: "选择器材 → 获取验证码 → 场馆 NFC 机器扫描验证 → 上传借出前正反两面照片完成借用。", time: "刚刚" },
       ],
     };
 
@@ -6022,13 +6069,13 @@
 
     function parseDetectionResult(value) {
       if (!value) {
-        return { status: "", damageLevel: "", confidence: 0, riskLabel: "低", issueCount: 0, summary: "暂无检测结果。", issues: [], targetMatched: false, comparable: false, needsAdminReview: false };
+        return { status: "", damageLevel: "", confidence: 0, riskLabel: "低", issueCount: 0, summary: "暂无检测结果。", issues: [], sideResults: [], targetMatched: false, comparable: false, needsAdminReview: false };
       }
       if (value === "正常") {
-        return { status: "正常", damageLevel: "normal", confidence: 0.97, riskLabel: "低", issueCount: 0, summary: "未发现明显破损，请到场馆机器完成归还扫码。", issues: [], targetMatched: true, comparable: true, needsAdminReview: false };
+        return { status: "正常", damageLevel: "normal", confidence: 0.97, riskLabel: "低", issueCount: 0, summary: "未发现明显破损，请到场馆机器完成归还扫码。", issues: [], sideResults: [], targetMatched: true, comparable: true, needsAdminReview: false };
       }
       if (value === "异常") {
-        return { status: "异常", damageLevel: "obvious", confidence: 0.86, riskLabel: "中", issueCount: 2, summary: "疑似新增损耗，已生成异常记录。", issues: ["疑似胶皮翘边", "疑似拍柄松动"], targetMatched: false, comparable: false, needsAdminReview: true };
+        return { status: "异常", damageLevel: "obvious", confidence: 0.86, riskLabel: "中", issueCount: 2, summary: "疑似新增损耗，已生成异常记录。", issues: ["疑似胶皮翘边", "疑似拍柄松动"], sideResults: [], targetMatched: false, comparable: false, needsAdminReview: true };
       }
       try {
         const data = JSON.parse(value);
@@ -6036,7 +6083,9 @@
         const targetMatched = data.target_matched === true;
         const comparable = data.comparable === true;
         const confidence = Math.max(0, Math.min(1, Number(data.confidence) || 0));
-        const passed = status === "正常" && confidence >= DETECTION_PASS_CONFIDENCE && targetMatched && comparable;
+        const sideResults = normalizeDetectionSideResults(data.side_results || data.sideResults);
+        const sidesPassed = !sideResults.length || sideResults.every((side) => side.status === "正常" && side.targetMatched === true && side.comparable === true);
+        const passed = status === "正常" && confidence >= DETECTION_PASS_CONFIDENCE && targetMatched && comparable && sidesPassed;
         return {
           status: passed ? "正常" : "异常",
           damageLevel: data.damage_level || (status === "异常" ? "obvious" : "normal"),
@@ -6045,16 +6094,48 @@
           issueCount: passed ? 0 : Math.max(1, Number(data.issue_count) || 0),
           summary: passed ? (data.summary || "未发现明显新增损耗。") : invalidDetectionSummary(data),
           issues: Array.isArray(data.issues) ? data.issues.filter(Boolean) : [],
+          sideResults,
           targetMatched,
           comparable,
           needsAdminReview: !passed || Boolean(data.needs_admin_review),
         };
       } catch {
-        return { status: String(value), damageLevel: "", confidence: 0, riskLabel: "低", issueCount: 0, summary: String(value), issues: [], targetMatched: false, comparable: false, needsAdminReview: true };
+        return { status: String(value), damageLevel: "", confidence: 0, riskLabel: "低", issueCount: 0, summary: String(value), issues: [], sideResults: [], targetMatched: false, comparable: false, needsAdminReview: true };
       }
     }
 
+    function normalizeDetectionSideResults(value) {
+      const rows = Array.isArray(value)
+        ? value
+        : (value && typeof value === "object"
+          ? Object.entries(value).map(([side, row]) => ({ ...(row || {}), side }))
+          : []);
+      return rows.map((row) => {
+        const side = row.side === "back" || row.side === "反面" ? "back" : "front";
+        const targetMatched = row.target_matched === true || row.targetMatched === true;
+        const comparable = row.comparable === true;
+        const damageLevel = row.damage_level || row.damageLevel || "normal";
+        const hasDamage = row.has_damage === true || row.hasDamage === true || damageLevel !== "normal";
+        const issues = Array.isArray(row.issues) ? row.issues.map(String).filter(Boolean).slice(0, 4) : [];
+        const normal = targetMatched && comparable && !hasDamage && damageLevel === "normal";
+        return {
+          side,
+          label: row.side_label || row.sideLabel || (side === "front" ? "正面" : "反面"),
+          status: row.status === "正常" || normal ? "正常" : "异常",
+          damageLevel,
+          targetMatched,
+          comparable,
+          hasDamage,
+          summary: String(row.summary || "").trim(),
+          issues,
+        };
+      });
+    }
+
     function invalidDetectionSummary(data) {
+      const sideResults = normalizeDetectionSideResults(data.side_results || data.sideResults);
+      if (sideResults.some((side) => side.targetMatched !== true || side.comparable !== true)) return "正反两面照片中有一面无法对应对比，请重新上传清晰照片或反馈给管理员。";
+      if (sideResults.some((side) => side.status !== "正常")) return "正反两面检测到疑似新增损耗，已生成异常记录。";
       if (data.target_matched !== true) return "照片中未清楚显示目标器材，无法完成归还质检对比。";
       if (data.comparable !== true) return "两张照片无法有效对比目标器材，请重新上传清晰照片或反馈给管理员。";
       if ((Number(data.confidence) || 0) < DETECTION_PASS_CONFIDENCE) return "检测可信度过低，请重新上传清晰照片或反馈给管理员。";
@@ -6062,6 +6143,7 @@
     }
 
     function serializeDetectionResult(result) {
+      const sideResults = normalizeDetectionSideResults(result.side_results || result.sideResults);
       return JSON.stringify({
         status: result.status === "异常" ? "异常" : "正常",
         damage_level: result.damage_level || "normal",
@@ -6070,6 +6152,17 @@
         issue_count: Math.max(0, Number(result.issue_count) || 0),
         summary: String(result.summary || "").trim(),
         issues: Array.isArray(result.issues) ? result.issues.map(String).filter(Boolean).slice(0, 5) : [],
+        side_results: sideResults.map((side) => ({
+          side: side.side,
+          side_label: side.label,
+          status: side.status,
+          damage_level: side.damageLevel,
+          target_matched: side.targetMatched,
+          comparable: side.comparable,
+          has_damage: side.hasDamage,
+          summary: side.summary,
+          issues: side.issues,
+        })),
         needs_admin_review: Boolean(result.needs_admin_review),
         target_matched: result.target_matched === true,
         comparable: result.comparable === true,
@@ -6081,7 +6174,8 @@
         && result.status === "正常"
         && result.confidence >= DETECTION_PASS_CONFIDENCE
         && result.targetMatched === true
-        && result.comparable === true;
+        && result.comparable === true
+        && (!result.sideResults?.length || result.sideResults.every((side) => side.status === "正常" && side.targetMatched === true && side.comparable === true));
     }
 
     function clearReturnDetectionTimers() {
@@ -6102,7 +6196,7 @@
         loanId,
         runId,
         status: "processing",
-        title: "正在检测归还照片",
+	        title: "正在检测归还正反面照片",
         detail: "AI 比对通常需要 18 到 22 秒，请停留在本页。",
       };
       window.__returnDetectionTimers = RETURN_DETECTION_WAIT_STEPS.map((step) => window.setTimeout(() => {
@@ -6934,10 +7028,10 @@
 
     function stripLoanPhotosForLocalCache(loan = {}) {
       const cached = { ...loan };
-      if (typeof cached.beforePhotoDataUrl === "string" && cached.beforePhotoDataUrl.startsWith("data:image/")) {
+      if (storedPhotoContainsInlineImage(cached.beforePhotoDataUrl)) {
         cached.beforePhotoDataUrl = "";
       }
-      if (typeof cached.returnPhotoDataUrl === "string" && cached.returnPhotoDataUrl.startsWith("data:image/")) {
+      if (storedPhotoContainsInlineImage(cached.returnPhotoDataUrl)) {
         cached.returnPhotoDataUrl = "";
       }
       return cached;
@@ -7073,6 +7167,49 @@
       return isListedEquipment(item) && item.status === "可借" && Number(item.available) > 0;
     }
 
+    function inventoryWaitMessage() {
+      return "暂无可借库存，管理员 NFC 入库后开放借用";
+    }
+
+    function equipmentAvailabilityText(item) {
+      return canBorrowEquipment(item) ? `可借 ${Number(item.available) || 0} 件` : "待 NFC 入库";
+    }
+
+    function isImageDataUrl(value) {
+      return typeof value === "string" && value.startsWith("data:image/");
+    }
+
+    function photoPairFromStored(value) {
+      if (!value) return { front: "", back: "" };
+      if (isImageDataUrl(value)) return { front: value, back: "" };
+      if (typeof value !== "string") return { front: "", back: "" };
+      try {
+        const parsed = JSON.parse(value);
+        if (!parsed || typeof parsed !== "object") return { front: "", back: "" };
+        return {
+          front: isImageDataUrl(parsed.front) ? parsed.front : "",
+          back: isImageDataUrl(parsed.back) ? parsed.back : "",
+        };
+      } catch {
+        return { front: "", back: "" };
+      }
+    }
+
+    function hasPhotoPair(value) {
+      const pair = photoPairFromStored(value);
+      return isImageDataUrl(pair.front) && isImageDataUrl(pair.back);
+    }
+
+    function serializePhotoPair(pair) {
+      if (!isImageDataUrl(pair?.front)) throw new Error("请先上传正面照片");
+      if (!isImageDataUrl(pair?.back)) throw new Error("请先上传反面照片");
+      return JSON.stringify({ front: pair.front, back: pair.back });
+    }
+
+    function storedPhotoContainsInlineImage(value) {
+      return typeof value === "string" && value.includes("data:image/");
+    }
+
     function loanById(id) {
       return store.loans.find((loan) => loan.id === id);
     }
@@ -7080,7 +7217,7 @@
     function loanNeedsBeforePhoto(loan) {
       return !!loan
         && ["待补借出照片", "使用中", "待归还", "异常待归还"].includes(loan.status)
-        && !loan.beforePhotoDataUrl;
+        && !hasPhotoPair(loan.beforePhotoDataUrl);
     }
 
     function loanDisplayStatus(loan) {
@@ -7518,7 +7655,7 @@
         ["发起借用", "bag"],
         ["获取验证码", "search"],
         ["NFC 机器验证", "scan"],
-        ["上传照片", "camera"],
+        ["上传正反面", "camera"],
         ["完成借用", "check"],
       ];
       return `
@@ -7544,7 +7681,7 @@
         <section class="action-panel">
           <div>
             <h2>开始借用</h2>
-            <p>选择器材 → 获取验证码 → 场馆 NFC 机器验证 → 完成借用。</p>
+            <p>选择器材 → 获取验证码 → 场馆 NFC 机器验证 → 上传正反面照片完成借用。</p>
           </div>
           <div class="button-row">
             <button class="primary-button" data-route="list">${icon("search")} 查看器材</button>
@@ -7559,7 +7696,7 @@
       if (!item) return "";
       const pendingBeforePhoto = loanNeedsBeforePhoto(loan);
       const action = pendingBeforePhoto
-        ? `<button class="primary-button" style="min-height:36px; border-radius:10px; font-size:12px;" data-borrow-confirm="${loan.id}">${icon("camera")} 上传借出前照片</button>`
+        ? `<button class="primary-button" style="min-height:36px; border-radius:10px; font-size:12px;" data-borrow-confirm="${loan.id}">${icon("camera")} 上传借出前正反面</button>`
         : `<button class="primary-button" style="min-height:36px; border-radius:10px; font-size:12px;" data-loan-detect="${loan.id}" data-detect-mode="photo">${icon("camera")} 归还前检测</button>`;
       return `
         <section class="active-loan">
@@ -7583,7 +7720,7 @@
           ${equipmentImage(item, "item-img")}
           <span style="width:100%;">
             <strong style="white-space:nowrap; overflow:hidden; text-overflow:ellipsis;">${item.name}</strong>
-            <small>可借 ${item.available} 件</small>
+            <small>${equipmentAvailabilityText(item)}</small>
           </span>
         </button>
       `;
@@ -7632,7 +7769,7 @@
           <span class="list-media">${equipmentImage(item, "list-img")}</span>
           <span>
             <strong>${item.name}</strong>
-            <small>可借 ${item.available} 件</small>
+            <small>${equipmentAvailabilityText(item)}</small>
           </span>
         </button>
       `;
@@ -7651,11 +7788,11 @@
             <div class="detail-title">
               <div>
                 <h1>${item.name}</h1>
-                <p>${canBorrow ? `可借 ${item.available} 件` : "暂无可借库存"}</p>
+                <p>${canBorrow ? `可借 ${item.available} 件` : inventoryWaitMessage()}</p>
               </div>
-            </div>
-            <div class="info-list">
-              <div><span>借用方式</span><strong>手机发起借用 → 获取验证码 → 场馆 NFC 机器验证 → 上传借出前照片生效</strong></div>
+	            </div>
+	            <div class="info-list">
+              <div><span>借用方式</span><strong>手机发起借用 → 获取验证码 → 场馆 NFC 机器验证 → 上传借出前正反两面照片生效</strong></div>
             </div>
             <div class="duration-picker">
               <div class="duration-picker-head">
@@ -7665,7 +7802,7 @@
               <div class="duration-options">${borrowDurationOptions()}</div>
               <p class="machine-hint" style="margin:0;">当前选择：${durationText}</p>
             </div>
-            <button class="primary-button" data-sync-borrow="${item.id}" ${canBorrow ? "" : "disabled"}>${icon("bag")} 借用</button>
+            <button class="primary-button" data-sync-borrow="${item.id}" ${canBorrow ? "" : "disabled"}>${icon("bag")} ${canBorrow ? "借用" : "等待 NFC 入库"}</button>
             <p class="machine-hint" style="margin-top:12px;">点击借用后将生成 6 位验证码，请前往场馆 NFC 识别机器输入验证码并贴 NFC 标签完成验证。</p>
           </section>
         </main>
@@ -7763,7 +7900,7 @@
                 1. 打开机器上的 SportLoop NFC 验证页面<br>
                 2. 输入上方 6 位验证码<br>
                 3. 将器材 NFC 标签贴到机器背面<br>
-                4. 验证通过后回到此页面，上传借出前照片完成借用
+	                4. 验证通过后回到此页面，上传借出前正反两面照片完成借用
               </p>
               <button class="primary-button" style="margin-top:12px;width:100%;" data-route="borrow">${icon("bag")} 查看我的借用</button>
             </section>
@@ -7775,8 +7912,8 @@
             <section class="result-card">
               <div class="borrow-confirm-hero">
                 <div class="borrow-confirm-badge">${icon(needsBeforePhoto ? "camera" : "check")}</div>
-                <h1 style="margin:0;font-size:28px;">${needsBeforePhoto ? "上传借出前照片" : "借用成功"}</h1>
-                <p class="body-text" style="text-align:center;margin-top:10px;">${needsBeforePhoto ? "NFC 验证已完成。请上传借出前照片，保存后这次借用才正式生效。" : "借出前照片已保存，借用记录已经生效。"}</p>
+	                <h1 style="margin:0;font-size:28px;">${needsBeforePhoto ? "上传借出前正反两面照片" : "借用成功"}</h1>
+	                <p class="body-text" style="text-align:center;margin-top:10px;">${needsBeforePhoto ? "NFC 验证已完成。请上传借出前正面和反面照片，保存后这次借用才正式生效。" : "借出前正反两面照片已保存，借用记录已经生效。"}</p>
               </div>
               ${equipmentImage(item, "detail-img")}<!-- [IMAGE-FN→detail-img] 借用确认页 -->
               <div class="detail-title" style="margin-top:14px;">
@@ -7790,16 +7927,28 @@
                 <div><span>借出时间</span><strong>${loan.borrowedAt}</strong></div>
                 <div><span>借用时长</span><strong>${loan.durationLabel || "未设置"}</strong></div>
                 <div><span>归还截止</span><strong>${loan.dueAt || "未设置"}</strong></div>
-                <div><span>归还要求</span><strong>归还照片检测正常后，机器才可扫码归还</strong></div>
+                <div><span>归还要求</span><strong>归还正反面照片检测正常后，机器才可扫码归还</strong></div>
               </div>
               ${needsBeforePhoto ? `
-                <label class="upload-real" style="margin-top:18px;">
-                  ${icon("camera")} 上传借出前照片
-                  <input id="borrowBeforePhotoInput" type="file" accept="image/*" capture="environment" />
-                </label>
-                <div id="borrowBeforePhotoName" class="photo-name">未选择借出前照片</div>
-                <button class="primary-button" style="margin-top:16px;width:100%;" data-save-borrow-before="${loan.id}">${icon("check")} 保存并完成借用</button>
-              ` : `
+	                <div class="photo-pair-grid">
+	                  <div class="photo-pair-slot">
+	                    <label class="upload-real">
+	                      ${icon("camera")} 借出前正面
+	                      <input id="borrowBeforeFrontPhotoInput" type="file" accept="image/*" capture="environment" />
+	                    </label>
+	                    <div id="borrowBeforeFrontPhotoName" class="photo-name">未选择正面照片</div>
+	                  </div>
+	                  <div class="photo-pair-slot">
+	                    <label class="upload-real">
+	                      ${icon("camera")} 借出前反面
+	                      <input id="borrowBeforeBackPhotoInput" type="file" accept="image/*" capture="environment" />
+	                    </label>
+	                    <div id="borrowBeforeBackPhotoName" class="photo-name">未选择反面照片</div>
+	                  </div>
+	                  <p class="photo-pair-helper">请分别拍清器材正面和反面，归还时会按同一面逐一对比。</p>
+	                </div>
+	                <button class="primary-button" style="margin-top:16px;width:100%;" data-save-borrow-before="${loan.id}">${icon("check")} 保存并完成借用</button>
+	              ` : `
                 <div class="button-row" style="margin-top:18px;">
                   <button class="secondary-button" data-detail="${item.id}">查看器材</button>
                   <button class="primary-button" data-route="borrow">我的借用</button>
@@ -7884,7 +8033,7 @@
           <p class="batch-form-status" id="batchBorrowStatus"></p>
           <button class="primary-button" type="submit">${icon("check")} 提交申请</button>
         </form>
-      ` : `<div class="empty">暂无可借器材。管理员录入并开放库存后，才能提交批量申请。</div>`;
+      ` : `<div class="empty">暂无可借器材。管理员 NFC 入库后会开放批量申请。</div>`;
       const body = `
         <main class="scroll">
           ${formContent}
@@ -7903,7 +8052,7 @@
             <span class="list-media">${equipmentImage(item, "list-img")}</span><!-- [IMAGE-FN→list-img] 批量申请·器材选择 -->
             <span>
               <strong>${escapeHtml(item.name)}</strong>
-              <small>可借 ${item.available} 件</small>
+              <small>${equipmentAvailabilityText(item)}</small>
             </span>
           </label>
           <label class="batch-qty">
@@ -7971,7 +8120,7 @@
     function batchStudentHint(status) {
       if (status === "待审核") return "申请已提交，等待管理员审批。";
       if (status === "已拒绝") return "管理员未通过这次申请，请调整后重新提交。";
-      if (status === "待补照片") return "机器批量扫码已同步，请到我的借用里逐件上传借出前照片。";
+      if (status === "待补照片") return "机器批量扫码已同步，请到我的借用里逐件上传借出前正反面照片。";
       if (status === "已归还") return "这次批量借还已经完成。";
       return "管理员通过后才可以到机器批量借还。";
     }
@@ -8068,7 +8217,7 @@
       const canReturn = loanCanMachineReturn(loan);
       const showCancel = loan.status === "待补借出照片";
       const primaryAction = pendingBeforePhoto
-        ? `<button class="primary-button" data-borrow-confirm="${loan.id}">${icon("camera")} 上传借出前照片</button>`
+        ? `<button class="primary-button" data-borrow-confirm="${loan.id}">${icon("camera")} 上传借出前正反面</button>`
         : canReturn
           ? `<button class="primary-button" data-sync-return="${loan.id}">${icon("bag")} 同步机器归还</button>`
           : loan.status === "异常待归还"
@@ -8108,12 +8257,12 @@
       if (!loan) return shell("归还前检测", `<main class="scroll"><div class="empty">没有可检测的借用记录。</div></main>`);
       const item = byId(loan.equipmentId);
       if (!item) return shell("归还前检测", `<main class="scroll"><div class="empty">未找到对应器材。</div></main>`);
-      if (!loan.beforePhotoDataUrl) {
+      if (!hasPhotoPair(loan.beforePhotoDataUrl)) {
         return shell("归还前检测", `
           <main class="scroll">
-            <div class="empty">这条记录还没有借出前照片，不能做归还对比。</div>
+            <div class="empty">这条记录还没有借出前正反两面照片，不能做归还对比。</div>
             <div class="button-row" style="padding:0 18px;">
-              <button class="primary-button" data-borrow-confirm="${loan.id}">${icon("camera")} 去上传借出前照片</button>
+              <button class="primary-button" data-borrow-confirm="${loan.id}">${icon("camera")} 去上传借出前正反面</button>
             </div>
           </main>
         `, { tabs: false });
@@ -8131,18 +8280,30 @@
               <span class="scan-line"></span>
             </div>
             <h1>归还前检测</h1>
-            <p>上传归还照片，系统会和借出前照片对比。检测正常后，机器端才允许扫码归还。</p>
-            <label class="upload-real ${isDetecting ? "is-disabled" : ""}">
-              ${icon("camera")} 上传归还照片
-              <input id="photoInput" type="file" accept="image/*" capture="environment" ${isDetecting ? "disabled" : ""} /><!-- [IMAGE-13] 用户拍摄/选择的归还检测照片（非静态资源） -->
-            </label>
-            <div id="photoName" class="photo-name">未选择归还照片</div>
-            <div class="ai-progress ${isDetecting ? "is-active" : ""}" id="aiDetectProgress" aria-live="polite">
-              <span class="ai-progress-step is-active">扫描借出前和归还照片</span>
-              <span class="ai-progress-step">对齐器材可见面与关键区域</span>
-              <span class="ai-progress-step">识别边缘缺口、撕裂和露底</span>
-              <span class="ai-progress-step">生成归还质检结论</span>
-            </div>
+	            <p>上传归还正面和反面照片，系统会按正面对正面、反面对反面逐一对比。检测正常后，机器端才允许扫码归还。</p>
+	            <div class="photo-pair-grid">
+	              <div class="photo-pair-slot">
+	                <label class="upload-real ${isDetecting ? "is-disabled" : ""}">
+	                  ${icon("camera")} 归还正面
+	                  <input id="returnFrontPhotoInput" type="file" accept="image/*" capture="environment" ${isDetecting ? "disabled" : ""} /><!-- [IMAGE-13] 用户拍摄/选择的归还检测正面照片（非静态资源） -->
+	                </label>
+	                <div id="returnFrontPhotoName" class="photo-name">未选择正面照片</div>
+	              </div>
+	              <div class="photo-pair-slot">
+	                <label class="upload-real ${isDetecting ? "is-disabled" : ""}">
+	                  ${icon("camera")} 归还反面
+	                  <input id="returnBackPhotoInput" type="file" accept="image/*" capture="environment" ${isDetecting ? "disabled" : ""} />
+	                </label>
+	                <div id="returnBackPhotoName" class="photo-name">未选择反面照片</div>
+	              </div>
+	              <p class="photo-pair-helper">请尽量保持和借出前相同角度；任一面缺失或不可比都会要求重拍。</p>
+	            </div>
+	            <div class="ai-progress ${isDetecting ? "is-active" : ""}" id="aiDetectProgress" aria-live="polite">
+	              <span class="ai-progress-step is-active">读取正反两面照片</span>
+	              <span class="ai-progress-step">正面对正面、反面对反面对比</span>
+	              <span class="ai-progress-step">检查两面边缘、裂口和露底</span>
+	              <span class="ai-progress-step">生成归还质检结论</span>
+	            </div>
             ${returnDetectionFeedbackHtml(loan.id)}
           </section>
           <div class="button-row">
@@ -8182,7 +8343,7 @@
             ${canReturn
               ? `<button class="primary-button" data-sync-return="${loan.id}">${icon("bag")} 同步机器归还</button>`
               : `<div class="button-row">
-                  <button class="secondary-button" data-loan-detect="${loan.id}">${icon("camera")} 重新上传照片</button>
+                  <button class="secondary-button" data-loan-detect="${loan.id}">${icon("camera")} 重新上传正反面</button>
                   <button class="primary-button" data-report-loan="${loan.id}">${icon("wrench")} 反馈给管理员</button>
                 </div>
                 <button class="secondary-button" data-route="home" style="margin-top:10px;">${icon("back")} 返回首页</button>`}
@@ -9269,8 +9430,8 @@
         if (!options.skipNavigate) render();
         return existing;
       }
-      if (!canBorrowEquipment(item)) {
-        state.notice = "场馆暂无可用库存";
+	      if (!canBorrowEquipment(item)) {
+	        state.notice = inventoryWaitMessage();
         if (!options.skipNavigate) render();
         return null;
       }
@@ -9317,13 +9478,13 @@
       const item = byId(loan.equipmentId);
       if (!item) return;
       if (!loanNeedsBeforePhoto(loan)) {
-        state.notice = "这条借用已经完成借出前照片";
+	        state.notice = "这条借用已经完成借出前正反面照片";
         render();
         return;
       }
       const shouldReserveInventory = loan.status === "待补借出照片";
-      if (shouldReserveInventory && !canBorrowEquipment(item)) {
-        state.notice = "场馆暂无可用库存，请确认机器借出是否有效";
+	      if (shouldReserveInventory && !canBorrowEquipment(item)) {
+	        state.notice = inventoryWaitMessage();
         render();
         return;
       }
@@ -9333,7 +9494,8 @@
       const previousRequest = request ? { status: request.status, adminNote: request.adminNote, borrowedAt: request.borrowedAt, borrowedAtMs: request.borrowedAtMs } : null;
 
       try {
-        loan.beforePhotoDataUrl = await readImageDataUrl("borrowBeforePhotoInput", "借出前照片");
+	        const beforePhotoPair = await readPhotoPair("borrowBeforeFrontPhotoInput", "borrowBeforeBackPhotoInput", "借出前");
+	        loan.beforePhotoDataUrl = serializePhotoPair(beforePhotoPair);
         loan.status = "使用中";
         loan.detectResult = "";
         loan.returnPhotoDataUrl = "";
@@ -9347,7 +9509,7 @@
           const pending = store.loans.some((row) => row.batchRequestId === request.id && loanNeedsBeforePhoto(row));
           if (!pending) {
             request.status = "已借出";
-            request.adminNote = "已补齐借出前照片";
+	            request.adminNote = "已补齐借出前正反面照片";
             request.borrowedAt = loan.borrowedAt;
             request.borrowedAtMs = loan.borrowedAtMs;
           }
@@ -9363,12 +9525,12 @@
         item.available = previousItem.available;
         item.status = previousItem.status;
         if (request && previousRequest) Object.assign(request, previousRequest);
-        state.notice = error.message || "借出前照片保存失败";
+	        state.notice = error.message || "借出前正反面照片保存失败";
         render();
         return;
       }
 
-      pushMessage("借用成功", `${item.name} ${item.assetId} 已保存借出前照片，归还截止 ${loan.dueAt}。`);
+	      pushMessage("借用成功", `${item.name} ${item.assetId} 已保存借出前正反两面照片，归还截止 ${loan.dueAt}。`);
       saveStore();
       state.notice = "借用成功";
       finishWithButtonFeedback(button, "已保存", () => route("borrowConfirm", { loanId: loan.id }));
@@ -9417,6 +9579,12 @@
       return compressImageFile(file, label);
     }
 
+    async function readPhotoPair(frontInputId, backInputId, label) {
+      const front = await readImageDataUrl(frontInputId, `${label}正面照片`);
+      const back = await readImageDataUrl(backInputId, `${label}反面照片`);
+      return { front, back };
+    }
+
     function startAiDetectionProgress() {
       const panel = document.querySelector("#aiDetectProgress");
       document.querySelector(".camera-box")?.classList.add("is-ai-scanning");
@@ -9455,16 +9623,17 @@
           button.disabled = true;
           button.innerHTML = `<span class="loading-spinner" aria-hidden="true"></span> 准备检测`;
         }
-        if (!loan.beforePhotoDataUrl) throw new Error("请先完成借出前照片上传");
-        const afterImageDataUrl = await readImageDataUrl("photoInput", "归还照片");
-        startReturnDetectionWait(loanId, runId);
-        timeoutTimer = window.setTimeout(() => controller.abort(), RETURN_DETECTION_TIMEOUT_MS);
-        const result = await supabaseFunctionRequest("analyze-equipment-damage", {
-          equipmentName: item.name,
-          assetId: item.assetId,
-          beforeImageDataUrl: loan.beforePhotoDataUrl,
-          afterImageDataUrl,
-        }, { signal: controller.signal });
+	        if (!hasPhotoPair(loan.beforePhotoDataUrl)) throw new Error("请先上传借出前正反两面照片");
+	        const beforeImages = photoPairFromStored(loan.beforePhotoDataUrl);
+	        const afterImages = await readPhotoPair("returnFrontPhotoInput", "returnBackPhotoInput", "归还");
+	        startReturnDetectionWait(loanId, runId);
+	        timeoutTimer = window.setTimeout(() => controller.abort(), RETURN_DETECTION_TIMEOUT_MS);
+	        const result = await supabaseFunctionRequest("analyze-equipment-damage", {
+	          equipmentName: item.name,
+	          assetId: item.assetId,
+	          beforeImages,
+	          afterImages,
+	        }, { signal: controller.signal });
         window.clearTimeout(timeoutTimer);
         finishReturnDetectionWait(loanId, runId);
         const normalizedResult = parseDetectionResult(serializeDetectionResult(result));
@@ -9476,11 +9645,12 @@
           issue_count: normalizedResult.issueCount,
           summary: normalizedResult.summary,
           issues: normalizedResult.issues,
-          needs_admin_review: normalizedResult.needsAdminReview,
-          target_matched: normalizedResult.targetMatched,
-          comparable: normalizedResult.comparable,
-        });
-        loan.returnPhotoDataUrl = afterImageDataUrl;
+	          needs_admin_review: normalizedResult.needsAdminReview,
+	          target_matched: normalizedResult.targetMatched,
+	          comparable: normalizedResult.comparable,
+	          side_results: normalizedResult.sideResults,
+	        });
+	        loan.returnPhotoDataUrl = serializePhotoPair(afterImages);
         const passed = detectionCanPass(normalizedResult);
         loan.returnMachineAllowed = passed;
         loan.status = passed ? "待归还" : "异常待归还";
@@ -9702,7 +9872,7 @@
       }
       const previous = { status: request.status, adminNote: request.adminNote, borrowedAt: request.borrowedAt, borrowedAtMs: request.borrowedAtMs };
       request.status = "待补照片";
-      request.adminNote = "等待上传借出前照片";
+	      request.adminNote = "等待上传借出前正反面照片";
       request.borrowedAt = formatDateTime(borrowedAtMs);
       request.borrowedAtMs = borrowedAtMs;
       store.loans.unshift(...loans);
@@ -9720,9 +9890,9 @@
         return;
       }
 
-      pushMessage("批量扫码已同步", `已同步 ${loans.length} 件器材，请逐件上传借出前照片后完成借用。`);
+	      pushMessage("批量扫码已同步", `已同步 ${loans.length} 件器材，请逐件上传借出前正反面照片后完成借用。`);
       saveStore();
-      state.notice = "请上传借出前照片";
+	      state.notice = "请上传借出前正反面照片";
       route("borrow");
     }
 
@@ -10714,7 +10884,7 @@
         nfcMachineState.step = "result";
         nfcMachineState.resultSuccess = true;
         nfcMachineState.resultTitle = "验证成功";
-        nfcMachineState.resultDesc = `${item.name} NFC 验证通过，学生可在手机上上传借出前照片完成借用。`;
+        nfcMachineState.resultDesc = `${item.name} NFC 验证通过，学生可在手机上上传借出前正反面照片完成借用。`;
       } catch (err) {
         nfcMachineState.step = "result";
         nfcMachineState.resultSuccess = false;
@@ -11545,13 +11715,13 @@
       }
 
       const pollingLoan = state.route === "borrowConfirm" ? loanById(state.activeLoanId) : null;
-      if ((state.route === "borrow" && (pendingNfcLoans().length > 0 || store.loans.some((loan) => loan.status === "待补借出照片" && !loan.beforePhotoDataUrl)))
+      if ((state.route === "borrow" && (pendingNfcLoans().length > 0 || store.loans.some((loan) => loanNeedsBeforePhoto(loan))))
           || (state.route === "borrowConfirm" && pollingLoan && pollingLoan.status === "等待NFC验证")) {
         window.clearTimeout(window.__borrowPollTimer);
         window.__borrowPollTimer = window.setTimeout(async () => {
           try { await refreshRemoteStore(); } catch (_) { /* ignore */ }
           if (state.route === "borrow") {
-            const justVerified = store.loans.find((loan) => loan.status === "待补借出照片" && !loan.beforePhotoDataUrl);
+	            const justVerified = store.loans.find((loan) => loanNeedsBeforePhoto(loan));
             if (justVerified) {
               route("borrowConfirm", { loanId: justVerified.id });
             } else {
@@ -11621,33 +11791,32 @@
         });
       }
 
-      // 借出前照片上传事件
-      const borrowBeforePhotoInput = document.querySelector("#borrowBeforePhotoInput");
-      if (borrowBeforePhotoInput) {
-        borrowBeforePhotoInput.addEventListener("change", (e) => {
-          if (e.target.files && e.target.files[0]) {
-            markPhotoSelected(e.target, "#borrowBeforePhotoName", "借出前照片");
-          }
-        });
-      }
-      const photoInput = document.querySelector("#photoInput");
-      if (photoInput) {
-        photoInput.addEventListener("change", (e) => {
-          if (e.target.files && e.target.files[0]) {
-            clearReturnDetectionError(state.activeLoanId);
-            markPhotoSelected(e.target, "#photoName", "归还照片");
-            const progress = document.querySelector("#aiDetectProgress");
-            if (progress) {
-              progress.classList.remove("is-active");
-              progress.querySelectorAll(".ai-progress-step").forEach((step, index) => {
-                step.classList.toggle("is-active", index === 0);
-                step.classList.remove("is-done");
-              });
-            }
-            document.querySelector(".camera-box")?.classList.remove("is-ai-scanning");
-          }
-        });
-      }
+	      // 借出与归还检测照片上传事件
+	      [
+	        ["#borrowBeforeFrontPhotoInput", "#borrowBeforeFrontPhotoName", "借出前正面照片", false],
+	        ["#borrowBeforeBackPhotoInput", "#borrowBeforeBackPhotoName", "借出前反面照片", false],
+	        ["#returnFrontPhotoInput", "#returnFrontPhotoName", "归还正面照片", true],
+	        ["#returnBackPhotoInput", "#returnBackPhotoName", "归还反面照片", true],
+	      ].forEach(([inputSelector, nameSelector, label, isReturnPhoto]) => {
+	        const input = document.querySelector(inputSelector);
+	        if (!input) return;
+	        input.addEventListener("change", (e) => {
+	          if (!e.target.files || !e.target.files[0]) return;
+	          if (isReturnPhoto) {
+	            clearReturnDetectionError(state.activeLoanId);
+	            const progress = document.querySelector("#aiDetectProgress");
+	            if (progress) {
+	              progress.classList.remove("is-active");
+	              progress.querySelectorAll(".ai-progress-step").forEach((step, index) => {
+	                step.classList.toggle("is-active", index === 0);
+	                step.classList.remove("is-done");
+	              });
+	            }
+	            document.querySelector(".camera-box")?.classList.remove("is-ai-scanning");
+	          }
+	          markPhotoSelected(e.target, nameSelector, label);
+	        });
+	      });
 
       // 报修表单 — 器材切换时联动更新问题类型
       const reportEquip = document.querySelector("#reportEquipment");

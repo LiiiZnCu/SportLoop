@@ -5,6 +5,19 @@ const corsHeaders = {
 };
 
 type DamageLevel = "normal" | "minor" | "obvious" | "severe";
+type SideName = "front" | "back";
+
+type SideResult = {
+  side: SideName;
+  side_label: "正面" | "反面";
+  status: "正常" | "异常";
+  damage_level: DamageLevel;
+  target_matched: boolean;
+  comparable: boolean;
+  has_damage: boolean;
+  summary: string;
+  issues: string[];
+};
 
 type DamageResult = {
   status: "正常" | "异常";
@@ -14,9 +27,15 @@ type DamageResult = {
   issue_count: number;
   summary: string;
   issues: string[];
+  side_results: SideResult[];
   needs_admin_review: boolean;
   target_matched: boolean;
   comparable: boolean;
+};
+
+type ImagePair = {
+  front: string;
+  back: string;
 };
 
 function jsonResponse(body: unknown, status = 200) {
@@ -40,6 +59,14 @@ function cleanModelText(text: string) {
     .trim();
 }
 
+function tryParseJson(text: string) {
+  try {
+    return JSON.parse(text);
+  } catch {
+    return null;
+  }
+}
+
 function parseModelJson(text: string) {
   const cleaned = cleanModelText(text);
   const direct = tryParseJson(cleaned);
@@ -51,21 +78,44 @@ function parseModelJson(text: string) {
   return extracted;
 }
 
-function tryParseJson(text: string) {
-  try {
-    return JSON.parse(text);
-  } catch {
-    return null;
-  }
+function isImageDataUrl(value: unknown) {
+  return typeof value === "string" && value.startsWith("data:image/");
+}
+
+function imageFromPair(value: unknown, side: SideName) {
+  if (!value || typeof value !== "object" || Array.isArray(value)) return "";
+  const record = value as Record<string, unknown>;
+  const direct = record[side];
+  return isImageDataUrl(direct) ? String(direct).trim() : "";
+}
+
+function readImagePair(body: Record<string, unknown>, key: "before" | "after"): ImagePair {
+  const camelPair = body[`${key}Images`];
+  const snakePair = body[`${key}_images`];
+  const legacy = key === "before" ? body.beforeImageDataUrl : body.afterImageDataUrl;
+  return {
+    front: imageFromPair(camelPair, "front") || imageFromPair(snakePair, "front") || (isImageDataUrl(legacy) ? String(legacy).trim() : ""),
+    back: imageFromPair(camelPair, "back") || imageFromPair(snakePair, "back"),
+  };
+}
+
+function assertImagePair(pair: ImagePair, label: "借出前" | "归还") {
+  if (!isImageDataUrl(pair.front)) throw new Error(`请上传${label}正面照片`);
+  if (!isImageDataUrl(pair.back)) throw new Error(`请上传${label}反面照片`);
 }
 
 function normalizeLevel(value: unknown): DamageLevel {
   const raw = String(value || "").toLowerCase();
-  if (["normal", "正常", "none"].includes(raw)) return "normal";
+  if (["normal", "正常", "none", "no"].includes(raw)) return "normal";
   if (["minor", "轻微", "轻微损耗"].includes(raw)) return "minor";
   if (["obvious", "明显", "明显损耗", "damaged"].includes(raw)) return "obvious";
   if (["severe", "严重", "严重损坏"].includes(raw)) return "severe";
   return "obvious";
+}
+
+function maxDamageLevel(levels: DamageLevel[]): DamageLevel {
+  const weight: Record<DamageLevel, number> = { normal: 0, minor: 1, obvious: 2, severe: 3 };
+  return levels.reduce((max, level) => weight[level] > weight[max] ? level : max, "normal" as DamageLevel);
 }
 
 function clampConfidence(value: unknown) {
@@ -75,49 +125,99 @@ function clampConfidence(value: unknown) {
   return Math.min(1, Math.max(0, num));
 }
 
+function issuesFrom(value: unknown, limit = 5) {
+  return Array.isArray(value) ? value.map((item) => String(item).trim()).filter(Boolean).slice(0, limit) : [];
+}
+
 function mentionsDifferentVisibleSide(text: string) {
   return /正反面|正反两面|正面和反面|正面与反面|反面和正面|反面与正面|不同可见面|不同拍面|黑色胶面和红色胶面|红色胶面和黑色胶面/.test(text);
 }
 
+function sideLabel(side: SideName): "正面" | "反面" {
+  return side === "front" ? "正面" : "反面";
+}
+
+function normalizeSideResult(raw: unknown, side: SideName): SideResult {
+  const data = raw && typeof raw === "object" ? raw as Record<string, unknown> : {};
+  const issues = issuesFrom(data.issues, 4);
+  const damageLevel = normalizeLevel(data.damage_level || data.damageLevel);
+  const targetMatched = data.target_matched === true || data.targetMatched === true;
+  const comparable = data.comparable === true;
+  const hasDamage = data.has_damage === true || data.hasDamage === true || damageLevel !== "normal" || issues.length > 0;
+  const status = targetMatched && comparable && !hasDamage && damageLevel === "normal" && data.status !== "异常" ? "正常" : "异常";
+  const label = sideLabel(side);
+  const fallback = targetMatched
+    ? (comparable ? `${label}未发现明显新增损耗。` : `${label}照片无法和借出前同面有效对比。`)
+    : `${label}照片未清楚显示目标器材。`;
+
+  return {
+    side,
+    side_label: label,
+    status,
+    damage_level: damageLevel,
+    target_matched: targetMatched,
+    comparable,
+    has_damage: hasDamage,
+    summary: String(data.summary || fallback).trim(),
+    issues,
+  };
+}
+
+function pickRawSide(raw: Record<string, unknown>, side: SideName) {
+  const rows = raw.side_results || raw.sideResults;
+  if (Array.isArray(rows)) {
+    return rows.find((row) => {
+      if (!row || typeof row !== "object") return false;
+      const data = row as Record<string, unknown>;
+      return data.side === side || data.side_label === sideLabel(side);
+    });
+  }
+  if (rows && typeof rows === "object") {
+    const data = rows as Record<string, unknown>;
+    return data[side] || data[sideLabel(side)];
+  }
+  return null;
+}
+
 function normalizeResult(raw: Record<string, unknown>): DamageResult {
-  const damageLevel = normalizeLevel(raw.damage_level);
-  const issues = Array.isArray(raw.issues)
-    ? raw.issues.map((item) => String(item).trim()).filter(Boolean).slice(0, 5)
-    : [];
+  const sideResults = [
+    normalizeSideResult(pickRawSide(raw, "front"), "front"),
+    normalizeSideResult(pickRawSide(raw, "back"), "back"),
+  ];
   const confidence = clampConfidence(raw.confidence);
-  const targetMatched = raw.target_matched === true;
-  const comparable = raw.comparable === true;
-  const sideMismatch = mentionsDifferentVisibleSide([raw.summary, ...issues].map((item) => String(item || "")).join(" "));
-  const forcedInvalid = confidence < 0.7 || targetMatched !== true || comparable !== true || sideMismatch;
+  const rawIssues = issuesFrom(raw.issues);
+  const sideIssues = sideResults.flatMap((side) => side.issues.map((issue) => `${side.side_label}：${issue}`));
+  const allIssueText = [raw.summary, ...rawIssues, ...sideIssues, ...sideResults.map((side) => side.summary)].map((item) => String(item || "")).join(" ");
+  const sideMismatch = mentionsDifferentVisibleSide(allIssueText);
+  const targetMatched = raw.target_matched === true && sideResults.every((side) => side.target_matched);
+  const comparable = raw.comparable === true && sideResults.every((side) => side.comparable) && !sideMismatch;
+  const sideDamageLevel = maxDamageLevel(sideResults.map((side) => side.damage_level));
+  const rawDamageLevel = normalizeLevel(raw.damage_level);
+  const damageLevel = maxDamageLevel([rawDamageLevel, sideDamageLevel]);
+  const forcedInvalid = confidence < 0.7 || !targetMatched || !comparable;
+  const abnormal = forcedInvalid || damageLevel !== "normal" || sideResults.some((side) => side.status === "异常");
   const invalidReason = !targetMatched
-    ? "照片中未清楚显示目标器材，无法完成归还质检对比。"
+    ? "正反两面照片中有一面未清楚显示目标器材，无法完成归还质检。"
     : sideMismatch
-      ? "两张照片是正反面或不同可见面，无法判断新增损耗，请按同一面同角度重拍。"
+      ? "正反两面照片未按同一面对应对比，请重新上传正面和反面照片。"
       : !comparable
-        ? "两张照片无法有效对比目标器材，无法完成归还质检。"
-        : "检测可信度过低，无法完成归还质检。";
-  const abnormal = forcedInvalid || damageLevel !== "normal";
-  const issueCount = Number.isFinite(Number(raw.issue_count))
-    ? Math.max(0, Math.min(9, Number(raw.issue_count)))
-    : issues.length;
-  const riskLabel = damageLevel === "severe" || damageLevel === "obvious"
-    ? "高"
-    : damageLevel === "minor" || forcedInvalid
-      ? "中"
-      : "低";
-  const normalizedIssues = forcedInvalid && !issues.length ? [invalidReason] : issues;
+        ? "正反两面照片中有一面无法有效对比目标器材，请重新上传清晰照片。"
+        : "检测可信度过低，请重新上传清晰照片。";
+  const issues = [...rawIssues, ...sideIssues].filter(Boolean).slice(0, 8);
+  const normalizedIssues = abnormal && !issues.length ? [invalidReason] : issues;
 
   return {
     status: abnormal ? "异常" : "正常",
-    damage_level: forcedInvalid && damageLevel === "normal" ? "obvious" : damageLevel,
-    risk_label: riskLabel,
+    damage_level: abnormal && damageLevel === "normal" ? "obvious" : damageLevel,
+    risk_label: damageLevel === "severe" || damageLevel === "obvious" ? "高" : (damageLevel === "minor" || abnormal ? "中" : "低"),
     confidence,
-    issue_count: abnormal ? Math.max(1, issueCount || normalizedIssues.length || 1) : 0,
-    summary: String(forcedInvalid ? invalidReason : (raw.summary || (abnormal ? "检测到疑似新增损耗，建议管理员复核。" : "未发现明显新增损耗。"))).trim(),
+    issue_count: abnormal ? Math.max(1, normalizedIssues.length) : 0,
+    summary: String(forcedInvalid ? invalidReason : (raw.summary || (abnormal ? "检测到疑似新增损耗，建议管理员复核。" : "正反两面均未发现明显新增损耗。"))).trim(),
     issues: normalizedIssues,
+    side_results: sideResults,
     needs_admin_review: abnormal || Boolean(raw.needs_admin_review),
     target_matched: targetMatched,
-    comparable: comparable && !sideMismatch,
+    comparable,
   };
 }
 
@@ -150,25 +250,23 @@ Deno.serve(async (req) => {
 
     const equipmentName = String(body.equipmentName || "").trim();
     const assetId = String(body.assetId || "").trim();
-    const beforeImageDataUrl = String(body.beforeImageDataUrl || "").trim();
-    const afterImageDataUrl = String(body.afterImageDataUrl || "").trim();
+    const beforeImages = readImagePair(body, "before");
+    const afterImages = readImagePair(body, "after");
 
     if (!equipmentName || !assetId) throw new Error("缺少器材信息");
-    if (!beforeImageDataUrl.startsWith("data:image/")) throw new Error("请上传借出前照片");
-    if (!afterImageDataUrl.startsWith("data:image/")) throw new Error("请上传归还照片");
+    assertImagePair(beforeImages, "借出前");
+    assertImagePair(afterImages, "归还");
 
     const prompt = [
       "你是校园体育器材归还质检助手。",
-      "第一张图片是借出前照片，第二张图片是归还后照片。",
+      "本次必须检查正反两面，四张图片顺序固定：1 借出前正面，2 借出前反面，3 归还正面，4 归还反面。",
       `器材：${equipmentName}，编号：${assetId}。`,
-      "先确认两张图片是否都清楚显示同一类目标器材；如果任一图片不是该器材、目标器材不清楚、被遮挡严重、无法和另一张图对比，必须判为异常。",
-      "先分别扫描每一张照片的单张可见破损：边缘缺口、胶皮缺失、露出橙色或木色底层、开裂、翘边、断裂、明显变形、明显污损都必须写入 issues。",
-      "如果照片不可比，仍然必须报告每张照片里能直接看见的破损点，不能因为不可比而省略可见破损。",
-      "归还质检必须比较同一可见面、同一关键区域；乒乓球拍黑色胶面和红色胶面、正面和反面、拍柄正反两侧都属于不同可见面，必须判为异常，comparable=false。",
-      "即使编号、品牌、器材外形一致，只要两张图片是正反面或不同可见面，也不能判正常，summary 必须提示按同一面同角度重拍。",
-      "只有两张图片都能确认是目标器材，并且同一面同一区域可对比，才继续对比归还后是否出现新增破损、变形、开裂、漏气、明显污损、部件脱落等新增损耗。",
-      "不要只识别器材类别后就判正常；正常必须建立在两张目标器材照片同一可见面可对比且没有新增损耗的基础上。",
-      "不要因为轻微拍摄角度、光线、阴影差异直接判异常，但角度差异不能掩盖同一面同一区域的最低对比要求。",
+      "只允许比较 1 vs 3、2 vs 4；不要把正面和反面交叉比较。",
+      "先分别确认四张图片是否都清楚显示同一类目标器材；任一张不清楚、遮挡严重、不是目标器材，整体必须判异常。",
+      "分别扫描正面组和反面组的单面可见破损：边缘缺口、胶皮缺失、露出橙色或木色底层、开裂、翘边、断裂、明显变形、明显污损都必须写入对应 side_results 的 issues。",
+      "如果某一面借出前和归还后不是同一可见面、同一关键区域，或者角度导致无法比较，该面 comparable=false，整体异常。",
+      "只有正面组和反面组都能确认目标器材、同面同区域可比，且两面都没有新增破损，整体才可判正常。",
+      "不要因为轻微光线、阴影差异直接判异常；但不能放宽正反面对应和同一区域对比要求。",
       "必须只返回 JSON，不要 Markdown，不要解释。",
       "JSON 字段固定为：",
       "{",
@@ -178,7 +276,11 @@ Deno.serve(async (req) => {
       '  "comparable": true 或 false,',
       '  "issue_count": 数字,',
       '  "summary": "一句中文结论",',
-      '  "issues": ["新增损耗点1", "新增损耗点2"],',
+      '  "issues": ["整体问题点1", "整体问题点2"],',
+      '  "side_results": [',
+      '    {"side":"front","side_label":"正面","status":"正常 | 异常","damage_level":"normal | minor | obvious | severe","target_matched":true,"comparable":true,"has_damage":false,"summary":"正面结论","issues":[]},',
+      '    {"side":"back","side_label":"反面","status":"正常 | 异常","damage_level":"normal | minor | obvious | severe","target_matched":true,"comparable":true,"has_damage":false,"summary":"反面结论","issues":[]}',
+      "  ],",
       '  "needs_admin_review": true 或 false',
       "}",
     ].join("\n");
@@ -193,14 +295,16 @@ Deno.serve(async (req) => {
         model,
         thinking: { type: "adaptive" },
         temperature: 0.1,
-        max_completion_tokens: 900,
+        max_completion_tokens: 1200,
         messages: [
           {
             role: "user",
             content: [
               { type: "text", text: prompt },
-              { type: "image_url", image_url: { url: beforeImageDataUrl } },
-              { type: "image_url", image_url: { url: afterImageDataUrl } },
+              { type: "image_url", image_url: { url: beforeImages.front } },
+              { type: "image_url", image_url: { url: beforeImages.back } },
+              { type: "image_url", image_url: { url: afterImages.front } },
+              { type: "image_url", image_url: { url: afterImages.back } },
             ],
           },
         ],
