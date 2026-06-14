@@ -5651,32 +5651,6 @@
       },
       equipment: [
         {
-          id: "paddle-red",
-          assetId: "PP-ZP",
-          name: "乒乓球拍（直拍）",
-          category: "乒乓球拍",
-          image: "assets/paddle-red.png",
-          total: 0,
-          available: 0,
-          status: "补充中",
-          health: 100,
-          venue: "",
-          desc: "",
-        },
-        {
-          id: "paddle-black",
-          assetId: "PP-HP",
-          name: "乒乓球拍（横拍）",
-          category: "乒乓球拍",
-          image: "assets/paddle-black.png",
-          total: 0,
-          available: 0,
-          status: "补充中",
-          health: 100,
-          venue: "",
-          desc: "",
-        },
-        {
           id: "basketball",
           assetId: "BK",
           name: "篮球",
@@ -5695,19 +5669,6 @@
           name: "足球",
           category: "足球",
           image: "assets/football.png",
-          total: 0,
-          available: 0,
-          status: "补充中",
-          health: 100,
-          venue: "",
-          desc: "",
-        },
-        {
-          id: "badminton",
-          assetId: "BD",
-          name: "羽毛球拍",
-          category: "羽毛球拍",
-          image: "assets/racket.png",
           total: 0,
           available: 0,
           status: "补充中",
@@ -5739,7 +5700,7 @@
       previous: "home",
       query: "",
       category: "全部",
-      selectedId: "paddle-red",
+      selectedId: "football",
       activeLoanId: "",
       notice: "",
       returnDetection: null,
@@ -6986,6 +6947,19 @@
       return store.equipment.find((item) => item.id === id) || null;
     }
 
+    function isRetiredEquipment(item) {
+      const text = `${item?.name || ""} ${item?.category || ""}`;
+      return item?.status === "已下架" || text.includes("乒乓") || text.includes("羽毛");
+    }
+
+    function isListedEquipment(item) {
+      return item && !isRetiredEquipment(item);
+    }
+
+    function listedEquipment() {
+      return store.equipment.filter(isListedEquipment);
+    }
+
     function loanById(id) {
       return store.loans.find((loan) => loan.id === id);
     }
@@ -7027,7 +7001,7 @@
       saveStore();
 
     if (!Array.isArray(store.venues) || !store.venues.length) {
-      const unique = [...new Set(store.equipment.map((item) => cleanVenue(item.venue)).filter(Boolean))];
+      const unique = [...new Set(listedEquipment().map((item) => cleanVenue(item.venue)).filter(Boolean))];
       store.venues = unique.length
         ? unique.map((name, i) => ({ id: "v" + String(i + 1), name, open: true }))
         : clone(seed.venues || []);
@@ -7334,11 +7308,12 @@
 
     // ⚡ 完美重组的首页核心渲染方法：保留全部原有生态，只精准重构顶部卡片和加上反馈入口
     function homePage() {
-      const totalAvailable = store.equipment.reduce((sum, item) => sum + item.available, 0);
-      const openVenues = new Set(store.equipment.filter((item) => item.available > 0).map((item) => cleanVenue(item.venue))).size;
-      const health = store.equipment.length ? Math.round(store.equipment.reduce((sum, item) => sum + item.health, 0) / store.equipment.length) : 0;
+      const equipment = listedEquipment();
+      const totalAvailable = equipment.reduce((sum, item) => sum + item.available, 0);
+      const openVenues = new Set(equipment.filter((item) => item.available > 0).map((item) => cleanVenue(item.venue))).size;
+      const health = equipment.length ? Math.round(equipment.reduce((sum, item) => sum + item.health, 0) / equipment.length) : 0;
       const currentLoan = activeLoan();
-      const popularEquipment = store.equipment.slice(0, 5);
+      const popularEquipment = equipment.slice(0, 5);
 
       return `
         <section class="screen home-screen">
@@ -7513,8 +7488,9 @@
     }
 
     function listPage() {
-      const categories = ["全部", ...new Set(store.equipment.map((item) => item.category))];
-      const filtered = store.equipment.filter((item) => {
+      const equipment = listedEquipment();
+      const categories = ["全部", ...new Set(equipment.map((item) => item.category))];
+      const filtered = equipment.filter((item) => {
         const hitCategory = state.category === "全部" || item.category === state.category;
         const hitQuery = !state.query || item.name.includes(state.query) || item.assetId.includes(state.query.toUpperCase());
         return hitCategory && hitQuery;
@@ -7775,7 +7751,7 @@
     }
 
     function batchBorrowPage() {
-      const available = store.equipment.filter((item) => item.status === "可借" && item.available > 0);
+      const available = listedEquipment().filter((item) => item.status === "可借" && item.available > 0);
       const ownRequests = batchRequestList().filter((request) => request.userId === state.currentUserId);
       const formContent = available.length ? `
         <form class="batch-apply-panel" id="batchBorrowForm">
@@ -8104,14 +8080,16 @@
 
     function reportPage() {
       const loan = loanById(state.activeLoanId) || activeLoan();
-      const item = loan ? byId(loan.equipmentId) : byId(state.selectedId);
+      const reportableEquipment = listedEquipment();
+      const selectedItem = byId(state.selectedId);
+      const item = loan ? byId(loan.equipmentId) : (isListedEquipment(selectedItem) ? selectedItem : reportableEquipment[0]);
       if (!item) {
         return shell("报损反馈", `<main class="scroll"><div class="empty">暂无可报损器材。场馆或系统问题请先联系管理员。</div></main>`);
       }
       const locked = !!loan;
       const equipField = locked
         ? `<div class="field"><span>问题器材</span><div class="locked-equip">${item.name} · ${item.assetId}</div><input type="hidden" id="reportEquipment" value="${item.id}" /></div>`
-        : `<label class="field"><span>问题器材</span><select id="reportEquipment">${store.equipment.map((eq) => `<option value="${eq.id}" ${eq.id === item.id ? "selected" : ""}>${eq.name} · ${eq.assetId}</option>`).join("")}</select></label>`;
+        : `<label class="field"><span>问题器材</span><select id="reportEquipment">${reportableEquipment.map((eq) => `<option value="${eq.id}" ${eq.id === item.id ? "selected" : ""}>${eq.name} · ${eq.assetId}</option>`).join("")}</select></label>`;
       const body = `
         <main class="scroll">
           <form class="form-card" id="reportForm">
@@ -8148,22 +8126,23 @@
     }
 
     function adminDashboardData() {
+      const equipment = listedEquipment();
       const pending = store.workOrders.filter((order) => order.status !== "已完成");
       const waitingMessages = adminMessageList().filter((message) => message.status !== "已回复");
       const batchRequests = batchRequestList();
       const pendingBatchRequests = batchRequests.filter((request) => request.status === "待审核");
-      const totalAvailable = store.equipment.reduce((sum, item) => sum + item.available, 0);
-      const totalStock = store.equipment.reduce((sum, item) => sum + item.total, 0);
-      const healthyCount = store.equipment.filter((item) => item.health >= 90).length;
-      const maintenanceCount = store.equipment.filter((item) => item.status !== "可借").length;
+      const totalAvailable = equipment.reduce((sum, item) => sum + item.available, 0);
+      const totalStock = equipment.reduce((sum, item) => sum + item.total, 0);
+      const healthyCount = equipment.filter((item) => item.health >= 90).length;
+      const maintenanceCount = equipment.filter((item) => item.status !== "可借").length;
       const progress = adminProgressMetrics();
       const filteredEquipment = filteredAdminEquipmentList();
       const syncLogs = machineSyncLogList();
       const operationLogs = adminOperationLogList();
-      const equipmentDesc = store.equipment.length
+      const equipmentDesc = equipment.length
         ? `当前 ${totalAvailable}/${totalStock} 件可借，${healthyCount} 类器材健康度良好。`
         : "暂无器材，先录入后学生端才会显示。";
-      const equipmentStatus = store.equipment.length ? `${maintenanceCount} 需关注` : "未录入";
+      const equipmentStatus = equipment.length ? `${maintenanceCount} 需关注` : "未录入";
       const equipmentContent = `
         ${adminNfcScanForm()}
         <div class="list-stack">
@@ -8189,7 +8168,7 @@
 
     function adminModuleCards(data) {
       return [
-        ["equipment", "器材档案", store.equipment.length],
+        ["equipment", "器材档案", listedEquipment().length],
         ["syncLogs", "同步记录", data.syncLogs.length],
         ["venues", "场馆管理", (store.venues || []).length],
         ["batch", "批量申请", data.pendingBatchRequests.length],
@@ -8338,8 +8317,9 @@
       const finishedBatchRequests = batchRequests.filter((request) => request.status !== "待审核").length;
       const taskTotal = store.workOrders.length + batchRequests.length;
       const taskDone = completedOrders + finishedBatchRequests;
-      const totalStock = store.equipment.reduce((sum, item) => sum + item.total, 0);
-      const totalAvailable = store.equipment.reduce((sum, item) => sum + item.available, 0);
+      const equipment = listedEquipment();
+      const totalStock = equipment.reduce((sum, item) => sum + item.total, 0);
+      const totalAvailable = equipment.reduce((sum, item) => sum + item.available, 0);
       const messageRate = messages.length ? percentOf(repliedMessages, messages.length) : 100;
       const workRate = taskTotal ? percentOf(taskDone, taskTotal) : 100;
       const stockRate = totalStock ? percentOf(totalAvailable, totalStock) : 0;
@@ -8395,7 +8375,7 @@
     }
 
     function adminNfcScanForm() {
-      const options = store.equipment.map((item) =>
+      const options = listedEquipment().map((item) =>
         `<option value="${escapeAttr(item.id)}">${escapeHtml(item.name)}</option>`
       ).join("");
       return `
@@ -8646,7 +8626,7 @@
     function filteredAdminEquipmentList() {
       const query = normalizeIdentityText(state.adminEquipmentQuery).toLowerCase();
       const status = state.adminEquipmentStatus || "全部";
-      return store.equipment.filter((item) => {
+      return listedEquipment().filter((item) => {
         const haystack = [
           item.name,
           item.assetId,
@@ -11112,7 +11092,7 @@
         equipment: {
           filename: `sportloop-equipment-${stamp}.csv`,
           label: "库存",
-          rows: store.equipment.map((item) => ({
+          rows: listedEquipment().map((item) => ({
             器材编号: item.assetId,
             名称: item.name,
             分类: item.category,
