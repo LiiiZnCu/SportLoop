@@ -1757,6 +1757,11 @@
       display: none;
     }
 
+    .upload-real.is-disabled {
+      pointer-events: none;
+      opacity: 0.62;
+    }
+
     .photo-name {
       display: inline-flex;
       align-items: center;
@@ -1793,6 +1798,62 @@
     .upload-real.is-selected {
       border-color: rgba(255, 255, 255, 0.42);
       box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.12), 0 12px 24px rgba(159, 18, 57, 0.14);
+    }
+
+    .return-detection-status {
+      display: flex;
+      gap: 10px;
+      align-items: flex-start;
+      margin-top: 12px;
+      padding: 12px;
+      border: 1px solid rgba(255, 255, 255, 0.22);
+      border-radius: 16px;
+      color: rgba(255, 255, 255, 0.9);
+      background: rgba(255, 255, 255, 0.12);
+    }
+
+    .return-detection-status.is-error {
+      background: rgba(255, 255, 255, 0.16);
+    }
+
+    .return-detection-status .loading-spinner,
+    .return-detection-icon {
+      flex: 0 0 22px;
+      margin-top: 1px;
+    }
+
+    .return-detection-status .loading-spinner {
+      border-color: rgba(255, 255, 255, 0.26);
+      border-top-color: #ffffff;
+    }
+
+    .return-detection-icon {
+      display: grid;
+      place-items: center;
+    }
+
+    .return-detection-icon svg {
+      width: 22px;
+      height: 22px;
+    }
+
+    .return-detection-copy {
+      min-width: 0;
+    }
+
+    .return-detection-copy strong {
+      display: block;
+      font-size: 14px;
+      line-height: 1.35;
+    }
+
+    .return-detection-copy span {
+      display: block;
+      margin-top: 3px;
+      color: rgba(255, 255, 255, 0.72);
+      font-size: 12px;
+      line-height: 1.45;
+      overflow-wrap: anywhere;
     }
 
     .form-card .upload-real.is-selected {
@@ -5462,6 +5523,12 @@
     const PHOTO_JPEG_QUALITY = 0.78;
     const DETECTION_PASS_CONFIDENCE = 0.7;
     const PHOTO_MAX_DATA_URL_LENGTH = 1800000;
+    const RETURN_DETECTION_TIMEOUT_MS = 45000;
+    const RETURN_DETECTION_WAIT_STEPS = [
+      { delay: 10000, title: "正在比对两张照片", detail: "AI 检测通常需要 18 到 22 秒，请继续停留在本页。" },
+      { delay: 22000, title: "云函数还在返回结果", detail: "页面没有卡死，检测完成后会自动跳转。" },
+      { delay: 35000, title: "检测时间偏长", detail: "超过 45 秒会自动停止，并提示重新尝试。" },
+    ];
 
     const reportIssueTypes = {
       "乒乓球拍": ["胶皮脱落", "拍柄松动", "表面磨损", "底板开裂"],
@@ -5657,6 +5724,7 @@
       selectedId: "paddle-red",
       activeLoanId: "",
       notice: "",
+      returnDetection: null,
       scanPhase: "idle",
       syncContext: "borrow",
       borrowPeriods: 1,
@@ -5817,12 +5885,13 @@
       return data;
     }
 
-    async function supabaseFunctionRequest(name, body) {
+    async function supabaseFunctionRequest(name, body, options = {}) {
       if (!authSession?.accessToken) throw new Error("请先登录");
       const response = await fetch(`${SUPABASE_URL}/functions/v1/${name}`, {
         method: "POST",
         headers: supabaseHeaders(),
         body: JSON.stringify(body),
+        signal: options.signal,
       });
       const data = await response.json().catch(() => ({}));
       if (!response.ok) throw new Error(friendlyFunctionError(data?.error || data?.message || "云函数请求失败"));
@@ -5927,6 +5996,89 @@
         && result.confidence >= DETECTION_PASS_CONFIDENCE
         && result.targetMatched === true
         && result.comparable === true;
+    }
+
+    function clearReturnDetectionTimers() {
+      (window.__returnDetectionTimers || []).forEach((timer) => window.clearTimeout(timer));
+      window.__returnDetectionTimers = [];
+    }
+
+    function isActiveReturnDetection(loanId, runId) {
+      return state.returnDetection
+        && state.returnDetection.loanId === loanId
+        && state.returnDetection.runId === runId
+        && state.returnDetection.status === "processing";
+    }
+
+    function startReturnDetectionWait(loanId, runId) {
+      clearReturnDetectionTimers();
+      state.returnDetection = {
+        loanId,
+        runId,
+        status: "processing",
+        title: "正在检测归还照片",
+        detail: "AI 比对通常需要 18 到 22 秒，请停留在本页。",
+      };
+      window.__returnDetectionTimers = RETURN_DETECTION_WAIT_STEPS.map((step) => window.setTimeout(() => {
+        if (!isActiveReturnDetection(loanId, runId)) return;
+        state.returnDetection = { ...state.returnDetection, title: step.title, detail: step.detail };
+        render();
+      }, step.delay));
+      render();
+    }
+
+    function finishReturnDetectionWait(loanId, runId) {
+      clearReturnDetectionTimers();
+      if (state.returnDetection?.loanId === loanId && state.returnDetection?.runId === runId) {
+        state.returnDetection = null;
+      }
+    }
+
+    function failReturnDetection(loanId, runId, message) {
+      clearReturnDetectionTimers();
+      state.returnDetection = {
+        loanId,
+        runId,
+        status: "error",
+        title: message,
+        detail: "请重新上传照片后再试。",
+      };
+      state.notice = message;
+      render();
+    }
+
+    function clearReturnDetectionError(loanId) {
+      if (state.returnDetection?.loanId === loanId && state.returnDetection?.status === "error") {
+        state.returnDetection = null;
+      }
+    }
+
+    function returnDetectionMessage(error) {
+      const message = error instanceof Error ? error.message : "";
+      if (error?.name === "AbortError") return "检测超时，请稍后重试";
+      if (
+        message.startsWith("请先") ||
+        message.includes("必须是图片") ||
+        message.includes("不能超过") ||
+        message.includes("太大")
+      ) return message;
+      if (message.includes("MiniMax") || message.includes("云函数")) return "检测服务异常，请联系管理员";
+      return "检测失败，请稍后重试";
+    }
+
+    function returnDetectionFeedbackHtml(loanId) {
+      const feedback = state.returnDetection?.loanId === loanId ? state.returnDetection : null;
+      if (!feedback) return "";
+      const isError = feedback.status === "error";
+      return `
+        <div class="return-detection-status ${isError ? "is-error" : "is-processing"}" role="status" aria-live="polite">
+          ${isError ? `<span class="return-detection-icon">${icon("alert")}</span>` : `<span class="loading-spinner" aria-hidden="true"></span>`}
+          <span class="return-detection-copy">
+            <strong>${escapeHtml(feedback.title)}</strong>
+            <span>${escapeHtml(feedback.detail)}</span>
+          </span>
+        </div>
+      `;
     }
 
     function detectionIsAbnormal(loan) {
@@ -7848,29 +8000,35 @@
           </main>
         `, { tabs: false });
       }
+      const detectionFeedback = state.returnDetection?.loanId === loan.id ? state.returnDetection : null;
+      const isDetecting = detectionFeedback?.status === "processing";
+      const detectButtonLabel = isDetecting
+        ? `<span class="loading-spinner" aria-hidden="true"></span> 正在检测`
+        : `${icon("camera")} ${detectionFeedback?.status === "error" ? "重新检测" : "开始损耗检测"}`;
       const body = `
         <main class="scroll">
           <section class="camera-panel">
-            <div class="camera-box">
+            <div class="camera-box ${isDetecting ? "is-ai-scanning" : ""}">
               ${equipmentImage(item, "camera-img")}<!-- [IMAGE-FN→camera-img] 归还前检测 -->
               <span class="scan-line"></span>
             </div>
             <h1>归还前检测</h1>
             <p>上传归还照片，系统会和借出前照片对比。检测正常后，机器端才允许扫码归还。</p>
-            <label class="upload-real">
+            <label class="upload-real ${isDetecting ? "is-disabled" : ""}">
               ${icon("camera")} 上传归还照片
-              <input id="photoInput" type="file" accept="image/*" capture="environment" /><!-- [IMAGE-13] 用户拍摄/选择的归还检测照片（非静态资源） -->
+              <input id="photoInput" type="file" accept="image/*" capture="environment" ${isDetecting ? "disabled" : ""} /><!-- [IMAGE-13] 用户拍摄/选择的归还检测照片（非静态资源） -->
             </label>
             <div id="photoName" class="photo-name">未选择归还照片</div>
-            <div class="ai-progress" id="aiDetectProgress" aria-live="polite">
+            <div class="ai-progress ${isDetecting ? "is-active" : ""}" id="aiDetectProgress" aria-live="polite">
               <span class="ai-progress-step is-active">扫描借出前和归还照片</span>
               <span class="ai-progress-step">对齐器材可见面与关键区域</span>
               <span class="ai-progress-step">识别边缘缺口、撕裂和露底</span>
               <span class="ai-progress-step">生成归还质检结论</span>
             </div>
+            ${returnDetectionFeedbackHtml(loan.id)}
           </section>
           <div class="button-row">
-            <button class="primary-button" data-ai-detect="${loan.id}">${icon("camera")} 开始损耗检测</button>
+            <button class="primary-button" data-ai-detect="${loan.id}" ${isDetecting ? "disabled" : ""}>${detectButtonLabel}</button>
           </div>
         </main>
       `;
@@ -9167,21 +9325,26 @@
       const item = byId(loan.equipmentId);
       if (!item) return;
       const button = document.querySelector(`[data-ai-detect="${loanId}"]`);
-      const originalHtml = button?.innerHTML || "";
-      const progressTimer = startAiDetectionProgress();
+      const runId = makeUuid();
+      const controller = new AbortController();
+      let timeoutTimer = null;
       try {
         if (button) {
           button.disabled = true;
-          button.innerHTML = `<span class="loading-spinner" aria-hidden="true"></span>`;
+          button.innerHTML = `<span class="loading-spinner" aria-hidden="true"></span> 准备检测`;
         }
         if (!loan.beforePhotoDataUrl) throw new Error("请先完成借出前照片上传");
         const afterImageDataUrl = await readImageDataUrl("photoInput", "归还照片");
+        startReturnDetectionWait(loanId, runId);
+        timeoutTimer = window.setTimeout(() => controller.abort(), RETURN_DETECTION_TIMEOUT_MS);
         const result = await supabaseFunctionRequest("analyze-equipment-damage", {
           equipmentName: item.name,
           assetId: item.assetId,
           beforeImageDataUrl: loan.beforePhotoDataUrl,
           afterImageDataUrl,
-        });
+        }, { signal: controller.signal });
+        window.clearTimeout(timeoutTimer);
+        finishReturnDetectionWait(loanId, runId);
         const normalizedResult = parseDetectionResult(serializeDetectionResult(result));
         loan.detectResult = serializeDetectionResult({
           status: normalizedResult.status,
@@ -9207,16 +9370,14 @@
           : `${item.name} 检测异常，暂不允许机器扫码归还，已生成复核记录。`);
         saveStore();
         saveRemoteLoan(loan);
-        stopAiDetectionProgress(progressTimer);
         route("result", { loanId });
       } catch (error) {
-        stopAiDetectionProgress(progressTimer);
-        state.notice = error instanceof Error ? error.message : "检测失败";
-        if (button) {
-          button.disabled = false;
-          button.innerHTML = originalHtml;
+        window.clearTimeout(timeoutTimer);
+        const message = returnDetectionMessage(error);
+        if (state.returnDetection?.status === "processing" && state.returnDetection?.runId !== runId) {
+          return;
         }
-        render();
+        failReturnDetection(loanId, runId, message);
       }
     }
 
@@ -11341,6 +11502,7 @@
       if (photoInput) {
         photoInput.addEventListener("change", (e) => {
           if (e.target.files && e.target.files[0]) {
+            clearReturnDetectionError(state.activeLoanId);
             markPhotoSelected(e.target, "#photoName", "归还照片");
             const progress = document.querySelector("#aiDetectProgress");
             if (progress) {
