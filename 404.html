@@ -5651,6 +5651,32 @@
       },
       equipment: [
         {
+          id: "paddle-red",
+          assetId: "PP-ZP",
+          name: "乒乓球拍（直拍）",
+          category: "乒乓球拍",
+          image: "assets/paddle-red.png",
+          total: 0,
+          available: 0,
+          status: "补充中",
+          health: 100,
+          venue: "",
+          desc: "",
+        },
+        {
+          id: "paddle-black",
+          assetId: "PP-HP",
+          name: "乒乓球拍（横拍）",
+          category: "乒乓球拍",
+          image: "assets/paddle-black.png",
+          total: 0,
+          available: 0,
+          status: "补充中",
+          health: 100,
+          venue: "",
+          desc: "",
+        },
+        {
           id: "basketball",
           assetId: "BK",
           name: "篮球",
@@ -5669,6 +5695,19 @@
           name: "足球",
           category: "足球",
           image: "assets/football.png",
+          total: 0,
+          available: 0,
+          status: "补充中",
+          health: 100,
+          venue: "",
+          desc: "",
+        },
+        {
+          id: "badminton",
+          assetId: "BD",
+          name: "羽毛球拍",
+          category: "羽毛球拍",
+          image: "assets/racket.png",
           total: 0,
           available: 0,
           status: "补充中",
@@ -6948,8 +6987,10 @@
     }
 
     function isRetiredEquipment(item) {
-      const text = `${item?.name || ""} ${item?.category || ""}`;
-      return item?.status === "已下架" || text.includes("乒乓") || text.includes("羽毛");
+      const retiredIds = new Set(["pingpong", "shuttle"]);
+      const name = item?.name || "";
+      const category = item?.category || "";
+      return retiredIds.has(item?.id) || name === "乒乓球" || name === "羽毛球" || category === "乒乓球" || category === "羽毛球";
     }
 
     function isListedEquipment(item) {
