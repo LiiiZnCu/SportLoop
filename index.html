@@ -3932,18 +3932,20 @@
 
     .profile-file-metrics {
       display: grid;
-      grid-template-columns: repeat(3, minmax(0, 1fr));
+      grid-template-columns: minmax(0, 1.08fr) minmax(0, 0.84fr) minmax(0, 1.08fr);
       min-height: 0;
       align-items: stretch;
     }
 
     .profile-file-metric {
       position: relative;
+      min-width: 0;
       min-height: 0;
       display: grid;
       align-content: center;
       justify-items: center;
-      padding: clamp(6px, 2.2vw, 14px) clamp(4px, 2vw, 10px);
+      overflow: hidden;
+      padding: clamp(6px, 2.1vw, 12px) clamp(3px, 1.5vw, 7px);
       border-right: 1px solid rgba(159, 18, 57, 0.18);
       text-align: center;
     }
@@ -3956,34 +3958,46 @@
       display: flex;
       align-items: center;
       justify-content: center;
-      gap: clamp(3px, 1.2vw, 6px);
+      gap: clamp(2px, 0.9vw, 4px);
+      min-width: 0;
       max-width: 100%;
       color: var(--ink);
-      font-size: clamp(8px, 2.6vw, 12px);
+      font-size: clamp(8px, 2.45vw, 11px);
       font-weight: 700;
       white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
     }
 
     .profile-file-metric span svg {
-      width: clamp(13px, 4vw, 18px);
-      height: clamp(13px, 4vw, 18px);
+      flex: 0 0 auto;
+      width: clamp(12px, 3.4vw, 15px);
+      height: clamp(12px, 3.4vw, 15px);
       color: var(--brand);
     }
 
     .profile-file-metric strong {
       display: block;
-      margin-top: clamp(8px, 2.8vw, 14px);
+      width: 100%;
+      margin-top: clamp(6px, 2.1vw, 10px);
       max-width: 100%;
-      font-size: clamp(16px, 4.4vw, 24px);
+      font-size: clamp(15px, 4vw, 22px);
       line-height: 1;
       font-weight: 900;
       text-align: center;
       white-space: nowrap;
+      overflow: hidden;
+      text-overflow: clip;
     }
 
     .profile-file-metric strong em {
+      display: block;
+      max-width: 100%;
       color: var(--brand);
+      font-size: clamp(14px, 3.7vw, 20px);
       font-style: normal;
+      overflow: hidden;
+      text-overflow: clip;
     }
 
     .profile-file-actions {
@@ -3997,6 +4011,7 @@
     }
 
     .profile-file-actions button {
+      min-width: 0;
       min-height: clamp(28px, 9.4vw, 40px);
       display: flex;
       align-items: center;
@@ -4008,6 +4023,8 @@
       font-size: clamp(8px, 2.7vw, 11px);
       font-weight: 800;
       white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
     }
 
     .profile-file-actions button:last-child {
@@ -4017,6 +4034,7 @@
     .profile-file-actions .profile-return-button {
       min-height: 29px;
       margin: 4px 3px;
+      padding: 0 7px;
       color: #ffffff;
       border-radius: 999px;
       background: var(--brand);
@@ -6935,6 +6953,16 @@
         : formatDateTime(ms);
     }
 
+    function formatProfileDueTime(ms) {
+      if (!Number.isFinite(ms)) return "未设置";
+      const due = new Date(ms);
+      const now = new Date();
+      const sameDay = due.getFullYear() === now.getFullYear() && due.getMonth() === now.getMonth() && due.getDate() === now.getDate();
+      return sameDay
+        ? `今日${new Intl.DateTimeFormat("zh-CN", { hour: "2-digit", minute: "2-digit" }).format(due)}`
+        : new Intl.DateTimeFormat("zh-CN", { month: "2-digit", day: "2-digit" }).format(due);
+    }
+
     function selectedBorrowPeriods() {
       return BORROW_PERIOD_OPTIONS.includes(Number(state.borrowPeriods)) ? Number(state.borrowPeriods) : 1;
     }
@@ -9023,7 +9051,7 @@
       const dueText = pendingPhotoCount === currentCount && currentCount
         ? "待补照片"
         : Number.isFinite(nearestDue)
-          ? formatDueTime(nearestDue)
+          ? formatProfileDueTime(nearestDue)
           : (currentCount ? "待归还" : "暂无");
       const rateChart = profileRateChart(ratePoints);
       const nickname = profileNickname();
