@@ -34,6 +34,13 @@
       --radius-md: 18px;
       --radius-lg: 28px;
       --tab-h: 66px;
+      --page-x: 22px;
+      --section-gap: 20px;
+      --card-gap: 14px;
+      --tight-gap: 10px;
+      --card-pad: 18px;
+      --card-pad-sm: 14px;
+      --item-media-h: 100px;
       font-family: -apple-system, BlinkMacSystemFont, "SF Pro Text", "PingFang SC", "Microsoft YaHei", Arial, sans-serif;
     }
 
@@ -117,7 +124,10 @@
       height: 100dvh;
       padding: 0;
       border-radius: 0;
-      background: transparent;
+      background:
+        linear-gradient(180deg, rgba(24, 21, 29, 0), rgba(24, 21, 29, 0.2) 48%, rgba(24, 21, 29, 0)),
+        radial-gradient(circle at 50% 80%, rgba(196, 107, 130, 0.07), transparent 56%),
+        radial-gradient(circle at 50% 78%, rgba(122, 103, 168, 0.08), transparent 64%);
       box-shadow: none;
     }
 
@@ -152,6 +162,15 @@
       flex-direction: column;
     }
 
+    .screen.is-route-entering {
+      animation: screenEnter 220ms cubic-bezier(0.2, 0.85, 0.18, 1) both;
+    }
+
+    @keyframes screenEnter {
+      0% { transform: translateY(4px); opacity: 0.72; }
+      100% { transform: translateY(0); opacity: 1; }
+    }
+
     .screen.admin-shell {
       color: rgba(255, 255, 255, 0.92);
       background:
@@ -179,7 +198,7 @@
     .scroll {
       flex: 1;
       overflow-y: auto;
-      padding: 0 22px calc(var(--tab-h) + 34px + env(safe-area-inset-bottom));
+      padding: 0 var(--page-x) calc(var(--tab-h) + var(--section-gap) + 14px + env(safe-area-inset-bottom));
       scrollbar-width: none;
       -webkit-overflow-scrolling: touch;
     }
@@ -194,8 +213,8 @@
       display: flex;
       align-items: center;
       justify-content: space-between;
-      gap: 12px;
-      padding: 0 22px 12px;
+      gap: var(--card-gap);
+      padding: 0 var(--page-x) 12px;
     }
 
     .page-title {
@@ -272,7 +291,7 @@
       z-index: 90;
       top: 72px;
       left: 50%;
-      max-width: calc(100% - 44px);
+      max-width: calc(100% - (var(--page-x) * 2));
       transform: translateX(-50%);
       padding: 10px 14px;
       color: #ffffff;
@@ -418,8 +437,8 @@
 
     .action-panel {
       display: grid;
-      gap: 16px;
-      padding: 18px;
+      gap: var(--card-gap);
+      padding: var(--card-pad);
     }
 
     .action-panel h2,
@@ -441,10 +460,10 @@
 
     .active-loan {
       display: grid;
-      grid-template-columns: 98px 1fr;
-      gap: 14px;
+      grid-template-columns: minmax(82px, 96px) 1fr;
+      gap: var(--card-gap);
       align-items: center;
-      padding: 16px;
+      padding: var(--card-pad-sm);
     }
 
     /* [IMAGE-CSS-loan-thumb] [IMAGE-CSS-order-img] 借用卡片 / 工单单图尺寸 */
@@ -460,8 +479,8 @@
       display: flex;
       align-items: center;
       justify-content: space-between;
-      gap: 14px;
-      margin: 20px 0 12px;
+      gap: var(--card-gap);
+      margin: var(--section-gap) 0 12px;
     }
 
     .text-button {
@@ -477,15 +496,15 @@
     .equipment-grid {
       display: grid;
       grid-template-columns: repeat(2, minmax(0, 1fr));
-      gap: 12px;
+      gap: var(--card-gap);
     }
 
     .equipment-card {
-      min-height: 178px;
+      min-height: 172px;
       display: flex;
       flex-direction: column;
-      gap: 10px;
-      padding: 13px;
+      gap: var(--tight-gap);
+      padding: var(--card-pad-sm);
       text-align: left;
       border: 1px solid var(--line);
       border-radius: var(--radius-md);
@@ -496,7 +515,7 @@
     /* [IMAGE-CSS-item-img] 器材图：首页热门网格尺寸 */
     .item-img {
       width: 100%;
-      height: 100px;
+      height: var(--item-media-h);
       object-fit: contain;
     }
 
@@ -555,8 +574,8 @@
     .flow {
       display: grid;
       grid-template-columns: repeat(5, 1fr);
-      gap: 7px;
-      padding: 14px;
+      gap: 8px;
+      padding: var(--card-pad-sm);
       border: 1px solid var(--line);
       border-radius: var(--radius-lg);
       background: var(--card);
@@ -599,7 +618,7 @@
     }
 
     .search-row {
-      padding: 0 22px 14px;
+      padding: 0 var(--page-x) 14px;
     }
 
     .search-box {
@@ -628,7 +647,7 @@
 
     .chips {
       display: flex;
-      gap: 10px;
+      gap: var(--tight-gap);
       overflow-x: auto;
       padding-bottom: 4px;
       scrollbar-width: none;
@@ -661,17 +680,57 @@
     .message-list,
     .admin-list {
       display: grid;
-      gap: 10px;
+      gap: var(--card-gap);
+    }
+
+    .list-stack > *,
+    .timeline > *,
+    .message-list > *,
+    .equipment-grid > * {
+      animation: listItemIn 260ms ease both;
+    }
+
+    .list-stack > *:nth-child(2),
+    .timeline > *:nth-child(2),
+    .message-list > *:nth-child(2),
+    .equipment-grid > *:nth-child(2) {
+      animation-delay: 35ms;
+    }
+
+    .list-stack > *:nth-child(3),
+    .timeline > *:nth-child(3),
+    .message-list > *:nth-child(3),
+    .equipment-grid > *:nth-child(3) {
+      animation-delay: 70ms;
+    }
+
+    .list-stack > *:nth-child(4),
+    .timeline > *:nth-child(4),
+    .message-list > *:nth-child(4),
+    .equipment-grid > *:nth-child(4) {
+      animation-delay: 105ms;
+    }
+
+    .list-stack > *:nth-child(n + 5),
+    .timeline > *:nth-child(n + 5),
+    .message-list > *:nth-child(n + 5),
+    .equipment-grid > *:nth-child(n + 5) {
+      animation-delay: 140ms;
+    }
+
+    @keyframes listItemIn {
+      0% { transform: translateY(5px); opacity: 0; }
+      100% { transform: translateY(0); opacity: 1; }
     }
 
     .list-card {
       width: 100%;
       min-height: 116px;
       display: grid;
-      grid-template-columns: 112px minmax(0, 1fr) auto;
+      grid-template-columns: minmax(86px, 28%) minmax(0, 1fr) auto;
       align-items: center;
-      gap: 12px;
-      padding: 12px;
+      gap: var(--tight-gap);
+      padding: var(--card-pad-sm);
       overflow: hidden;
       text-align: left;
       color: var(--ink);
@@ -691,11 +750,11 @@
 
     .list-media {
       position: relative;
-      width: 112px;
-      height: 86px;
+      width: 100%;
+      height: 78px;
       display: grid;
       place-items: center;
-      flex: 0 0 112px;
+      flex: 0 0 auto;
       overflow: hidden;
       border-radius: 14px;
       background: #ffffff;
@@ -704,8 +763,8 @@
     /* [IMAGE-CSS-list-img] 器材图：列表/管理员档案缩略图尺寸 */
     .list-img {
       display: block;
-      width: 92px;
-      height: 72px;
+      width: 84px;
+      height: 66px;
       object-fit: contain;
       object-position: center;
       margin: auto;
@@ -713,13 +772,13 @@
 
     .detail-card,
     .result-card {
-      padding: 18px;
+      padding: var(--card-pad);
     }
 
     /* [IMAGE-CSS-detail-img] 器材图：详情页/借用确认/检测结果大图尺寸 */
     .detail-img {
       width: 100%;
-      height: 228px;
+      height: clamp(204px, 58vw, 252px);
       object-fit: contain;
       border-radius: 22px;
       background: linear-gradient(145deg, rgba(159, 18, 57, 0.08), rgba(255, 255, 255, 0.7));
@@ -729,15 +788,15 @@
       display: flex;
       align-items: flex-start;
       justify-content: space-between;
-      gap: 12px;
-      margin-top: 14px;
+      gap: var(--card-gap);
+      margin-top: var(--card-gap);
     }
 
     .metric-row {
       display: grid;
       grid-template-columns: repeat(3, 1fr);
-      gap: 10px;
-      margin: 16px 0;
+      gap: var(--tight-gap);
+      margin: var(--card-gap) 0;
     }
 
     .metric {
@@ -762,8 +821,8 @@
 
     .info-list {
       display: grid;
-      gap: 9px;
-      margin: 16px 0;
+      gap: var(--tight-gap);
+      margin: var(--card-gap) 0;
     }
 
     .info-list div,
@@ -800,9 +859,9 @@
 
     .duration-picker {
       display: grid;
-      gap: 10px;
-      margin: 16px 0;
-      padding: 14px;
+      gap: var(--tight-gap);
+      margin: var(--card-gap) 0;
+      padding: var(--card-pad-sm);
       border: 1px solid rgba(159, 18, 57, 0.12);
       border-radius: 18px;
       background: rgba(255, 255, 255, 0.74);
@@ -830,7 +889,7 @@
     .duration-options {
       display: grid;
       grid-template-columns: repeat(3, minmax(0, 1fr));
-      gap: 8px;
+      gap: var(--tight-gap);
     }
 
     .duration-option {
@@ -871,8 +930,8 @@
     .batch-apply-panel,
     .batch-request-card {
       display: grid;
-      gap: 14px;
-      padding: 16px;
+      gap: var(--card-gap);
+      padding: var(--card-pad);
       border: 1px solid rgba(159, 18, 57, 0.1);
       border-radius: 22px;
       background: rgba(255, 255, 255, 0.94);
@@ -885,15 +944,15 @@
 
     .batch-equipment-list {
       display: grid;
-      gap: 10px;
+      gap: var(--tight-gap);
     }
 
     .batch-equipment-option {
       display: grid;
-      grid-template-columns: minmax(0, 1fr) 78px;
-      gap: 10px;
+      grid-template-columns: minmax(0, 1fr) 80px;
+      gap: var(--tight-gap);
       align-items: center;
-      padding: 10px;
+      padding: var(--card-pad-sm);
       border: 1px solid var(--line);
       border-radius: 18px;
       background: rgba(255, 250, 252, 0.78);
@@ -902,9 +961,9 @@
     .batch-equipment-main {
       min-width: 0;
       display: grid;
-      grid-template-columns: 22px 72px minmax(0, 1fr);
+      grid-template-columns: 22px 68px minmax(0, 1fr);
       align-items: center;
-      gap: 10px;
+      gap: 9px;
     }
 
     .batch-equipment-main input {
@@ -914,7 +973,7 @@
     }
 
     .batch-equipment-main .list-media {
-      width: 72px;
+      width: 68px;
       height: 58px;
       border-radius: 12px;
     }
@@ -1029,7 +1088,7 @@
       line-height: 1.35;
     }
 
-    @media (max-width: 390px) {
+    @media (max-width: 420px) {
       .batch-equipment-option {
         grid-template-columns: 1fr;
       }
@@ -1066,6 +1125,11 @@
       transition: transform 180ms ease, opacity 180ms ease;
     }
 
+    .primary-button.is-action-done,
+    .secondary-button.is-action-done {
+      animation: actionDonePulse 260ms cubic-bezier(0.2, 0.85, 0.18, 1) both;
+    }
+
     .primary-button {
       color: #ffffff;
       background: linear-gradient(145deg, #c91946, #8c102e);
@@ -1078,6 +1142,12 @@
       background: rgba(255, 255, 255, 0.8);
     }
 
+    @keyframes actionDonePulse {
+      0% { transform: scale(0.98); }
+      60% { transform: scale(1.018); }
+      100% { transform: scale(1); }
+    }
+
     .primary-button:disabled,
     .secondary-button:disabled {
       cursor: not-allowed;
@@ -1088,8 +1158,8 @@
     .button-row {
       display: grid;
       grid-template-columns: repeat(2, minmax(0, 1fr));
-      gap: 10px;
-      margin-top: 14px;
+      gap: var(--tight-gap);
+      margin-top: var(--card-gap);
     }
 
     .loan-action-row {
@@ -1102,7 +1172,7 @@
     }
 
     .machine-card {
-      padding: 18px;
+      padding: var(--card-pad);
     }
 
     .machine-visual {
@@ -1153,6 +1223,19 @@
       border-radius: 15px;
       color: var(--ink);
       background: rgba(255, 255, 255, 0.82);
+      transition: border-color 180ms ease, box-shadow 180ms ease, background 180ms ease;
+    }
+
+    .field:focus-within > span {
+      color: var(--brand);
+    }
+
+    .field input:focus,
+    .field select:focus,
+    .field textarea:focus {
+      border-color: rgba(159, 18, 57, 0.36);
+      background: rgba(255, 255, 255, 0.94);
+      box-shadow: 0 0 0 4px rgba(159, 18, 57, 0.08);
     }
 
     .field textarea {
@@ -1163,10 +1246,10 @@
     .machine-item {
       display: grid;
       grid-template-columns: 92px 1fr;
-      gap: 12px;
+      gap: var(--tight-gap);
       align-items: center;
       margin: 14px 0;
-      padding: 12px;
+      padding: var(--card-pad-sm);
       border: 1px solid var(--line);
       border-radius: var(--radius-md);
       background: rgba(255, 255, 255, 0.7);
@@ -1198,7 +1281,7 @@
     }
 
     .borrow-card {
-      padding: 15px;
+      padding: var(--card-pad-sm);
     }
 
     .borrow-head {
@@ -1210,7 +1293,7 @@
 
     .camera-panel {
       overflow: hidden;
-      padding: 18px;
+      padding: var(--card-pad);
       color: #ffffff;
       background:
         linear-gradient(180deg, rgba(0, 0, 0, 0.08), rgba(0, 0, 0, 0.78)),
@@ -1241,8 +1324,13 @@
       right: 14px;
       top: 50%;
       height: 2px;
-      background: #ffffff;
+      background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.96), transparent);
       box-shadow: 0 0 18px rgba(255, 255, 255, 0.78);
+      opacity: 0.58;
+    }
+
+    .camera-box.is-ai-scanning .scan-line {
+      animation: scanSweep 1.7s ease-in-out infinite;
     }
 
     @keyframes scanSweep {
@@ -1607,6 +1695,93 @@
       box-shadow: none;
     }
 
+    .ai-progress {
+      display: none;
+      margin-top: 12px;
+      padding: 12px;
+      border-radius: 16px;
+      color: rgba(255, 255, 255, 0.82);
+      background: rgba(255, 255, 255, 0.1);
+      border: 1px solid rgba(255, 255, 255, 0.16);
+    }
+
+    .ai-progress.is-active {
+      display: grid;
+      gap: 8px;
+      animation: listItemIn 220ms ease both;
+    }
+
+    .ai-progress-step {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      font-size: 12px;
+      font-weight: 800;
+      line-height: 1.35;
+      opacity: 0.48;
+      transition: opacity 180ms ease, transform 180ms ease;
+    }
+
+    .ai-progress-step::before {
+      content: "";
+      width: 7px;
+      height: 7px;
+      flex: 0 0 auto;
+      border-radius: 999px;
+      background: rgba(255, 255, 255, 0.48);
+      transition: background 180ms ease, border 180ms ease, transform 180ms ease;
+    }
+
+    .ai-progress-step.is-done::before {
+      width: 6px;
+      height: 10px;
+      border-right: 2px solid rgba(255, 255, 255, 0.92);
+      border-bottom: 2px solid rgba(255, 255, 255, 0.92);
+      border-radius: 0;
+      background: transparent;
+      transform: rotate(45deg) translateY(-1px);
+    }
+
+    .ai-progress-step.is-active {
+      opacity: 1;
+      transform: translateX(1px);
+    }
+
+    .ai-progress-step.is-active::before {
+      background: #ffffff;
+      box-shadow: 0 0 14px rgba(255, 255, 255, 0.62);
+    }
+
+    .issue-list {
+      display: grid;
+      gap: var(--tight-gap);
+      margin: 0 0 14px;
+      padding: 0;
+      list-style: none;
+    }
+
+    .issue-list li {
+      position: relative;
+      padding: 10px 12px;
+      border-radius: 13px;
+      color: var(--muted);
+      background: var(--brand-soft);
+      border: 1px solid rgba(159, 18, 57, 0.13);
+      font-size: 13px;
+      font-weight: 800;
+      line-height: 1.45;
+      animation: issueReveal 260ms cubic-bezier(0.2, 0.85, 0.18, 1) both;
+    }
+
+    .issue-list li:nth-child(2) { animation-delay: 45ms; }
+    .issue-list li:nth-child(3) { animation-delay: 90ms; }
+    .issue-list li:nth-child(n + 4) { animation-delay: 135ms; }
+
+    @keyframes issueReveal {
+      0% { transform: translateY(5px); opacity: 0; }
+      100% { transform: translateY(0); opacity: 1; }
+    }
+
     .upload-real {
       min-height: 52px;
       display: flex;
@@ -1730,6 +1905,10 @@
     }
 
     .photo-name {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 6px;
       margin-top: 9px;
       color: rgba(255, 255, 255, 0.7);
       font-size: 13px;
@@ -1738,14 +1917,24 @@
 
     .photo-name.is-selected {
       color: rgba(255, 255, 255, 0.92);
+      animation: photoPicked 240ms cubic-bezier(0.2, 0.85, 0.18, 1) both;
     }
 
-    .result-card .photo-name {
+    .form-card .photo-name {
       color: var(--muted);
     }
 
-    .result-card .photo-name.is-selected {
+    .form-card .photo-name.is-selected {
       color: var(--brand);
+    }
+
+    .photo-name.is-selected::before {
+      content: "";
+      width: 6px;
+      height: 10px;
+      border-right: 2px solid currentColor;
+      border-bottom: 2px solid currentColor;
+      transform: rotate(45deg) translateY(-1px);
     }
 
     .upload-real.is-selected {
@@ -1757,15 +1946,15 @@
       display: flex;
       gap: 10px;
       align-items: flex-start;
-      margin-top: 14px;
+      margin-top: 12px;
       padding: 12px;
       border: 1px solid rgba(255, 255, 255, 0.22);
       border-radius: 16px;
+      color: rgba(255, 255, 255, 0.9);
       background: rgba(255, 255, 255, 0.12);
     }
 
     .return-detection-status.is-error {
-      border-color: rgba(255, 255, 255, 0.26);
       background: rgba(255, 255, 255, 0.16);
     }
 
@@ -1783,7 +1972,6 @@
     .return-detection-icon {
       display: grid;
       place-items: center;
-      color: #ffffff;
     }
 
     .return-detection-icon svg {
@@ -1810,15 +1998,25 @@
       overflow-wrap: anywhere;
     }
 
+    .form-card .upload-real.is-selected {
+      border-color: rgba(159, 18, 57, 0.34);
+      box-shadow: inset 0 0 0 1px rgba(159, 18, 57, 0.08), 0 12px 24px rgba(159, 18, 57, 0.12);
+    }
+
+    @keyframes photoPicked {
+      0% { transform: translateY(3px); opacity: 0.5; }
+      100% { transform: translateY(0); opacity: 1; }
+    }
+
     .form-card {
-      padding: 17px;
+      padding: var(--card-pad-sm);
     }
 
     .message-item {
       display: grid;
       grid-template-columns: 46px 1fr;
-      gap: 12px;
-      padding: 14px;
+      gap: var(--tight-gap);
+      padding: var(--card-pad-sm);
       border: 1px solid var(--line);
       border-radius: var(--radius-md);
       background: var(--card);
@@ -1866,8 +2064,8 @@
 
     .admin-contact-card {
       display: grid;
-      gap: 12px;
-      padding: 14px;
+      gap: var(--card-gap);
+      padding: var(--card-pad-sm);
       border: 1px solid rgba(245, 239, 241, 0.12);
       border-radius: var(--radius-md);
       background:
@@ -1905,7 +2103,7 @@
     }
 
     .admin-hero {
-      padding: 20px;
+      padding: var(--card-pad);
       color: #ffffff;
       background: linear-gradient(145deg, #211e2a, #3a2f4d);
     }
@@ -1913,8 +2111,8 @@
     .admin-dashboard-hero {
       position: relative;
       display: grid;
-      gap: 14px;
-      padding: clamp(16px, 4.5vw, 22px);
+      gap: var(--tight-gap);
+      padding: var(--card-pad-sm);
       overflow: hidden;
       border: 1px solid rgba(196, 107, 130, 0.18);
       background:
@@ -1950,14 +2148,6 @@
       margin-top: 4px;
     }
 
-    .admin-overline {
-      margin: 0;
-      color: #c9bbb5;
-      font-size: 12px;
-      font-weight: 900;
-      letter-spacing: 0.04em;
-    }
-
     .admin-ring-summary {
       margin-top: 8px;
       color: rgba(245, 239, 241, 0.76);
@@ -1985,13 +2175,14 @@
       position: relative;
       z-index: 1;
       display: grid;
-      justify-items: center;
-      gap: 14px;
+      grid-template-columns: auto minmax(0, 1fr);
+      align-items: center;
+      gap: 12px;
     }
 
     .admin-activity-ring {
       position: relative;
-      width: clamp(168px, 50vw, 212px);
+      width: clamp(104px, 30vw, 132px);
       aspect-ratio: 1;
       border-radius: 50%;
       background: radial-gradient(circle, rgba(255, 255, 255, 0.07), rgba(255, 255, 255, 0.018) 55%, transparent 56%);
@@ -2009,23 +2200,23 @@
 
     .admin-ring-message {
       inset: 0;
-      --ring-width: 17px;
+      --ring-width: 11px;
       --ring-value: var(--message-rate);
       --ring-color: #c46b82;
       --ring-glow: rgba(196, 107, 130, 0.24);
     }
 
     .admin-ring-work {
-      inset: 28px;
-      --ring-width: 15px;
+      inset: 18px;
+      --ring-width: 10px;
       --ring-value: var(--work-rate);
       --ring-color: #9a86c8;
       --ring-glow: rgba(154, 134, 200, 0.24);
     }
 
     .admin-ring-stock {
-      inset: 54px;
-      --ring-width: 13px;
+      inset: 35px;
+      --ring-width: 9px;
       --ring-value: var(--stock-rate);
       --ring-color: #6f8fc8;
       --ring-glow: rgba(111, 143, 200, 0.24);
@@ -2033,9 +2224,10 @@
 
     .admin-ring-center {
       position: absolute;
-      inset: clamp(62px, 18vw, 78px);
+      inset: 35%;
       display: grid;
       place-content: center;
+      min-width: 0;
       text-align: center;
       border-radius: 50%;
       background: rgba(25, 21, 24, 0.88);
@@ -2044,44 +2236,51 @@
 
     .admin-ring-center strong {
       color: #ffffff;
-      font-size: clamp(30px, 9vw, 42px);
+      font-size: clamp(12px, 3.6vw, 17px);
       line-height: 1;
+      letter-spacing: 0;
       font-family: "DIN Alternate", "SF Pro Display", Arial, sans-serif;
+      white-space: nowrap;
     }
 
     .admin-ring-center span {
-      margin-top: 6px;
+      margin-top: 1px;
       color: #bfaeb4;
-      font-size: 11px;
+      font-size: clamp(7px, 2vw, 9px);
+      line-height: 1;
       font-weight: 900;
+      white-space: nowrap;
     }
 
     .admin-ring-legend {
       width: 100%;
       display: grid;
-      grid-template-columns: repeat(3, minmax(0, 1fr));
-      gap: 8px;
+      grid-template-columns: 1fr;
+      gap: 6px;
     }
 
     .admin-ring-legend-item {
       min-width: 0;
       display: grid;
-      gap: 4px;
-      padding: 9px 8px;
-      border-radius: 16px;
+      grid-template-columns: 20px minmax(0, 1fr) auto;
+      align-items: center;
+      gap: 7px;
+      padding: 8px 9px;
+      border-radius: 14px;
       color: rgba(255, 255, 255, 0.92);
-      font-size: 11px;
+      font-size: clamp(10px, 2.7vw, 12px);
       font-weight: 900;
-      text-align: center;
+      text-align: left;
       background: rgba(255, 255, 255, 0.07);
       box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.08);
+      white-space: nowrap;
     }
 
     .admin-ring-legend-item::before {
       content: "";
-      width: 24px;
+      width: 18px;
       height: 4px;
-      justify-self: center;
+      justify-self: start;
       border-radius: 999px;
       background: var(--legend-color);
       box-shadow: 0 0 14px var(--legend-glow);
@@ -2110,7 +2309,7 @@
 
     .admin-ring-legend-item b {
       color: #ffffff;
-      font-size: 15px;
+      font-size: clamp(13px, 3.5vw, 15px);
       font-family: "DIN Alternate", "SF Pro Display", Arial, sans-serif;
     }
 
@@ -2166,8 +2365,36 @@
     .admin-kpi-grid {
       display: grid;
       grid-template-columns: repeat(3, minmax(0, 1fr));
-      gap: 8px;
+      gap: var(--tight-gap);
       margin: 10px 0 8px;
+    }
+
+    .admin-dashboard-section {
+      display: grid;
+      gap: 6px;
+      margin: 10px 0 8px;
+    }
+
+    .admin-dashboard-section-head {
+      display: flex;
+      align-items: end;
+      justify-content: space-between;
+      gap: 10px;
+      padding: 0 2px;
+      color: rgba(255, 255, 255, 0.92);
+    }
+
+    .admin-dashboard-section-head h2 {
+      margin: 0;
+      font-size: clamp(15px, 4vw, 18px);
+      line-height: 1.15;
+    }
+
+    .admin-dashboard-section-head span {
+      color: rgba(245, 239, 241, 0.58);
+      font-size: clamp(11px, 2.9vw, 12px);
+      font-weight: 800;
+      white-space: nowrap;
     }
 
     .admin-dashboard-scroll {
@@ -2182,13 +2409,110 @@
       overflow: hidden;
       --kpi-accent: #c46b82;
       --kpi-border: rgba(196, 107, 130, 0.22);
-      border-color: rgba(255, 255, 255, 0.11);
+      border-color: var(--kpi-border);
       color: #ffffff;
       background:
-        radial-gradient(circle at 18% 14%, rgba(255, 255, 255, 0.08), transparent 32%),
-        linear-gradient(145deg, rgba(255, 255, 255, 0.095), rgba(255, 255, 255, 0.035));
-      box-shadow: inset 0 0 0 1px var(--kpi-border), 0 14px 30px rgba(20, 16, 25, 0.24);
-      backdrop-filter: blur(14px);
+        radial-gradient(circle at 18% 10%, rgba(255, 255, 255, 0.07), transparent 34%),
+        linear-gradient(145deg, rgba(45, 36, 50, 0.94), rgba(24, 21, 29, 0.98));
+      box-shadow: inset 0 0 0 1px var(--kpi-border), 0 14px 30px rgba(13, 10, 18, 0.34);
+      backdrop-filter: blur(12px);
+    }
+
+    .admin-dashboard-scroll .admin-kpi-card.is-compact {
+      min-height: 82px;
+      grid-template-columns: 28px minmax(0, 1fr);
+      gap: 7px;
+      padding: 10px 9px;
+      border-radius: 18px;
+    }
+
+    .admin-dashboard-scroll .admin-kpi-card.is-compact > div {
+      min-width: 0;
+    }
+
+    .admin-dashboard-scroll .admin-kpi-card.is-compact .admin-kpi-icon {
+      width: 28px;
+      height: 28px;
+      border-radius: 10px;
+    }
+
+    .admin-dashboard-scroll .admin-task-card {
+      appearance: none;
+      isolation: isolate;
+      min-height: 58px;
+      grid-template-columns: 24px minmax(0, 1fr);
+      gap: 6px;
+      padding: 8px 7px;
+      border-radius: 15px;
+      font: inherit;
+      text-align: left;
+      cursor: pointer;
+      transition: transform 180ms ease, border-color 180ms ease, box-shadow 180ms ease;
+    }
+
+    .admin-dashboard-scroll .admin-task-card::after {
+      content: "";
+      position: absolute;
+      inset: 1px;
+      z-index: 0;
+      border-radius: inherit;
+      background: radial-gradient(circle at 50% 0%, var(--kpi-border), transparent 58%);
+      opacity: 0;
+      transition: opacity 180ms ease;
+      pointer-events: none;
+    }
+
+    .admin-dashboard-scroll .admin-task-card > * {
+      position: relative;
+      z-index: 1;
+    }
+
+    .admin-dashboard-scroll .admin-task-card:hover,
+    .admin-dashboard-scroll .admin-task-card:focus-visible {
+      border-color: var(--kpi-border);
+      box-shadow: 0 10px 20px rgba(9, 7, 10, 0.22), 0 0 0 1px var(--kpi-border);
+    }
+
+    .admin-dashboard-scroll .admin-task-card:hover::after,
+    .admin-dashboard-scroll .admin-task-card:focus-visible::after,
+    .admin-dashboard-scroll .admin-task-card:active::after {
+      opacity: 1;
+    }
+
+    .admin-dashboard-scroll .admin-task-card .admin-kpi-icon {
+      width: 24px;
+      height: 24px;
+      border-radius: 9px;
+    }
+
+    .admin-dashboard-scroll .admin-task-card small {
+      font-size: clamp(9px, 2.35vw, 11px);
+    }
+
+    .admin-dashboard-scroll .admin-task-card strong {
+      margin-top: 2px;
+      font-size: clamp(16px, 4.4vw, 20px);
+    }
+
+    .admin-dashboard-scroll .admin-task-number {
+      display: inline-block;
+      min-width: 0.75em;
+      transform-origin: 50% 70%;
+      font-variant-numeric: tabular-nums;
+    }
+
+    .admin-dashboard-scroll .admin-task-number.is-count-changing {
+      animation: adminCountPulse 260ms cubic-bezier(0.2, 0.85, 0.18, 1) both;
+    }
+
+    @keyframes adminCountPulse {
+      0% { transform: scale(0.96); opacity: 0.78; }
+      62% { transform: scale(1.055); opacity: 1; }
+      100% { transform: scale(1); opacity: 1; }
+    }
+
+    .admin-dashboard-scroll .admin-task-card:active {
+      transform: scale(0.98);
     }
 
     .admin-dashboard-scroll .admin-kpi-card:nth-child(2) {
@@ -2215,7 +2539,7 @@
 
     .admin-dashboard-scroll .admin-kpi-icon {
       color: var(--kpi-accent);
-      background: rgba(255, 255, 255, 0.07);
+      background: rgba(255, 255, 255, 0.06);
       box-shadow: inset 0 0 0 1px var(--kpi-border);
     }
 
@@ -2224,8 +2548,76 @@
       color: rgba(255, 255, 255, 0.62);
     }
 
-    .admin-dashboard-scroll .admin-kpi-card strong {
+    .admin-dashboard-scroll .admin-kpi-card small {
+      display: block;
+      width: 100%;
+      min-width: 0;
+      font-size: clamp(10px, 2.55vw, 12px);
+      line-height: 1.15;
+      white-space: nowrap;
+      letter-spacing: 0;
+    }
+
+    .admin-dashboard-scroll .admin-kpi-card.is-compact strong {
+      display: flex;
+      align-items: baseline;
+      gap: 2px;
+      min-width: 0;
       color: #ffffff;
+      font-size: clamp(19px, 5.4vw, 23px);
+      white-space: nowrap;
+      letter-spacing: 0;
+    }
+
+    .admin-dashboard-scroll .admin-kpi-card strong span {
+      flex-shrink: 0;
+      margin-left: 0;
+      font-size: clamp(10px, 2.5vw, 12px);
+    }
+
+    .admin-dashboard-scroll .admin-task-card .admin-task-number {
+      color: #ffffff;
+      font-size: inherit;
+      font-family: inherit;
+    }
+
+    @media (max-width: 390px) {
+      .admin-dashboard-scroll .admin-kpi-card.is-compact {
+        min-height: 96px;
+        grid-template-columns: 1fr;
+        justify-items: center;
+        align-content: center;
+        gap: 6px;
+        padding: 10px 6px;
+        text-align: center;
+      }
+
+      .admin-dashboard-scroll .admin-kpi-card.is-compact .admin-kpi-icon {
+        width: 26px;
+        height: 26px;
+        border-radius: 10px;
+      }
+
+      .admin-dashboard-scroll .admin-kpi-card.is-compact strong {
+        justify-content: center;
+        font-size: clamp(18px, 5vw, 21px);
+      }
+
+      .admin-dashboard-scroll .admin-kpi-card.is-compact.admin-task-card {
+        min-height: 56px;
+        grid-template-columns: 1fr;
+        align-content: center;
+        gap: 4px;
+        padding: 8px 6px;
+      }
+
+      .admin-dashboard-scroll .admin-task-card .admin-kpi-icon {
+        display: none;
+      }
+
+      .admin-dashboard-scroll .admin-task-card strong {
+        font-size: clamp(16px, 4.8vw, 19px);
+      }
     }
 
     .admin-quick-nav {
@@ -2276,6 +2668,10 @@
       cursor: grabbing;
     }
 
+    .admin-quick-stage.is-settling .admin-quick-button.is-active i {
+      animation: fanDockPulse 240ms cubic-bezier(0.2, 0.85, 0.18, 1) both;
+    }
+
     .admin-quick-stage::before {
       content: "";
       position: absolute;
@@ -2285,11 +2681,11 @@
       height: min(116vw, 486px);
       transform: translateX(-50%);
       border-radius: 50%;
-      border: 1px solid rgba(255, 255, 255, 0.08);
+      border: 1px solid rgba(245, 239, 241, 0.055);
       background:
-        radial-gradient(circle, transparent 0 44%, rgba(196, 107, 130, 0.1) 44.5% 46%, transparent 46.5% 56%, rgba(255, 255, 255, 0.07) 57% 57.5%, transparent 58%),
-        radial-gradient(circle at 50% 50%, rgba(122, 103, 168, 0.13), transparent 62%);
-      box-shadow: 0 -28px 72px rgba(64, 52, 88, 0.16);
+        radial-gradient(circle, transparent 0 44%, rgba(196, 107, 130, 0.065) 44.5% 46%, transparent 46.5% 56%, rgba(245, 239, 241, 0.045) 57% 57.5%, transparent 58%),
+        radial-gradient(circle at 50% 50%, rgba(122, 103, 168, 0.07), transparent 62%);
+      box-shadow: 0 -24px 64px rgba(36, 26, 31, 0.18);
       pointer-events: none;
     }
 
@@ -2378,6 +2774,14 @@
       filter: drop-shadow(0 18px 24px rgba(36, 26, 31, 0.3));
     }
 
+    .admin-quick-button.is-active .admin-quick-text {
+      animation: fanTextRise 360ms cubic-bezier(0.2, 0.85, 0.18, 1) both;
+    }
+
+    .admin-quick-button.is-active b {
+      animation: fanBadgePop 320ms cubic-bezier(0.2, 0.85, 0.18, 1) both;
+    }
+
     .admin-quick-button.is-hidden {
       opacity: 0;
       pointer-events: none;
@@ -2447,6 +2851,22 @@
       box-shadow: 0 0 16px rgba(255, 255, 255, 0.24);
     }
 
+    @keyframes fanTextRise {
+      0% { transform: translateY(3px); opacity: 0.72; }
+      100% { transform: translateY(0); opacity: 1; }
+    }
+
+    @keyframes fanBadgePop {
+      0% { transform: scale(0.86); opacity: 0.2; }
+      100% { transform: scale(1); opacity: 1; }
+    }
+
+    @keyframes fanDockPulse {
+      0% { transform: scale(0.98); }
+      64% { transform: scale(1.035); }
+      100% { transform: scale(1); }
+    }
+
     .admin-quick-button i svg {
       width: 29px;
       height: 29px;
@@ -2508,10 +2928,10 @@
     }
 
     .admin-quick-button.is-batch {
-      --quick-color: #b96578;
-      --quick-deep: #6f3848;
-      --quick-glow: rgba(185, 101, 120, 0.2);
-      --quick-border: rgba(211, 142, 158, 0.22);
+      --quick-color: #6aa494;
+      --quick-deep: #365d58;
+      --quick-glow: rgba(106, 164, 148, 0.2);
+      --quick-border: rgba(143, 193, 180, 0.2);
     }
 
     .admin-quick-button.is-messages {
@@ -2522,10 +2942,10 @@
     }
 
     .admin-quick-button.is-orders {
-      --quick-color: #9a86c8;
-      --quick-deep: #5a4c75;
-      --quick-glow: rgba(154, 134, 200, 0.22);
-      --quick-border: rgba(184, 166, 220, 0.2);
+      --quick-color: #7f91c6;
+      --quick-deep: #3e496d;
+      --quick-glow: rgba(127, 145, 198, 0.21);
+      --quick-border: rgba(154, 170, 218, 0.2);
     }
 
     .admin-quick-button.is-equipment {
@@ -2533,6 +2953,13 @@
       --quick-deep: #613341;
       --quick-glow: rgba(169, 95, 115, 0.21);
       --quick-border: rgba(200, 132, 150, 0.2);
+    }
+
+    .admin-quick-button.is-venues {
+      --quick-color: #8f7dbc;
+      --quick-deep: #4d4268;
+      --quick-glow: rgba(143, 125, 188, 0.2);
+      --quick-border: rgba(176, 160, 214, 0.19);
     }
 
     .admin-quick-button.is-sync {
@@ -2543,17 +2970,17 @@
     }
 
     .admin-quick-button.is-logs {
-      --quick-color: #9a6a78;
-      --quick-deep: #554149;
-      --quick-glow: rgba(154, 106, 120, 0.18);
-      --quick-border: rgba(190, 148, 160, 0.18);
+      --quick-color: #9d8372;
+      --quick-deep: #5a4941;
+      --quick-glow: rgba(157, 131, 114, 0.17);
+      --quick-border: rgba(195, 170, 154, 0.18);
     }
 
     .admin-quick-button.is-export {
-      --quick-color: #8d5b6b;
-      --quick-deep: #4e303c;
-      --quick-glow: rgba(141, 91, 107, 0.18);
-      --quick-border: rgba(178, 132, 146, 0.18);
+      --quick-color: #6f8a9f;
+      --quick-deep: #374a5a;
+      --quick-glow: rgba(111, 138, 159, 0.18);
+      --quick-border: rgba(151, 174, 192, 0.18);
     }
 
     @media (max-width: 390px) {
@@ -2648,9 +3075,9 @@
 
     .admin-section-card {
       display: grid;
-      gap: 16px;
-      margin-top: 18px;
-      padding: 18px 0 0;
+      gap: var(--card-gap);
+      margin-top: var(--section-gap);
+      padding: var(--card-gap) 0 0;
       border: 0;
       border-top: 1px solid rgba(245, 239, 241, 0.12);
       border-radius: 0;
@@ -2709,9 +3136,9 @@
 
     .order-card {
       display: grid;
-      grid-template-columns: 78px minmax(0, 1fr);
-      gap: 12px;
-      padding: 14px 0;
+      grid-template-columns: minmax(70px, 78px) minmax(0, 1fr);
+      gap: var(--tight-gap);
+      padding: 16px 0;
       border-radius: 0;
       border-top: 1px solid rgba(245, 239, 241, 0.1);
       background: transparent;
@@ -2731,15 +3158,15 @@
     .admin-actions {
       grid-column: 1 / -1;
       display: grid;
-      grid-template-columns: repeat(3, minmax(0, 1fr));
-      gap: 8px;
+      grid-template-columns: repeat(auto-fit, minmax(88px, 1fr));
+      gap: var(--tight-gap);
       min-width: 0;
     }
 
     .admin-actions .primary-button,
     .admin-actions .secondary-button {
-      width: 100%;
       min-width: 0;
+      width: 100%;
       min-height: 44px;
       padding-inline: 8px;
       border-radius: 14px;
@@ -2749,7 +3176,7 @@
 
     .admin-equipment-form {
       display: grid;
-      gap: 12px;
+      gap: var(--card-gap);
       padding: 2px 0 0;
       border: 0;
       border-radius: 0;
@@ -2758,8 +3185,8 @@
 
     .admin-equipment-form-grid {
       display: grid;
-      grid-template-columns: repeat(2, minmax(0, 1fr));
-      gap: 10px;
+      grid-template-columns: 1fr;
+      gap: var(--tight-gap);
     }
 
     .admin-equipment-form .field {
@@ -2773,8 +3200,8 @@
     .admin-machine-sync-card,
     .admin-equipment-row {
       display: grid;
-      gap: 12px;
-      padding: 16px 0;
+      gap: var(--card-gap);
+      padding: 17px 0;
       border: 0;
       border-top: 1px solid rgba(245, 239, 241, 0.1);
       border-radius: 0;
@@ -2791,6 +3218,7 @@
       align-items: flex-start;
       justify-content: space-between;
       gap: 10px;
+      flex-wrap: wrap;
     }
 
     .admin-machine-sync-head h3 {
@@ -2993,6 +3421,23 @@
       color: rgba(245, 239, 241, 0.62);
     }
 
+    .admin-module-scroll .empty {
+      border-color: rgba(245, 239, 241, 0.1);
+      background: rgba(255, 255, 255, 0.045);
+      box-shadow: none;
+    }
+
+    .admin-module-scroll .secondary-button {
+      color: rgba(245, 239, 241, 0.82);
+      border-color: rgba(245, 239, 241, 0.14);
+      background: rgba(255, 255, 255, 0.055);
+      box-shadow: none;
+    }
+
+    .admin-module-scroll .secondary-button:active {
+      background: rgba(255, 255, 255, 0.08);
+    }
+
     .admin-module-scroll .admin-contact-reply {
       border: 1px solid rgba(245, 239, 241, 0.12);
       background: rgba(255, 255, 255, 0.05);
@@ -3004,14 +3449,35 @@
 
     .admin-tool-card,
     .admin-filter-panel,
-    .admin-log-card {
+    .admin-log-card,
+    .admin-module-scroll .batch-request-card {
       display: grid;
-      gap: 10px;
-      padding: 15px 0;
+      gap: var(--card-gap);
+      padding: 16px 0;
       border: 0;
       border-top: 1px solid rgba(245, 239, 241, 0.1);
       border-radius: 0;
       background: transparent;
+    }
+
+    .admin-module-scroll .batch-request-title strong {
+      color: rgba(255, 255, 255, 0.94);
+    }
+
+    .admin-module-scroll .batch-request-title small,
+    .admin-module-scroll .batch-item-line {
+      color: rgba(245, 239, 241, 0.62);
+    }
+
+    .admin-module-scroll .batch-request-meta span {
+      color: #dca8b6;
+      background: rgba(196, 107, 130, 0.12);
+      box-shadow: inset 0 0 0 1px rgba(196, 107, 130, 0.14);
+    }
+
+    .admin-module-scroll .batch-item-list {
+      background: rgba(255, 255, 255, 0.045);
+      box-shadow: inset 0 0 0 1px rgba(245, 239, 241, 0.08);
     }
 
     .admin-tool-head,
@@ -3020,6 +3486,7 @@
       align-items: flex-start;
       justify-content: space-between;
       gap: 10px;
+      flex-wrap: wrap;
     }
 
     .admin-tool-head h3,
@@ -3041,8 +3508,8 @@
 
     .admin-export-actions {
       display: grid;
-      grid-template-columns: repeat(3, minmax(0, 1fr));
-      gap: 8px;
+      grid-template-columns: repeat(auto-fit, minmax(104px, 1fr));
+      gap: var(--tight-gap);
     }
 
     .admin-export-actions .secondary-button {
@@ -3052,7 +3519,7 @@
     }
 
     .admin-filter-panel {
-      grid-template-columns: minmax(0, 1fr) minmax(118px, 0.4fr);
+      grid-template-columns: 1fr;
       align-items: end;
     }
 
@@ -3088,6 +3555,8 @@
     .admin-equipment-row .list-media {
       width: 72px;
       height: 60px;
+      border: 1px solid rgba(245, 239, 241, 0.1);
+      background: rgba(255, 255, 255, 0.055);
     }
 
     .admin-equipment-main {
@@ -3124,8 +3593,8 @@
     .admin-equipment-edit {
       grid-column: 1 / -1;
       display: grid;
-      grid-template-columns: repeat(4, minmax(0, 1fr));
-      gap: 8px;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: var(--tight-gap);
       align-items: end;
     }
 
@@ -3191,8 +3660,8 @@
 
     .profile-card {
       display: grid;
-      gap: 11px;
-      padding: 18px;
+      gap: var(--tight-gap);
+      padding: var(--card-pad);
     }
 
     .profile-head {
@@ -3244,8 +3713,8 @@
       display: flex;
       align-items: center;
       justify-content: space-between;
-      gap: 18px;
-      padding: 0 26px 12px;
+      gap: var(--card-gap);
+      padding: 0 var(--page-x) 12px;
     }
 
     .profile-topbar h1 {
@@ -3271,7 +3740,7 @@
     }
 
     .profile-scroll {
-      padding: 0 22px calc(var(--tab-h) + 34px + env(safe-area-inset-bottom));
+      padding: 0 var(--page-x) calc(var(--tab-h) + var(--section-gap) + 14px + env(safe-area-inset-bottom));
     }
 
     .profile-identity {
@@ -3279,7 +3748,7 @@
       display: grid;
       grid-template-columns: 86px minmax(0, 1fr) 32px;
       align-items: center;
-      gap: 18px;
+      gap: var(--card-gap);
       padding: 12px 2px 18px;
     }
 
@@ -3364,9 +3833,9 @@
       display: grid;
       grid-template-columns: 72px minmax(0, 1fr);
       align-items: center;
-      gap: 16px;
+      gap: var(--card-gap);
       margin: 8px 0 14px;
-      padding: 18px;
+      padding: var(--card-pad);
       border: 1px solid rgba(159, 18, 57, 0.08);
       border-radius: 24px;
       background: rgba(255, 255, 255, 0.96);
@@ -3631,7 +4100,7 @@
       isolation: isolate;
       aspect-ratio: 1400 / 1024;
       width: 100%;
-      margin: 12px 0 20px;
+      margin: var(--tight-gap) 0 var(--section-gap);
       overflow: visible;
     }
 
@@ -3700,7 +4169,7 @@
       display: flex;
       align-items: center;
       gap: 6px;
-      margin-bottom: clamp(14px, 4vw, 18px);
+      margin-bottom: 14px;
       padding-left: 2px;
     }
 
@@ -3740,18 +4209,22 @@
 
     .profile-file-metrics {
       display: grid;
-      grid-template-columns: repeat(3, minmax(0, 1fr));
+      grid-template-columns: minmax(0, 1.08fr) minmax(0, 0.84fr) minmax(0, 1.08fr);
       min-height: 0;
       align-items: stretch;
     }
 
     .profile-file-metric {
       position: relative;
+      min-width: 0;
       min-height: 0;
       display: grid;
       align-content: center;
-      padding: clamp(6px, 2.2vw, 14px) clamp(4px, 2vw, 10px);
+      justify-items: center;
+      overflow: hidden;
+      padding: clamp(6px, 2.1vw, 12px) clamp(3px, 1.5vw, 7px);
       border-right: 1px solid rgba(159, 18, 57, 0.18);
+      text-align: center;
     }
 
     .profile-file-metric:last-child {
@@ -3761,31 +4234,47 @@
     .profile-file-metric span {
       display: flex;
       align-items: center;
-      gap: clamp(3px, 1.2vw, 6px);
+      justify-content: center;
+      gap: clamp(2px, 0.9vw, 4px);
+      min-width: 0;
+      max-width: 100%;
       color: var(--ink);
-      font-size: clamp(8px, 2.6vw, 12px);
+      font-size: clamp(8px, 2.45vw, 11px);
       font-weight: 700;
       white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
     }
 
     .profile-file-metric span svg {
-      width: clamp(13px, 4vw, 18px);
-      height: clamp(13px, 4vw, 18px);
+      flex: 0 0 auto;
+      width: clamp(12px, 3.4vw, 15px);
+      height: clamp(12px, 3.4vw, 15px);
       color: var(--brand);
     }
 
     .profile-file-metric strong {
       display: block;
-      margin-top: clamp(8px, 2.8vw, 14px);
-      font-size: clamp(17px, 5.2vw, 26px);
+      width: 100%;
+      margin-top: clamp(6px, 2.1vw, 10px);
+      max-width: 100%;
+      font-size: clamp(15px, 4vw, 22px);
       line-height: 1;
       font-weight: 900;
+      text-align: center;
       white-space: nowrap;
+      overflow: hidden;
+      text-overflow: clip;
     }
 
     .profile-file-metric strong em {
+      display: block;
+      max-width: 100%;
       color: var(--brand);
+      font-size: clamp(14px, 3.7vw, 20px);
       font-style: normal;
+      overflow: hidden;
+      text-overflow: clip;
     }
 
     .profile-file-actions {
@@ -3799,6 +4288,7 @@
     }
 
     .profile-file-actions button {
+      min-width: 0;
       min-height: clamp(28px, 9.4vw, 40px);
       display: flex;
       align-items: center;
@@ -3810,6 +4300,8 @@
       font-size: clamp(8px, 2.7vw, 11px);
       font-weight: 800;
       white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
     }
 
     .profile-file-actions button:last-child {
@@ -3819,6 +4311,7 @@
     .profile-file-actions .profile-return-button {
       min-height: 29px;
       margin: 4px 3px;
+      padding: 0 7px;
       color: #ffffff;
       border-radius: 999px;
       background: var(--brand);
@@ -4014,10 +4507,16 @@
     }
 
     .empty {
-      padding: 18px;
+      animation: emptyStateIn 240ms cubic-bezier(0.2, 0.85, 0.18, 1) both;
+      padding: var(--card-pad);
       border: 1px solid var(--line);
       border-radius: var(--radius-md);
       background: rgba(255, 255, 255, 0.72);
+    }
+
+    @keyframes emptyStateIn {
+      0% { transform: translateY(4px); opacity: 0; }
+      100% { transform: translateY(0); opacity: 1; }
     }
 
     .tabbar {
@@ -4038,7 +4537,25 @@
       backdrop-filter: blur(16px);
     }
 
+    .tabbar::before {
+      content: "";
+      position: absolute;
+      left: 5px;
+      top: 5px;
+      bottom: 5px;
+      z-index: 0;
+      width: calc((100% - 10px) / 5);
+      border-radius: 19px;
+      background: var(--brand-soft);
+      opacity: var(--tab-indicator-opacity, 1);
+      transform: translateX(calc(var(--tab-index, 0) * 100%));
+      transition: transform 240ms cubic-bezier(0.2, 0.85, 0.18, 1), opacity 160ms ease;
+      pointer-events: none;
+    }
+
     .tab-button {
+      position: relative;
+      z-index: 1;
       min-height: 52px;
       display: grid;
       place-items: center;
@@ -4046,12 +4563,12 @@
       color: var(--muted);
       border-radius: 19px;
       background: transparent;
-      transition: transform 180ms ease, color 180ms ease, background 180ms ease;
+      transition: color 180ms ease, background 180ms ease;
     }
 
     .tab-button.active {
       color: var(--brand);
-      background: var(--brand-soft);
+      background: transparent;
       font-weight: 850;
     }
 
@@ -4062,6 +4579,20 @@
     .tab-button svg {
       width: 21px;
       height: 21px;
+      transition: transform 220ms cubic-bezier(0.2, 0.85, 0.18, 1), stroke-width 180ms ease;
+    }
+
+    .tab-button.active svg {
+      transform: scale(1.04);
+      stroke-width: 2.7;
+    }
+
+    .tab-button:active svg {
+      transform: scale(0.96);
+    }
+
+    .tab-button.active:active svg {
+      transform: scale(1);
     }
 
     .brand-lockup {
@@ -4286,6 +4817,33 @@
       .loading-spinner {
         animation: none;
       }
+
+      .screen.is-route-entering,
+      .list-stack > *,
+      .timeline > *,
+      .message-list > *,
+      .equipment-grid > *,
+      .issue-list li,
+      .empty,
+      .camera-box.is-ai-scanning .scan-line,
+      .admin-quick-stage.is-settling .admin-quick-button.is-active i,
+      .admin-dashboard-scroll .admin-task-number.is-count-changing,
+      .primary-button.is-action-done,
+      .secondary-button.is-action-done,
+      .photo-name.is-selected {
+        animation: none !important;
+      }
+
+      .tabbar::before,
+      .tab-button svg,
+      .admin-quick-button,
+      .ai-progress-step,
+      .ai-progress-step::before,
+      .field input,
+      .field select,
+      .field textarea {
+        transition: none !important;
+      }
     }
 
     .login-switch {
@@ -4408,7 +4966,7 @@
       font-weight: 800;
     }
 
-    /* ==================== NFC 读取弹窗样式 ==================== */
+    /* ==================== NFC 扫描弹窗样式 ==================== */
     .nfc-scan-overlay {
       position: absolute;
       inset: 0;
@@ -4543,7 +5101,7 @@
       cursor: not-allowed;
     }
 
-    /* NFC 读取中设备图示 */
+    /* NFC 扫描中设备图示 */
     .nfc-device-visual {
       position: relative;
       width: 120px;
@@ -4748,7 +5306,7 @@
       color: rgba(255, 255, 255, 0.65);
     }
 
-    /* 机器模式 NFC 读取动画（大尺寸公屏版） */
+    /* 机器模式 NFC 扫描动画（大尺寸公屏版） */
     .nfc-machine-scan-visual {
       position: relative;
       width: 180px;
@@ -4898,6 +5456,15 @@
     }
 
     @media (max-width: 360px) {
+      :root {
+        --page-x: 16px;
+        --section-gap: 16px;
+        --card-gap: 12px;
+        --card-pad: 14px;
+        --card-pad-sm: 12px;
+        --item-media-h: 88px;
+      }
+
       .equipment-grid,
       .kpi-grid,
       .metric-row,
@@ -4921,16 +5488,27 @@
       .info-list strong {
         white-space: normal;
       }
+
+      .list-card {
+        grid-template-columns: 86px minmax(0, 1fr);
+      }
+
+      .list-card .tag {
+        grid-column: 2;
+        justify-self: start;
+        margin-top: 4px;
+      }
+
     }
 
     @media (max-width: 480px) and (max-height: 760px) {
       .profile-topbar {
         min-height: 54px;
-        padding: 0 24px 6px;
+        padding: 0 var(--page-x) 6px;
       }
 
       .profile-scroll {
-        padding: 0 18px calc(var(--tab-h) + 30px + env(safe-area-inset-bottom));
+        padding: 0 var(--page-x) calc(var(--tab-h) + 30px + env(safe-area-inset-bottom));
       }
 
       .profile-identity {
@@ -4998,18 +5576,26 @@
     }
 
     @media (min-width: 481px) and (max-width: 1023px) {
+      :root {
+        --page-x: 28px;
+        --section-gap: 24px;
+        --card-gap: 16px;
+        --card-pad: 20px;
+        --item-media-h: 112px;
+      }
+
       .topbar,
       .home-top,
       .search-row,
       .scroll > * {
-        width: min(520px, calc(100% - 44px));
+        width: min(560px, calc(100% - 56px));
         margin-left: auto;
         margin-right: auto;
       }
 
       .profile-topbar,
       .profile-scroll > section {
-        width: min(430px, calc(100% - 44px));
+        width: min(460px, calc(100% - 56px));
         margin-left: auto;
         margin-right: auto;
       }
@@ -5026,6 +5612,36 @@
       .profile-scroll {
         padding-left: 0;
         padding-right: 0;
+      }
+
+      .equipment-grid {
+        grid-template-columns: repeat(3, minmax(0, 1fr));
+      }
+
+      .list-card {
+        grid-template-columns: 112px minmax(0, 1fr) auto;
+      }
+
+      .list-media {
+        width: 112px;
+        height: 86px;
+      }
+
+      .list-img {
+        width: 92px;
+        height: 72px;
+      }
+
+      .admin-equipment-form-grid {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+      }
+
+      .admin-filter-panel {
+        grid-template-columns: minmax(0, 1fr) minmax(132px, 0.45fr);
+      }
+
+      .admin-equipment-edit {
+        grid-template-columns: repeat(4, minmax(0, 1fr));
       }
 
       .tabbar {
@@ -5288,8 +5904,8 @@
     // 💡 强刷版本键名，绕过老旧的缓存干扰，促使全新首页布局立刻下发
     const STORAGE_KEY = "sportloop-ios-app-v7";
     const AUTH_STORAGE_KEY = "sportloop-supabase-auth-v1";
-    const SUPABASE_URL = "https://udxcarumabyqfbnrpqxa.supabase.co";
-    const SUPABASE_PUBLIC_KEY = "sb_publishable_HCLrmU8VEm6XPFHz-mf6zg_ztSp2gEQ";
+    const SUPABASE_URL = "https://jwylvubakymfkdncuwhp.supabase.co";
+    const SUPABASE_PUBLIC_KEY = "sb_publishable_LQqefYrKcOKLIqqFqNTjgQ_qFjyZOB8";
 
     // 替换 assets 下同名图片后，把此数字 +1，可避免浏览器继续显示旧图缓存
     const ASSET_VERSION = "12";
@@ -5511,12 +6127,14 @@
       isAdmin: false,
       remoteLoading: false,
       loading: false,
+      renderedRoute: "",
       adminEquipmentQuery: "",
       adminEquipmentStatus: "全部",
-      adminFanIndex: 3,
+      adminFanIndex: 0,
       adminFanSuppressClick: false,
       adminFanSuppressUntil: 0,
       adminFanLastSwipeAt: 0,
+      adminTaskCounts: {},
       adminNfcFeedback: null,
     };
 
@@ -6297,7 +6915,7 @@
       if (!authSession?.accessToken) return;
       await refreshAdminAccess();
 
-      const [equipmentRows, profileRows, loanRows, messageRows, contactRows, orderRows, batchRows, syncLogRows, operationLogRows] = await Promise.all([
+      const [equipmentRows, profileRows, loanRows, messageRows, contactRows, orderRows, batchRows, syncLogRows, operationLogRows, venueRows] = await Promise.all([
         supabaseRequest("equipment?select=*&order=name.asc"),
         supabaseRequest(`student_profiles?select=*&user_id=eq.${authSession.userId}`),
         supabaseRequest("loans?select=*&order=created_at.desc"),
@@ -6307,6 +6925,7 @@
         supabaseRequest("batch_borrow_requests?select=*&order=created_at.desc"),
         supabaseRequest("machine_sync_logs?select=*&order=created_at.desc&limit=40"),
         supabaseRequest("admin_operation_logs?select=*&order=created_at.desc&limit=60"),
+        supabaseRequest("venues?select=*&order=name.asc"),
       ]);
 
       store.equipment = equipmentRows.map(dbEquipmentToLocal);
@@ -6320,6 +6939,7 @@
       store.batchRequests = batchRows.map(dbBatchRequestToLocal);
       store.machineSyncLogs = syncLogRows.map(dbMachineSyncLogToLocal);
       store.adminOperationLogs = operationLogRows.map(dbAdminOperationLogToLocal);
+      store.venues = venueRows.map(dbVenueToLocal);
       saveStore();
     }
 
@@ -6656,6 +7276,7 @@
       return value.replace(/\s*\d+\s*号机/g, "").replace(/自助机/g, "").trim();
     }
 
+
     let store = loadStore();
     let authSession = loadAuthSession();
     applyAuthSessionToState();
@@ -6665,14 +7286,6 @@
       item.machineSyncedAt = item.machineSyncedAt || "";
     });
     saveStore();
-
-    if (!Array.isArray(store.venues) || !store.venues.length) {
-      const unique = [...new Set(store.equipment.filter((item) => item.status !== "已下架").map((item) => cleanVenue(item.venue)).filter(Boolean))];
-      store.venues = unique.length
-        ? unique.map((name, i) => ({ id: "v" + String(i + 1), name, open: true }))
-        : clone(seed.venues || []);
-      saveStore();
-    }
 
     function stripLoanPhotosForLocalCache(loan = {}) {
       const cached = { ...loan };
@@ -6761,6 +7374,16 @@
       return sameDay
         ? `今日 ${new Intl.DateTimeFormat("zh-CN", { hour: "2-digit", minute: "2-digit" }).format(due)}`
         : formatDateTime(ms);
+    }
+
+    function formatProfileDueTime(ms) {
+      if (!Number.isFinite(ms)) return "未设置";
+      const due = new Date(ms);
+      const now = new Date();
+      const sameDay = due.getFullYear() === now.getFullYear() && due.getMonth() === now.getMonth() && due.getDate() === now.getDate();
+      return sameDay
+        ? `今日${new Intl.DateTimeFormat("zh-CN", { hour: "2-digit", minute: "2-digit" }).format(due)}`
+        : new Intl.DateTimeFormat("zh-CN", { month: "2-digit", day: "2-digit" }).format(due);
     }
 
     function selectedBorrowPeriods() {
@@ -6887,6 +7510,14 @@
       }
       loan.status = "已取消";
       saveStore();
+
+    if (!Array.isArray(store.venues) || !store.venues.length) {
+      const unique = [...new Set(listedEquipment().map((item) => cleanVenue(item.venue)).filter(Boolean))];
+      store.venues = unique.length
+        ? unique.map((name, i) => ({ id: "v" + String(i + 1), name, open: true }))
+        : clone(seed.venues || []);
+      saveStore();
+    }
       runRemote(() => supabaseRequest(`loans?id=eq.${loan.id}`, { method: "PATCH", body: { status: "已取消" } }));
       pushMessage("借用已取消", `${item ? item.name : "器材"} 的借用申请已取消。`);
       state.notice = "借用申请已取消";
@@ -7084,6 +7715,13 @@
       return html;
     }
 
+    function applyRouteMotion(routeKey) {
+      const routeChanged = state.renderedRoute !== routeKey;
+      state.renderedRoute = routeKey;
+      if (!routeChanged || window.matchMedia?.("(prefers-reduced-motion: reduce)")?.matches) return;
+      document.querySelector(".screen")?.classList.add("is-route-entering");
+    }
+
     function markPhotoSelected(input, statusSelector, label) {
       const file = input?.files?.[0];
       if (!file) return;
@@ -7096,6 +7734,22 @@
       upload?.classList.add("is-selected");
     }
 
+    function markActionDone(button, label = "已完成") {
+      if (!button) return;
+      button.classList.add("is-action-done");
+      button.disabled = true;
+      button.innerHTML = `${icon("check")} ${label}`;
+    }
+
+    function finishWithButtonFeedback(button, label, done) {
+      if (!button) {
+        done();
+        return;
+      }
+      markActionDone(button, label);
+      window.setTimeout(done, 220);
+    }
+
     function tabbar() {
       const tabs = [
         ["home", "首页", "home"],
@@ -7104,8 +7758,10 @@
         ["messages", "消息", "bell"],
         ["profile", "我的", "user"],
       ];
+      const activeIndex = tabs.findIndex(([name]) => state.route === name);
+      const indicatorIndex = Math.max(0, activeIndex);
       return `
-        <nav class="tabbar" aria-label="底部导航">
+        <nav class="tabbar" aria-label="底部导航" style="--tab-index:${indicatorIndex}; --tab-indicator-opacity:${activeIndex >= 0 ? 1 : 0};">
           ${tabs.map(([name, label, svg]) => `
             <button class="tab-button ${state.route === name ? "active" : ""}" data-route="${name}" aria-label="${label}">
               ${icon(svg)}<span>${label}</span>
@@ -7178,7 +7834,7 @@
     function homePage() {
       const equipment = listedEquipment();
       const totalAvailable = equipment.reduce((sum, item) => sum + item.available, 0);
-      const openVenues = (Array.isArray(store.venues) ? store.venues.filter((v) => v.open).length : 0);
+      const openVenues = new Set(equipment.filter((item) => item.available > 0).map((item) => cleanVenue(item.venue))).size;
       const health = equipment.length ? Math.round(equipment.reduce((sum, item) => sum + item.health, 0) / equipment.length) : 0;
       const currentLoan = activeLoan();
       const popularEquipment = equipment.slice(0, 5);
@@ -7198,6 +7854,7 @@
                 <h1 class="new-hero-title">器材借用</h1>
                 <p class="new-hero-subtitle">先看状态，再去借用</p>
                 <div class="new-stats-stack">
+                  <!-- 1. 今日可借 -->
                   <div class="new-stat-card">
                     <div class="new-stat-icon-wrapper red-theme">
                       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect><line x1="16" y1="2" x2="16" y2="6"></line><line x1="8" y1="2" x2="8" y2="6"></line><line x1="3" y1="10" x2="21" y2="10"></line><polyline points="8 14 10 16 14 12"></polyline></svg>
@@ -7208,6 +7865,7 @@
                     </div>
                   </div>
 
+                  <!-- 2. 状态良好 -->
                   <div class="new-stat-card">
                     <div class="new-stat-icon-wrapper blue-theme">
                       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"></path><polyline points="9 11 11 13 15 9"></polyline></svg>
@@ -7218,6 +7876,7 @@
                     </div>
                   </div>
 
+                  <!-- 3. 开放场地 -->
                   <div class="new-stat-card">
                     <div class="new-stat-icon-wrapper purple-theme">
                       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="18" height="18" rx="2" ry="2"></rect><line x1="9" y1="3" x2="9" y2="21"></line><line x1="15" y1="3" x2="15" y2="21"></line><line x1="3" y1="9" x2="21" y2="9"></line><line x1="3" y1="15" x2="21" y2="15"></line></svg>
@@ -7260,7 +7919,7 @@
         ["发起借用", "bag"],
         ["获取验证码", "search"],
         ["NFC 机器验证", "scan"],
-        ["上传照片", "camera"],
+        ["上传正反面", "camera"],
         ["完成借用", "check"],
       ];
       return `
@@ -7395,8 +8054,8 @@
                 <h1>${item.name}</h1>
                 <p>${canBorrow ? `可借 ${item.available} 件` : inventoryWaitMessage()}</p>
               </div>
-            </div>
-            <div class="info-list">
+	            </div>
+	            <div class="info-list">
               <div><span>借用方式</span><strong>手机发起借用 → 获取验证码 → 场馆 NFC 机器验证 → 上传借出前正反两面照片生效</strong></div>
             </div>
             <div class="duration-picker">
@@ -7407,7 +8066,7 @@
               <div class="duration-options">${borrowDurationOptions()}</div>
               <p class="machine-hint" style="margin:0;">当前选择：${durationText}</p>
             </div>
-	            <button class="primary-button" data-sync-borrow="${item.id}" ${canBorrow ? "" : "disabled"}>${icon("bag")} ${canBorrow ? "借用" : "等待 NFC 入库"}</button>
+            <button class="primary-button" data-sync-borrow="${item.id}" ${canBorrow ? "" : "disabled"}>${icon("bag")} ${canBorrow ? "借用" : "等待 NFC 入库"}</button>
             <p class="machine-hint" style="margin-top:12px;">点击借用后将生成 6 位验证码，请前往场馆 NFC 识别机器输入验证码并贴 NFC 标签完成验证。</p>
           </section>
         </main>
@@ -7534,7 +8193,7 @@
                 <div><span>借出时间</span><strong>${loan.borrowedAt}</strong></div>
                 <div><span>借用时长</span><strong>${loan.durationLabel || "未设置"}</strong></div>
                 <div><span>归还截止</span><strong>${loan.dueAt || "未设置"}</strong></div>
-	                <div><span>归还要求</span><strong>归还正反面照片检测正常后，机器才可扫码归还</strong></div>
+                <div><span>归还要求</span><strong>归还正反面照片检测正常后，机器才可扫码归还</strong></div>
               </div>
               ${needsBeforePhoto ? `
 	                <div class="photo-requirement-strip">
@@ -7558,8 +8217,8 @@
 	                  </div>
 	                  <p class="photo-pair-helper">请分别拍清器材正面和反面，归还时会按同一面逐一对比。</p>
 	                </div>
-                <button class="primary-button" style="margin-top:16px;width:100%;" data-save-borrow-before="${loan.id}">${icon("check")} 保存并完成借用</button>
-              ` : `
+	                <button class="primary-button" style="margin-top:16px;width:100%;" data-save-borrow-before="${loan.id}">${icon("check")} 保存并完成借用</button>
+	              ` : `
                 <div class="button-row" style="margin-top:18px;">
                   <button class="secondary-button" data-detail="${item.id}">查看器材</button>
                   <button class="primary-button" data-route="borrow">当前借用</button>
@@ -7663,7 +8322,7 @@
             <span class="list-media">${equipmentImage(item, "list-img")}</span><!-- [IMAGE-FN→list-img] 批量申请·器材选择 -->
             <span>
               <strong>${escapeHtml(item.name)}</strong>
-              <small>可借 ${item.available} 件</small>
+              <small>${equipmentAvailabilityText(item)}</small>
             </span>
           </label>
           <label class="batch-qty">
@@ -7886,7 +8545,7 @@
       const body = `
         <main class="scroll">
           <section class="camera-panel">
-            <div class="camera-box">
+            <div class="camera-box ${isDetecting ? "is-ai-scanning" : ""}">
               ${equipmentImage(item, "camera-img")}<!-- [IMAGE-FN→camera-img] 归还前检测 -->
               <span class="scan-line"></span>
             </div>
@@ -7899,20 +8558,26 @@
 	            <div class="photo-pair-grid">
 	              <div class="photo-pair-slot">
 	                <label class="upload-real ${isDetecting ? "is-disabled" : ""}">
-                  ${icon("camera")} 归还正面
-                  <input id="returnFrontPhotoInput" type="file" accept="image/*" capture="environment" ${isDetecting ? "disabled" : ""} /><!-- [IMAGE-13] 用户拍摄/选择的归还检测正面照片（非静态资源） -->
-                </label>
-                <div id="returnFrontPhotoName" class="photo-name">未选择正面照片</div>
-              </div>
-              <div class="photo-pair-slot">
-                <label class="upload-real ${isDetecting ? "is-disabled" : ""}">
-                  ${icon("camera")} 归还反面
-                  <input id="returnBackPhotoInput" type="file" accept="image/*" capture="environment" ${isDetecting ? "disabled" : ""} />
-                </label>
-                <div id="returnBackPhotoName" class="photo-name">未选择反面照片</div>
-              </div>
-              <p class="photo-pair-helper">请尽量保持和借出前相同角度；任一面缺失或不可比都会要求重拍。</p>
-            </div>
+	                  ${icon("camera")} 归还正面
+	                  <input id="returnFrontPhotoInput" type="file" accept="image/*" capture="environment" ${isDetecting ? "disabled" : ""} /><!-- [IMAGE-13] 用户拍摄/选择的归还检测正面照片（非静态资源） -->
+	                </label>
+	                <div id="returnFrontPhotoName" class="photo-name">未选择正面照片</div>
+	              </div>
+	              <div class="photo-pair-slot">
+	                <label class="upload-real ${isDetecting ? "is-disabled" : ""}">
+	                  ${icon("camera")} 归还反面
+	                  <input id="returnBackPhotoInput" type="file" accept="image/*" capture="environment" ${isDetecting ? "disabled" : ""} />
+	                </label>
+	                <div id="returnBackPhotoName" class="photo-name">未选择反面照片</div>
+	              </div>
+	              <p class="photo-pair-helper">请尽量保持和借出前相同角度；任一面缺失或不可比都会要求重拍。</p>
+	            </div>
+	            <div class="ai-progress ${isDetecting ? "is-active" : ""}" id="aiDetectProgress" aria-live="polite">
+	              <span class="ai-progress-step is-active">读取正反两面照片</span>
+	              <span class="ai-progress-step">正面对正面、反面对反面对比</span>
+	              <span class="ai-progress-step">检查两面边缘、裂口和露底</span>
+	              <span class="ai-progress-step">生成归还质检结论</span>
+	            </div>
             ${returnDetectionFeedbackHtml(loan.id)}
           </section>
           <div class="button-row">
@@ -7947,7 +8612,7 @@
               ${metric(result.riskLabel, "风险")}
               ${metric(String(result.issueCount), "问题点")}
             </div>
-            ${result.issues.length ? `<p class="machine-hint">疑似问题：${result.issues.map(escapeHtml).join("、")}</p>` : ""}
+            ${result.issues.length ? `<ul class="issue-list">${result.issues.map((issue) => `<li>${escapeHtml(issue)}</li>`).join("")}</ul>` : ""}
             <p class="machine-hint">${canReturn ? "检测正常，系统已允许机器扫码归还。请到场馆机器完成归还后，再同步状态。" : "检测未通过，暂不允许机器扫码归还，请等待管理员复核。"}</p>
             ${canReturn
               ? `<button class="primary-button" data-sync-return="${loan.id}">${icon("scan")} 去机器扫码归还</button>`
@@ -8052,30 +8717,30 @@
 
     function adminModuleCards(data) {
       return [
+        ["equipment", "器材档案", listedEquipment().length],
+        ["syncLogs", "同步记录", data.syncLogs.length],
+        ["venues", "场馆管理", (store.venues || []).length],
         ["batch", "批量申请", data.pendingBatchRequests.length],
         ["messages", "学生留言", data.waitingMessages.length],
         ["orders", "报修工单", data.pending.length],
-        ["equipment", "器材档案", listedEquipment().length],
-        ["syncLogs", "同步记录", data.syncLogs.length],
         ["logs", "操作记录", data.operationLogs.length],
-        ["venues", "场馆管理", (store.venues || []).length],
         ["export", "数据导出", 3],
       ];
     }
 
     function adminModuleDetails(data) {
       return {
-        venues: {
-          title: "场馆管理",
-          desc: "添加体育场馆，并控制开放/关闭状态。",
-          status: `${(store.venues || []).filter((v) => v.open).length} 开放`,
-          content: adminVenueManager(),
-        },
         export: {
           title: "数据导出",
           desc: "导出库存、机器同步和管理员操作，方便盘点交接。",
           status: "CSV",
           content: adminExportTools(),
+        },
+        venues: {
+          title: "场馆管理",
+          desc: "添加体育场馆，并控制开放/关闭状态。",
+          status: `${(store.venues || []).filter((v) => v.status === "open").length} 开放`,
+          content: adminVenueManager(),
         },
         batch: {
           title: "批量申请",
@@ -8119,26 +8784,35 @@
     function adminPage() {
       const data = adminDashboardData();
       const body = `
-        <main class="scroll">
+        <main class="scroll admin-dashboard-scroll">
           <section class="admin-hero admin-dashboard-hero">
             <div class="admin-ring-top">
               <div>
-                <p class="admin-overline">今日运营</p>
                 <h1>管理员工作台</h1>
                 <p class="admin-ring-summary">留言·任务·库存实时计算</p>
               </div>
               <span class="admin-ring-mode">实时</span>
             </div>
-            <div class="admin-ring-stage">
-              ${adminActivityRing(data.progress)}
+          <div class="admin-ring-stage">
+            ${adminActivityRing(data.progress)}
+          </div>
+          </section>
+          <section class="admin-dashboard-section">
+            <div class="admin-dashboard-section-head">
+              <h2>今日待办</h2>
+            </div>
+            <div class="admin-kpi-grid">
+              ${adminTaskCard("待回复", data.waitingMessages.length, "条", "message", "adminMessages")}
+              ${adminTaskCard("待审批", data.pendingBatchRequests.length, "单", "check", "adminBatch")}
+              ${adminTaskCard("报修工单", data.pending.length, "单", "wrench", "adminOrders")}
             </div>
           </section>
-          ${adminQuickNav(adminModuleCards(data))}
-          <div class="admin-kpi-grid">
-            ${adminKpi("待回复", data.waitingMessages.length, "条", "message")}
-            ${adminKpi("待审批", data.pendingBatchRequests.length, "单", "check")}
-            ${adminKpi("可借总量", data.totalAvailable, "件", "bag")}
-          </div>
+          <section class="admin-dashboard-section">
+            <div class="admin-dashboard-section-head">
+              <h2>管理功能</h2>
+            </div>
+            ${adminQuickNav(adminModuleCards(data))}
+          </section>
         </main>
       `;
       if (!state.isAdmin) {
@@ -8230,15 +8904,23 @@
       `;
     }
 
-    function adminKpi(label, value, unit, iconName) {
+    function adminTaskCountClass(key, value) {
+      if (!state.adminTaskCounts) state.adminTaskCounts = {};
+      const previous = state.adminTaskCounts[key];
+      state.adminTaskCounts[key] = value;
+      return previous !== undefined && previous !== value ? " is-count-changing" : "";
+    }
+
+    function adminTaskCard(label, value, unit, iconName, routeName) {
+      const countClass = adminTaskCountClass(routeName, value);
       return `
-        <article class="admin-kpi-card is-compact">
+        <button class="admin-kpi-card is-compact admin-task-card" type="button" data-admin-route="${escapeAttr(routeName)}">
           <i class="admin-kpi-icon">${icon(iconName)}</i>
           <div>
             <small>${escapeHtml(label)}</small>
-            <strong>${value}<span>${escapeHtml(unit)}</span></strong>
+            <strong><span class="admin-task-number${countClass}">${value}</span><span>${escapeHtml(unit)}</span></strong>
           </div>
-        </article>
+        </button>
       `;
     }
 
@@ -8291,42 +8973,6 @@
       `;
     }
 
-    function adminVenueManager() {
-      const venues = Array.isArray(store.venues) ? store.venues : [];
-      return `
-        <form class="admin-machine-sync-card" id="adminVenueForm">
-          <div class="admin-machine-sync-head">
-            <div>
-              <h3>添加场馆</h3>
-              <p>输入场馆名称后点击添加。</p>
-            </div>
-          </div>
-          <div style="display:grid;gap:12px;">
-            <label class="field" style="margin:0;">
-              <span>场馆名称</span>
-              <input id="adminVenueInput" placeholder="例如：游泳馆" style="color:#fff;background:#1a1a2e;border:1px solid rgba(255,255,255,0.3);border-radius:12px;padding:12px;font-size:16px;width:100%;min-height:48px;box-sizing:border-box;" />
-            </label>
-            <button class="primary-button" type="submit">${icon("bag")} 添加场馆</button>
-          </div>
-        </form>
-        <div class="list-stack">
-          ${venues.length ? venues.map(adminVenueRow).join("") : '<div class="empty">暂无场馆，请添加。</div>'}
-        </div>
-      `;
-    }
-
-    function adminVenueRow(venue) {
-      return `
-        <article class="admin-equipment-row" data-admin-venue="${escapeAttr(venue.id)}">
-          <div class="admin-equipment-main" style="grid-column:1/-1;">
-            <strong>${escapeHtml(venue.name)}</strong>
-            <small>${venue.open ? "开放中" : "已关闭"}</small>
-          </div>
-          <button class="${venue.open ? "secondary-button" : "primary-button"}" data-admin-venue-toggle="${escapeAttr(venue.id)}" style="grid-column:1/-1;margin-top:6px;">${venue.open ? icon("shield") + " 关闭场地" : icon("check") + " 开放场地"}</button>
-        </article>
-      `;
-    }
-
     function adminEquipmentFilterPanel() {
       const statuses = ["全部", "可借", "补充中", "维修中", "异常待确认"];
       return `
@@ -8343,6 +8989,193 @@
           </label>
         </div>
       `;
+    }
+
+
+    // ===== 场馆 Supabase CRUD =====
+    function dbVenueToLocal(row) {
+      return {
+        id: row.id,
+        name: row.name,
+        location: row.location || "",
+        openTime: row.open_time || "全天",
+        status: row.status === "closed" ? "closed" : "open",
+      };
+    }
+
+    async function fetchRemoteVenues() {
+      if (!authSession?.accessToken) return;
+      const data = await supabaseRequest("venues?select=*&order=name.asc");
+      store.venues = Array.isArray(data) ? data.map(dbVenueToLocal) : [];
+      saveStore();
+      return store.venues;
+    }
+
+    async function saveRemoteVenue(venue) {
+      if (!authSession?.accessToken) return;
+      const payload = {
+        id: venue.id,
+        user_id: authSession.userId,
+        name: venue.name,
+        location: venue.location || "",
+        open_time: venue.openTime || "全天",
+        status: venue.status || "open",
+      };
+      return supabaseRequest("venues?on_conflict=id", {
+        method: "POST",
+        headers: { Prefer: "resolution=merge-duplicates,return=representation" },
+        body: payload,
+      });
+    }
+
+    async function deleteRemoteVenue(venueId) {
+      if (!authSession?.accessToken) return;
+      return supabaseRequest("venues?id=eq." + encodeURIComponent(venueId), { method: "DELETE" });
+    }
+
+    // ===== 场馆管理 UI =====
+    function adminVenueManager() {
+      const venues = Array.isArray(store.venues) ? store.venues : [];
+      const openCount = venues.filter((v) => v.status === "open").length;
+      return /* html */`
+        <div class="admin-section">
+          <div class="admin-section-head">
+            <div>
+              <h2>场馆管理</h2>
+              <p class="admin-section-summary">当前 ${openCount}/${venues.length} 个场馆开放</p>
+            </div>
+            <button class="primary-button" id="adminVenueAddBtn" type="button">${icon("bag")} 新增场馆</button>
+          </div>
+          <form class="admin-machine-sync-card" id="adminVenueForm" style="display:none;">
+            <div class="admin-machine-sync-head">
+              <div><h3 id="adminVenueFormTitle">新增场馆</h3></div>
+            </div>
+            <div style="display:grid;gap:12px;">
+              <input type="hidden" id="adminVenueId" />
+              <label class="field" style="margin:0;">
+                <span>场馆名称</span>
+                <input id="adminVenueName" placeholder="例如：游泳馆" />
+              </label>
+              <label class="field" style="margin:0;">
+                <span>场馆位置</span>
+                <input id="adminVenueLocation" placeholder="例如：东区体育馆一楼" />
+              </label>
+              <label class="field" style="margin:0;">
+                <span>开放时间</span>
+                <input id="adminVenueOpenTime" placeholder="例如：08:00 - 22:00" />
+              </label>
+              <label class="field" style="margin:0;">
+                <span>状态</span>
+                <select id="adminVenueStatus">
+                  <option value="open">正常开放</option>
+                  <option value="closed">暂停开放</option>
+                </select>
+              </label>
+              <div style="display:flex;gap:8px;">
+                <button class="primary-button" type="submit">${icon("check")} 保存</button>
+                <button class="secondary-button" type="button" id="adminVenueCancelBtn">${icon("back")} 取消</button>
+              </div>
+            </div>
+          </form>
+          <div class="list-stack">
+            ${venues.length ? venues.map(adminVenueRow).join("") : '<div class="empty">暂无场馆信息。</div>'}
+          </div>
+        </div>
+      `;
+    }
+
+    function adminVenueRow(venue) {
+      const statusLabel = venue.status === "open" ? "正常开放" : "暂停开放";
+      const statusColor = venue.status === "open" ? "#22c55e" : "#f59e0b";
+      return /* html */`
+        <article class="admin-equipment-row" data-admin-venue="${escapeAttr(venue.id)}">
+          <div class="admin-equipment-main" style="grid-column:1/-1;display:flex;justify-content:space-between;align-items:center;">
+            <div>
+              <strong>${escapeHtml(venue.name)}</strong>
+              <small>${escapeHtml(venue.location || "未设置位置")} · ${escapeHtml(venue.openTime || "全天")}</small>
+            </div>
+            <span style="display:inline-block;padding:2px 10px;border-radius:12px;font-size:12px;color:#fff;background:${statusColor};">${statusLabel}</span>
+          </div>
+          <div style="display:flex;gap:8px;grid-column:1/-1;">
+            <button class="secondary-button" data-admin-venue-edit="${escapeAttr(venue.id)}">${icon("wrench")} 编辑</button>
+            <button class="secondary-button" style="color:#ef4444;border-color:rgba(239,68,68,0.4);" data-admin-venue-delete="${escapeAttr(venue.id)}">${icon("logout")} 删除</button>
+          </div>
+        </article>
+      `;
+    }
+
+    // ===== 场馆操作 Handlers =====
+    async function handleAdminVenueAdd(event) {
+      event.preventDefault();
+      const id = document.querySelector("#adminVenueId").value.trim();
+      const name = document.querySelector("#adminVenueName").value.trim();
+      const location = document.querySelector("#adminVenueLocation").value.trim();
+      const openTime = document.querySelector("#adminVenueOpenTime").value.trim();
+      const status = document.querySelector("#adminVenueStatus").value;
+      if (!name) { state.notice = "请输入场馆名称"; render(); return; }
+      if (!Array.isArray(store.venues)) store.venues = [];
+      if (store.venues.some((v) => v.id !== id && v.name === name)) { state.notice = "场馆已存在"; render(); return; }
+      const venue = { id: id || "v" + makeUuid().slice(0, 8), name, location, openTime, status };
+      try {
+        const savedRows = await saveRemoteVenue(venue);
+        const savedVenue = Array.isArray(savedRows) && savedRows[0] ? dbVenueToLocal(savedRows[0]) : venue;
+        const idx = store.venues.findIndex((v) => v.id === savedVenue.id);
+        if (idx >= 0) {
+          store.venues[idx] = savedVenue;
+        } else {
+          store.venues.push(savedVenue);
+        }
+        saveStore();
+        state.notice = id ? "已更新场馆：" + name : "已添加场馆：" + name;
+        document.querySelector("#adminVenueForm").style.display = "none";
+      } catch (error) {
+        reportRemoteSyncError(error);
+        state.notice = error.message || "场馆保存失败";
+      }
+      render();
+    }
+
+    function handleAdminVenueEdit(venueId) {
+      const venue = (store.venues || []).find((v) => v.id === venueId);
+      if (!venue) return;
+      const form = document.querySelector("#adminVenueForm");
+      document.querySelector("#adminVenueFormTitle").textContent = "编辑场馆";
+      document.querySelector("#adminVenueId").value = venue.id;
+      document.querySelector("#adminVenueName").value = venue.name;
+      document.querySelector("#adminVenueLocation").value = venue.location || "";
+      document.querySelector("#adminVenueOpenTime").value = venue.openTime || "";
+      document.querySelector("#adminVenueStatus").value = venue.status || "open";
+      form.style.display = "block";
+    }
+
+    function handleAdminVenueDelete(venueId) {
+      const venue = (store.venues || []).find((v) => v.id === venueId);
+      if (!venue) return;
+      showConfirm("确定要删除场馆「" + venue.name + "」吗？此操作不可撤销。", async () => {
+        try {
+          await deleteRemoteVenue(venueId);
+          store.venues = store.venues.filter((v) => v.id !== venueId);
+          saveStore();
+          state.notice = "已删除场馆：" + venue.name;
+        } catch (error) {
+          reportRemoteSyncError(error);
+          state.notice = error.message || "场馆删除失败";
+        }
+        render();
+      }, "删除");
+    }
+
+    function resetAdminVenueForm() {
+      const form = document.querySelector("#adminVenueForm");
+      if (form) {
+        form.style.display = "none";
+        document.querySelector("#adminVenueFormTitle").textContent = "新增场馆";
+        document.querySelector("#adminVenueId").value = "";
+        document.querySelector("#adminVenueName").value = "";
+        document.querySelector("#adminVenueLocation").value = "";
+        document.querySelector("#adminVenueOpenTime").value = "";
+        document.querySelector("#adminVenueStatus").value = "open";
+      }
     }
 
     function filteredAdminEquipmentList() {
@@ -8449,9 +9282,9 @@
         messages: ["message", "is-messages"],
         orders: ["wrench", "is-orders"],
         equipment: ["bag", "is-equipment"],
+        venues: ["grid", "is-venues"],
         syncLogs: ["refresh", "is-sync"],
         logs: ["file", "is-logs"],
-        venues: ["grid", "is-venues"],
         export: ["file", "is-export"],
       };
       const activeIndex = adminFanActiveIndex(items.length);
@@ -8768,7 +9601,7 @@
       const dueText = pendingPhotoCount === currentCount && currentCount
         ? "待补照片"
         : Number.isFinite(nearestDue)
-          ? formatDueTime(nearestDue)
+          ? formatProfileDueTime(nearestDue)
           : (currentCount ? "待归还" : "暂无");
       const rateChart = profileRateChart(ratePoints);
       const nickname = profileNickname();
@@ -8849,7 +9682,6 @@
             <button class="profile-setting-row" data-route="identity">${icon("idcard")}<strong>校园认证</strong><span>学号与身份管理</span>${icon("chevron")}</button>
             <button class="profile-setting-row" data-route="creditRules">${icon("shield")}<strong>信用规则</strong><span>了解信用评分规则</span>${icon("chevron")}</button>
             <button class="profile-setting-row" data-route="report">${icon("help")}<strong>帮助与反馈</strong><span>常见问题与反馈</span>${icon("chevron")}</button>
-            <button class="profile-setting-row" data-route="nfcMachine">${icon("scan")}<strong>NFC 机器模式</strong><span>场馆验证机专用页面</span>${icon("chevron")}</button>
             <button class="profile-setting-row" data-route="contactAdmin">${icon("headset")}<strong>联系管理员</strong><span>意见建议与咨询</span>${icon("chevron")}</button>
             <button class="profile-setting-row logout-row" data-logout>${icon("logout")}<strong>退出登录</strong><span>回到登录页面</span>${icon("chevron")}</button>
           </section>
@@ -8893,7 +9725,7 @@
         if (!options.skipNavigate) render();
         return existing;
       }
-      if (!canBorrowEquipment(item)) {
+	      if (!canBorrowEquipment(item)) {
 	        state.notice = inventoryWaitMessage();
         if (!options.skipNavigate) render();
         return null;
@@ -8935,19 +9767,19 @@
       return loan;
     }
 
-    async function finishBorrowWithBeforePhoto(loanId) {
+    async function finishBorrowWithBeforePhoto(loanId, button) {
       const loan = loanById(loanId);
       if (!loan) return;
       const item = byId(loan.equipmentId);
       if (!item) return;
       if (!loanNeedsBeforePhoto(loan)) {
-        state.notice = "这条借用已经完成借出前正反面照片";
+	        state.notice = "这条借用已经完成借出前正反面照片";
         render();
         return;
       }
       const shouldReserveInventory = loan.status === "待补借出照片";
-      if (shouldReserveInventory && !canBorrowEquipment(item)) {
-        state.notice = inventoryWaitMessage();
+	      if (shouldReserveInventory && !canBorrowEquipment(item)) {
+	        state.notice = inventoryWaitMessage();
         render();
         return;
       }
@@ -8957,8 +9789,8 @@
       const previousRequest = request ? { status: request.status, adminNote: request.adminNote, borrowedAt: request.borrowedAt, borrowedAtMs: request.borrowedAtMs } : null;
 
       try {
-        const beforePhotoPair = await readPhotoPair("borrowBeforeFrontPhotoInput", "borrowBeforeBackPhotoInput", "借出前");
-        loan.beforePhotoDataUrl = serializePhotoPair(beforePhotoPair);
+	        const beforePhotoPair = await readPhotoPair("borrowBeforeFrontPhotoInput", "borrowBeforeBackPhotoInput", "借出前");
+	        loan.beforePhotoDataUrl = serializePhotoPair(beforePhotoPair);
         loan.status = "使用中";
         loan.detectResult = "";
         loan.returnPhotoDataUrl = "";
@@ -8972,7 +9804,7 @@
           const pending = store.loans.some((row) => row.batchRequestId === request.id && loanNeedsBeforePhoto(row));
           if (!pending) {
             request.status = "已借出";
-            request.adminNote = "已补齐借出前正反面照片";
+	            request.adminNote = "已补齐借出前正反面照片";
             request.borrowedAt = loan.borrowedAt;
             request.borrowedAtMs = loan.borrowedAtMs;
           }
@@ -8988,15 +9820,15 @@
         item.available = previousItem.available;
         item.status = previousItem.status;
         if (request && previousRequest) Object.assign(request, previousRequest);
-        state.notice = error.message || "借出前正反面照片保存失败";
+	        state.notice = error.message || "借出前正反面照片保存失败";
         render();
         return;
       }
 
-      pushMessage("借用成功", `${item.name} ${item.assetId} 已保存借出前正反两面照片，归还截止 ${loan.dueAt}。`);
+	      pushMessage("借用成功", `${item.name} ${item.assetId} 已保存借出前正反两面照片，归还截止 ${loan.dueAt}。`);
       saveStore();
       state.notice = "借用成功";
-      route("borrowConfirm", { loanId: loan.id });
+      finishWithButtonFeedback(button, "已保存", () => route("borrowConfirm", { loanId: loan.id }));
     }
 
     function loadImageFromFile(file, label) {
@@ -9048,6 +9880,30 @@
       return { front, back };
     }
 
+    function startAiDetectionProgress() {
+      const panel = document.querySelector("#aiDetectProgress");
+      document.querySelector(".camera-box")?.classList.add("is-ai-scanning");
+      if (!panel) return null;
+      const steps = [...panel.querySelectorAll(".ai-progress-step")];
+      if (!steps.length) return null;
+      let activeIndex = 0;
+      panel.classList.add("is-active");
+      const update = () => {
+        steps.forEach((step, index) => {
+          step.classList.toggle("is-active", index === activeIndex);
+          step.classList.toggle("is-done", index < activeIndex);
+        });
+        activeIndex = Math.min(steps.length - 1, activeIndex + 1);
+      };
+      update();
+      return window.setInterval(update, 950);
+    }
+
+    function stopAiDetectionProgress(timer) {
+      if (timer) window.clearInterval(timer);
+      document.querySelector(".camera-box")?.classList.remove("is-ai-scanning");
+    }
+
     async function runAiDetection(loanId) {
       const loan = loanById(loanId);
       if (!loan) return;
@@ -9062,17 +9918,17 @@
           button.disabled = true;
           button.innerHTML = `<span class="loading-spinner" aria-hidden="true"></span> 准备检测`;
         }
-        if (!hasPhotoPair(loan.beforePhotoDataUrl)) throw new Error("请先上传借出前正反两面照片");
-        const beforeImages = photoPairFromStored(loan.beforePhotoDataUrl);
-        const afterImages = await readPhotoPair("returnFrontPhotoInput", "returnBackPhotoInput", "归还");
-        startReturnDetectionWait(loanId, runId);
-        timeoutTimer = window.setTimeout(() => controller.abort(), RETURN_DETECTION_TIMEOUT_MS);
-        const result = await supabaseFunctionRequest("analyze-equipment-damage", {
-          equipmentName: item.name,
-          assetId: item.assetId,
-          beforeImages,
-          afterImages,
-        }, { signal: controller.signal });
+	        if (!hasPhotoPair(loan.beforePhotoDataUrl)) throw new Error("请先上传借出前正反两面照片");
+	        const beforeImages = photoPairFromStored(loan.beforePhotoDataUrl);
+	        const afterImages = await readPhotoPair("returnFrontPhotoInput", "returnBackPhotoInput", "归还");
+	        startReturnDetectionWait(loanId, runId);
+	        timeoutTimer = window.setTimeout(() => controller.abort(), RETURN_DETECTION_TIMEOUT_MS);
+	        const result = await supabaseFunctionRequest("analyze-equipment-damage", {
+	          equipmentName: item.name,
+	          assetId: item.assetId,
+	          beforeImages,
+	          afterImages,
+	        }, { signal: controller.signal });
         window.clearTimeout(timeoutTimer);
         finishReturnDetectionWait(loanId, runId);
         const normalizedResult = parseDetectionResult(serializeDetectionResult(result));
@@ -9084,12 +9940,12 @@
           issue_count: normalizedResult.issueCount,
           summary: normalizedResult.summary,
           issues: normalizedResult.issues,
-          needs_admin_review: normalizedResult.needsAdminReview,
-          target_matched: normalizedResult.targetMatched,
-          comparable: normalizedResult.comparable,
-          side_results: normalizedResult.sideResults,
-        });
-        loan.returnPhotoDataUrl = serializePhotoPair(afterImages);
+	          needs_admin_review: normalizedResult.needsAdminReview,
+	          target_matched: normalizedResult.targetMatched,
+	          comparable: normalizedResult.comparable,
+	          side_results: normalizedResult.sideResults,
+	        });
+	        loan.returnPhotoDataUrl = serializePhotoPair(afterImages);
         const passed = detectionCanPass(normalizedResult);
         loan.returnMachineAllowed = passed;
         loan.status = passed ? "待归还" : "异常待归还";
@@ -9219,7 +10075,7 @@
       batchRequestList().unshift(request);
       saveStore();
       state.notice = "";
-      render();
+      finishWithButtonFeedback(event.submitter, "已提交", render);
     }
 
     async function notifyBatchRequestUser(request, title, body) {
@@ -9311,7 +10167,7 @@
       }
       const previous = { status: request.status, adminNote: request.adminNote, borrowedAt: request.borrowedAt, borrowedAtMs: request.borrowedAtMs };
       request.status = "待补照片";
-      request.adminNote = "等待上传借出前正反面照片";
+	      request.adminNote = "等待上传借出前正反面照片";
       request.borrowedAt = formatDateTime(borrowedAtMs);
       request.borrowedAtMs = borrowedAtMs;
       store.loans.unshift(...loans);
@@ -9329,9 +10185,9 @@
         return;
       }
 
-      pushMessage("批量扫码已同步", `已同步 ${loans.length} 件器材，请逐件上传借出前正反面照片后完成借用。`);
+	      pushMessage("批量扫码已同步", `已同步 ${loans.length} 件器材，请逐件上传借出前正反面照片后完成借用。`);
       saveStore();
-      state.notice = "请上传借出前正反面照片";
+	      state.notice = "请上传借出前正反面照片";
       route("borrow");
     }
 
@@ -9398,7 +10254,7 @@
       route("borrow");
     }
 
-    function submitRenewLoan(loanId) {
+    function submitRenewLoan(loanId, button) {
       const loan = loanById(loanId);
       if (!canRenewLoan(loan)) {
         state.notice = "这条记录当前不可续借";
@@ -9431,7 +10287,7 @@
       saveStore();
       saveRemoteLoan(loan);
       state.notice = "续借申请已通过";
-      route("borrow", { loanId });
+      finishWithButtonFeedback(button, "已提交", () => route("borrow", { loanId }));
     }
 
     function createOrder(equipmentId, source, title, loanId = "") {
@@ -9728,12 +10584,15 @@
       if (!state.loggedIn) {
         appEl.classList.remove("is-admin-view");
         const loginPages = { login: loginPage, roleSelect: roleSelectPage, credentials: credentialsPage, register: registerPage };
+        const routeKey = `login:${state.route || "login"}`;
         appEl.innerHTML = (loginPages[state.route] || loginPage)();
+        applyRouteMotion(routeKey);
         bindLogin();
         return;
       }
       state.route = normalizeRouteForRole(state.route);
       appEl.classList.toggle("is-admin-view", state.route.startsWith("admin"));
+      const routeKey = `app:${state.route}`;
 
       const pages = {
         home: homePage,
@@ -9766,6 +10625,7 @@
         identity: identityPage,
       };
       appEl.innerHTML = (pages[state.route] || homePage)();
+      applyRouteMotion(routeKey);
       bind();
     }
 
@@ -10500,7 +11360,7 @@
       store.profile = nextProfile;
       saveStore();
       state.notice = "校园身份认证已保存";
-      route("profileInfo");
+      finishWithButtonFeedback(event.submitter, "已保存", () => route("profileInfo"));
     }
 
     function setContactStatus(message, isError = true) {
@@ -10547,7 +11407,7 @@
       pushMessage("已发送给管理员", "你的留言已同步到管理员端，管理员回复后会出现在消息和联系记录里。");
       saveStore();
       state.notice = "已发送给管理员";
-      render();
+      finishWithButtonFeedback(event.submitter, "已发送", render);
     }
 
     async function replyAdminMessage(messageId, card) {
@@ -10687,19 +11547,6 @@
       return { items, addedChipCount, duplicateCount, duplicateTags, syncedAt };
     }
 
-    function handleAdminVenueAdd(event) {
-      event.preventDefault();
-      const input = document.querySelector("#adminVenueInput");
-      const name = (input ? input.value : "").trim();
-      if (!name) { state.notice = "请输入场馆名称"; render(); return; }
-      if (!Array.isArray(store.venues)) store.venues = [];
-      if (store.venues.some((v) => v.name === name)) { state.notice = "场馆已存在"; render(); return; }
-      const maxId = store.venues.reduce((max, v) => Math.max(max, Number(v.id.replace(/\D/g, "")) || 0), 0);
-      store.venues.push({ id: "v" + String(maxId + 1), name, open: true });
-      saveStore();
-      state.notice = "已添加场馆：" + name;
-      render();
-    }
 
     function handleAdminVenueToggle(venueId) {
       const venue = (store.venues || []).find((v) => v.id === venueId);
@@ -10710,28 +11557,6 @@
       render();
     }
 
-    function handleAdminVenueAdd(event) {
-      event.preventDefault();
-      const input = document.querySelector("#adminVenueInput");
-      const name = (input ? input.value : "").trim();
-      if (!name) { state.notice = "请输入场馆名称"; render(); return; }
-      if (!Array.isArray(store.venues)) store.venues = [];
-      if (store.venues.some((v) => v.name === name)) { state.notice = "场馆已存在"; render(); return; }
-      const maxId = store.venues.reduce((max, v) => Math.max(max, Number(v.id.replace(/\D/g, "")) || 0), 0);
-      store.venues.push({ id: "v" + String(maxId + 1), name, open: true });
-      saveStore();
-      state.notice = "已添加场馆：" + name;
-      render();
-    }
-
-    function handleAdminVenueToggle(venueId) {
-      const venue = (store.venues || []).find((v) => v.id === venueId);
-      if (!venue) return;
-      venue.open = !venue.open;
-      saveStore();
-      state.notice = venue.open ? "已开放：" + venue.name : "已关闭：" + venue.name;
-      render();
-    }
 
     function setAdminNfcFeedback(status, text, tone = "") {
       state.adminNfcFeedback = { status, text, tone };
@@ -10917,6 +11742,15 @@
       setAdminFanIndex((Number(state.adminFanIndex) || 0) + step);
     }
 
+    function markAdminFanSettling(stage) {
+      if (!stage) return;
+      window.clearTimeout(window.__adminFanSettleTimer);
+      stage.classList.add("is-settling");
+      window.__adminFanSettleTimer = window.setTimeout(() => {
+        stage.classList.remove("is-settling");
+      }, 260);
+    }
+
     function updateAdminFanView(progress = 0, dragging = false) {
       const stage = document.querySelector("[data-admin-fan-stage]");
       const cards = Array.from(document.querySelectorAll("[data-admin-fan-index]"));
@@ -10958,6 +11792,7 @@
       } else {
         updateAdminFanView(0, false);
       }
+      markAdminFanSettling(stage);
       if (!didSwitch) {
         state.adminFanSuppressClick = false;
         state.adminFanSuppressUntil = 0;
@@ -10990,10 +11825,21 @@
       if (adminContactForm) adminContactForm.addEventListener("submit", submitAdminContactForm);
       const adminNfcScanForm = document.querySelector("#adminNfcScanForm");
       if (adminNfcScanForm) adminNfcScanForm.addEventListener("submit", handleAdminNfcScan);
+      const adminVenueAddBtn = document.querySelector("#adminVenueAddBtn");
+      if (adminVenueAddBtn) adminVenueAddBtn.addEventListener("click", () => {
+        const form = document.querySelector("#adminVenueForm");
+        if (form) form.style.display = "block";
+        resetAdminVenueForm();
+      });
       const adminVenueForm = document.querySelector("#adminVenueForm");
       if (adminVenueForm) adminVenueForm.addEventListener("submit", handleAdminVenueAdd);
-      document.querySelectorAll("[data-admin-venue-toggle]").forEach((node) =>
-        node.addEventListener("click", () => handleAdminVenueToggle(node.dataset.adminVenueToggle))
+      const adminVenueCancelBtn = document.querySelector("#adminVenueCancelBtn");
+      if (adminVenueCancelBtn) adminVenueCancelBtn.addEventListener("click", resetAdminVenueForm);
+      document.querySelectorAll("[data-admin-venue-edit]").forEach((node) =>
+        node.addEventListener("click", () => handleAdminVenueEdit(node.dataset.adminVenueEdit))
+      );
+      document.querySelectorAll("[data-admin-venue-delete]").forEach((node) =>
+        node.addEventListener("click", () => handleAdminVenueDelete(node.dataset.adminVenueDelete))
       );
       document.querySelectorAll("[data-admin-delete-tag]").forEach((node) =>
         node.addEventListener("click", () => handleAdminDeleteTag(node.dataset.adminDeleteTag, node.dataset.tagValue))
@@ -11175,7 +12021,7 @@
         window.__borrowPollTimer = window.setTimeout(async () => {
           try { await refreshRemoteStore(); } catch (_) { /* ignore */ }
           if (state.route === "borrow") {
-            const justVerified = store.loans.find((loan) => loanNeedsBeforePhoto(loan));
+	            const justVerified = store.loans.find((loan) => loanNeedsBeforePhoto(loan));
             if (justVerified) {
               route("borrowConfirm", { loanId: justVerified.id });
             } else {
@@ -11204,11 +12050,11 @@
       }));
       document.querySelectorAll("[data-submit-renew]").forEach((node) => node.addEventListener("click", () => {
         if (node.disabled) return;
-        submitRenewLoan(node.dataset.submitRenew);
+        submitRenewLoan(node.dataset.submitRenew, node);
       }));
       document.querySelectorAll("[data-save-borrow-before]").forEach((node) => node.addEventListener("click", () => {
         if (node.disabled) return;
-        finishBorrowWithBeforePhoto(node.dataset.saveBorrowBefore);
+        finishBorrowWithBeforePhoto(node.dataset.saveBorrowBefore, node);
       }));
       document.querySelectorAll("[data-ai-detect]").forEach((node) => node.addEventListener("click", () => runAiDetection(node.dataset.aiDetect)));
       document.querySelectorAll("[data-admin-pause]").forEach((node) => node.addEventListener("click", () => updateOrder(node.dataset.adminPause, "暂停借出")));
@@ -11245,21 +12091,32 @@
         });
       }
 
-      // 借出与归还检测照片上传事件
-      [
-        ["#borrowBeforeFrontPhotoInput", "#borrowBeforeFrontPhotoName", "借出前正面照片", false],
-        ["#borrowBeforeBackPhotoInput", "#borrowBeforeBackPhotoName", "借出前反面照片", false],
-        ["#returnFrontPhotoInput", "#returnFrontPhotoName", "归还正面照片", true],
-        ["#returnBackPhotoInput", "#returnBackPhotoName", "归还反面照片", true],
-      ].forEach(([inputSelector, nameSelector, label, isReturnPhoto]) => {
-        const input = document.querySelector(inputSelector);
-        if (!input) return;
-        input.addEventListener("change", (e) => {
-          if (!e.target.files || !e.target.files[0]) return;
-          if (isReturnPhoto) clearReturnDetectionError(state.activeLoanId);
-          markPhotoSelected(e.target, nameSelector, label);
-        });
-      });
+	      // 借出与归还检测照片上传事件
+	      [
+	        ["#borrowBeforeFrontPhotoInput", "#borrowBeforeFrontPhotoName", "借出前正面照片", false],
+	        ["#borrowBeforeBackPhotoInput", "#borrowBeforeBackPhotoName", "借出前反面照片", false],
+	        ["#returnFrontPhotoInput", "#returnFrontPhotoName", "归还正面照片", true],
+	        ["#returnBackPhotoInput", "#returnBackPhotoName", "归还反面照片", true],
+	      ].forEach(([inputSelector, nameSelector, label, isReturnPhoto]) => {
+	        const input = document.querySelector(inputSelector);
+	        if (!input) return;
+	        input.addEventListener("change", (e) => {
+	          if (!e.target.files || !e.target.files[0]) return;
+	          if (isReturnPhoto) {
+	            clearReturnDetectionError(state.activeLoanId);
+	            const progress = document.querySelector("#aiDetectProgress");
+	            if (progress) {
+	              progress.classList.remove("is-active");
+	              progress.querySelectorAll(".ai-progress-step").forEach((step, index) => {
+	                step.classList.toggle("is-active", index === 0);
+	                step.classList.remove("is-done");
+	              });
+	            }
+	            document.querySelector(".camera-box")?.classList.remove("is-ai-scanning");
+	          }
+	          markPhotoSelected(e.target, nameSelector, label);
+	        });
+	      });
 
       // 报修表单 — 器材切换时联动更新问题类型
       const reportEquip = document.querySelector("#reportEquipment");
@@ -11280,7 +12137,7 @@
           const repDesc = document.querySelector("#reportDesc").value;
           createOrder(eqId, "手机端自主报备", repType + " (" + repDesc + ")");
           state.notice = "故障工单已同步到管理员端！";
-          route("home");
+          finishWithButtonFeedback(e.submitter, "已提交", () => route("home"));
         });
       }
     }
