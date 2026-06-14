@@ -1,6 +1,6 @@
 # SportLoop GitHub Pages
 
-这是 SportLoop 的静态发布版本，可以直接部署到 GitHub Pages。当前版本已接入 Supabase，用来保存学生认证、器材档案、机器入库同步、借用续借、批量借出申请、联系管理员、报修工单和管理员操作记录。
+这是 SportLoop 的静态发布版本，可以直接部署到 GitHub Pages。当前版本已接入 Supabase，用来保存学生认证、器材档案、场馆管理、机器入库同步、借用续借、批量借出申请、联系管理员、报修工单和管理员操作记录。
 
 ## 发布内容
 
@@ -30,7 +30,9 @@ https://jwylvubakymfkdncuwhp.supabase.co
 4. 如果管理员端提示“管理员未授权”，复制页面显示的 UID，插入 `admin_users` 表。
 5. 管理员授权后，在管理员端录入器材；脚本不会再自动生成演示器材。
 
-这次新增了 `batch_borrow_requests`、`machine_sync_logs`、`admin_operation_logs` 表，新增了 `loans.batch_request_id`、`loans.before_photo_data_url`、`loans.return_photo_data_url`、`loans.return_machine_allowed`、`loans.nfc_serial`、`loans.nfc_verified_at`、`loans.verification_code`、`loans.verification_code_expires_at`、`loans.student_name`、`loans.student_id` 字段，以及 `equipment.nfc_tags`、`equipment.machine_synced_at` 字段。线上数据库要重新运行一遍 `supabase_sportloop.sql`，批量申请、NFC 验证借用、机器入库同步记录、归还检测闭环和管理员操作记录才能生效。
+当前 SQL 包含 `venues`、`batch_borrow_requests`、`machine_sync_logs`、`admin_operation_logs` 表，包含 `loans.batch_request_id`、`loans.before_photo_data_url`、`loans.return_photo_data_url`、`loans.return_machine_allowed`、`loans.nfc_serial`、`loans.nfc_verified_at`、`loans.verification_code`、`loans.verification_code_expires_at`、`loans.student_name`、`loans.student_id` 字段，以及 `equipment.nfc_tags`、`equipment.machine_synced_at` 字段。线上数据库要运行 `supabase_sportloop.sql`，场馆管理、批量申请、NFC 验证借用、机器入库同步记录、归还检测闭环和管理员操作记录才能生效。
+
+场馆管理由管理员维护。前端会从 `venues` 表读取场馆列表；新增、编辑、删除场馆时，必须等 Supabase 写入成功后才更新页面。SQL 已给 `venues` 显式授权并开启 RLS：只有管理员能读取和修改，匿名用户不能访问。
 
 登录和注册是分开的：未注册账号不能直接登录，必须先在网页注册页创建账号。账号不能重复；校园认证里只有学号不能重复，姓名和院系可以相同。批量借出申请由学生提交，管理员审批通过后，学生先获取验证码，到 NFC 机器验证标签，再在学生端逐件上传借出前照片，全部补齐后才算借出成功。
 
@@ -88,6 +90,12 @@ http://127.0.0.1:5178/
 ## 常用检查
 
 ```bash
+node scripts/check-venue-flow.mjs
 node -e "const fs=require('fs'); for (const f of ['index.html','404.html']) { const h=fs.readFileSync(f,'utf8'); new Function(h.match(/<script>([\\s\\S]*)<\\/script>/)[1]); }"
 cmp -s index.html 404.html && echo ok
 ```
+
+## 搜索记录
+
+- Supabase Changelog / Data API 授权：2026 年新表需要显式 `GRANT` 后才能通过 `/rest/v1/` 访问。
+- Supabase Securing your API 文档：Data API 先看 Postgres 授权，再看 RLS；两者都要配置。

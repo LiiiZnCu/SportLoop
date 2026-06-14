@@ -1649,6 +1649,52 @@
       border: 1px solid rgba(159, 18, 57, 0.14);
     }
 
+    .borrow-step-strip {
+      display: grid;
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+      gap: 8px;
+      margin: 14px 0 16px;
+      padding: 10px;
+      border-radius: 16px;
+      background: rgba(159, 18, 57, 0.055);
+      border: 1px solid rgba(159, 18, 57, 0.14);
+    }
+
+    .borrow-step {
+      min-width: 0;
+      display: grid;
+      justify-items: center;
+      gap: 5px;
+      color: var(--muted);
+      font-size: clamp(10px, 2.8vw, 12px);
+      font-weight: 800;
+      text-align: center;
+    }
+
+    .borrow-step b {
+      width: 24px;
+      height: 24px;
+      display: grid;
+      place-items: center;
+      border-radius: 50%;
+      color: var(--muted);
+      background: rgba(255, 255, 255, 0.8);
+      box-shadow: inset 0 0 0 1px rgba(159, 18, 57, 0.12);
+      font-size: 11px;
+    }
+
+    .borrow-step.is-done,
+    .borrow-step.is-active {
+      color: var(--brand-deep);
+    }
+
+    .borrow-step.is-done b,
+    .borrow-step.is-active b {
+      color: #fff;
+      background: var(--brand);
+      box-shadow: none;
+    }
+
     .ai-progress {
       display: none;
       margin-top: 12px;
@@ -1795,6 +1841,48 @@
       margin-top: 0;
       line-height: 1.35;
       overflow-wrap: anywhere;
+    }
+
+    .photo-requirement-strip {
+      display: grid;
+      grid-template-columns: auto minmax(0, 1fr);
+      align-items: center;
+      gap: 8px 10px;
+      margin-top: 14px;
+      padding: 10px 12px;
+      border: 1px solid rgba(255, 255, 255, 0.22);
+      border-radius: 14px;
+      background: rgba(255, 255, 255, 0.12);
+      text-align: left;
+    }
+
+    .photo-requirement-strip span {
+      display: inline-flex;
+      align-items: center;
+      min-height: 24px;
+      padding: 0 8px;
+      border-radius: 999px;
+      color: #ffffff;
+      background: rgba(159, 18, 57, 0.92);
+      font-size: 11px;
+      font-weight: 900;
+      white-space: nowrap;
+    }
+
+    .photo-requirement-strip strong {
+      min-width: 0;
+      color: rgba(255, 255, 255, 0.94);
+      font-size: 13px;
+      line-height: 1.35;
+    }
+
+    .result-card .photo-requirement-strip {
+      border-color: rgba(159, 18, 57, 0.16);
+      background: rgba(159, 18, 57, 0.06);
+    }
+
+    .result-card .photo-requirement-strip strong {
+      color: var(--ink);
     }
 
     .photo-pair-helper {
@@ -2812,10 +2900,10 @@
 
     .admin-quick-button small {
       min-height: 15px;
-      color: rgba(255, 255, 255, 0.56);
-      font-size: clamp(10px, 2.8vw, 12px);
+      color: rgba(255, 255, 255, 0.72);
+      font-size: clamp(11px, 2.8vw, 12.5px);
       font-weight: 800;
-      line-height: 1.25;
+      line-height: 1.3;
       white-space: nowrap;
     }
 
@@ -3145,6 +3233,60 @@
       white-space: nowrap;
     }
 
+    .nfc-requirement-list {
+      display: grid;
+      gap: 8px;
+      margin: 0;
+      padding: 0;
+      list-style: none;
+    }
+
+    .nfc-requirement-list li {
+      display: grid;
+      grid-template-columns: 22px minmax(0, 1fr);
+      gap: 8px;
+      align-items: center;
+      min-height: 34px;
+      color: rgba(245, 239, 241, 0.78);
+      font-size: 12px;
+      line-height: 1.4;
+    }
+
+    .nfc-requirement-list i {
+      width: 22px;
+      height: 22px;
+      display: grid;
+      place-items: center;
+      border-radius: 50%;
+      color: #ffffff;
+      background: rgba(196, 107, 130, 0.22);
+      font-style: normal;
+      font-size: 11px;
+      font-weight: 900;
+    }
+
+    .admin-nfc-result {
+      min-height: 36px;
+      margin: 0;
+      padding: 9px 11px;
+      color: rgba(245, 239, 241, 0.72);
+      border-radius: 12px;
+      background: rgba(255, 255, 255, 0.05);
+      font-size: 12px;
+      line-height: 1.45;
+    }
+
+    .admin-nfc-result.is-ok {
+      color: #c6f4d8;
+      background: rgba(22, 116, 68, 0.16);
+    }
+
+    .admin-nfc-result.is-warn,
+    .admin-nfc-result.is-error {
+      color: #ffd2dc;
+      background: rgba(161, 15, 43, 0.16);
+    }
+
     .admin-machine-sync-card textarea {
       width: 100%;
       min-height: 118px;
@@ -3161,6 +3303,53 @@
 
     .admin-machine-sync-card textarea::placeholder {
       color: rgba(245, 239, 241, 0.46);
+    }
+
+    .admin-module-context {
+      display: grid;
+      gap: 10px;
+      margin-bottom: 14px;
+      padding: 0 0 16px;
+      border-bottom: 1px solid rgba(245, 239, 241, 0.1);
+    }
+
+    .admin-module-context-top {
+      display: flex;
+      align-items: flex-start;
+      justify-content: space-between;
+      gap: 12px;
+    }
+
+    .admin-module-context span {
+      display: block;
+      margin-bottom: 4px;
+      color: rgba(245, 239, 241, 0.62);
+      font-size: 11px;
+      font-weight: 800;
+    }
+
+    .admin-module-context h1 {
+      margin: 0;
+      color: #fff;
+      font-size: clamp(22px, 6vw, 30px);
+      line-height: 1.12;
+    }
+
+    .admin-module-context p {
+      margin: 0;
+      color: rgba(245, 239, 241, 0.68);
+      font-size: 13px;
+      line-height: 1.5;
+    }
+
+    .admin-module-context .secondary-button {
+      width: auto;
+      min-height: 40px;
+      padding: 0 12px;
+      color: rgba(255, 255, 255, 0.88);
+      border-color: rgba(245, 239, 241, 0.16);
+      background: rgba(255, 255, 255, 0.08);
+      flex: 0 0 auto;
     }
 
     .admin-module-scroll .field > span {
@@ -3482,10 +3671,25 @@
     }
 
     .profile-screen {
+      isolation: isolate;
       background-color: #fbf5f7;
+      background: transparent;
+    }
+
+    .profile-screen::before {
+      content: "";
+      position: absolute;
+      z-index: 0;
+      inset: calc(-18px - env(safe-area-inset-top)) 0 0;
+      pointer-events: none;
       background:
-        radial-gradient(circle at 82% 10%, rgba(159, 18, 57, 0.035), transparent 32%),
-        linear-gradient(180deg, #fffefe 0%, #fdf8f9 22%, #f9f1f4 62%, #fffefe 100%);
+        radial-gradient(circle at 82% 10%, rgba(159, 18, 57, 0.035), transparent 34%),
+        linear-gradient(180deg, #fffafa 0%, #fbf4f6 48%, #fffafa 100%);
+    }
+
+    .profile-screen > * {
+      position: relative;
+      z-index: 1;
     }
 
     .profile-topbar {
@@ -4183,8 +4387,8 @@
       min-height: 92px;
       display: grid;
       align-content: center;
-      gap: 7px;
-      padding: clamp(7px, 2.2vw, 10px);
+      gap: 6px;
+      padding: clamp(8px, 2.3vw, 11px);
       text-align: left;
       color: var(--ink);
       border-radius: 20px;
@@ -4210,16 +4414,16 @@
 
     .profile-shortcut strong {
       overflow: hidden;
-      font-size: clamp(9.5px, 2.95vw, 12.5px);
-      line-height: 1.15;
+      font-size: clamp(10.5px, 2.9vw, 12.5px);
+      line-height: 1.25;
       text-overflow: ellipsis;
     }
 
     .profile-shortcut span {
-      color: var(--muted);
+      color: #6b6168;
       overflow: hidden;
-      font-size: clamp(8.5px, 2.7vw, 10px);
-      line-height: 1.25;
+      font-size: clamp(9.5px, 2.55vw, 10.5px);
+      line-height: 1.35;
       display: -webkit-box;
       -webkit-line-clamp: 2;
       -webkit-box-orient: vertical;
@@ -5552,12 +5756,24 @@
 
     /* 首页专属轻量级反馈卡片样式 */
     .home-feedback-card {
+      margin: 22px 0 24px;
       background: linear-gradient(135deg, var(--brand-soft) 0%, #ffffff 100%);
       border: 1px dashed var(--brand);
       border-radius: var(--radius-lg);
       padding: 14px 18px;
       box-shadow: var(--shadow-soft);
+      cursor: pointer;
       transition: all 0.2s;
+    }
+
+    .action-panel + .home-feedback-card,
+    .active-loan + .home-feedback-card {
+      margin-top: 26px;
+    }
+
+    .home-feedback-card + .action-panel,
+    .home-feedback-card + .active-loan {
+      margin-top: 26px;
     }
 
     .home-feedback-card:active {
@@ -5575,6 +5791,19 @@
     .feedback-card-text {
       flex: 1;
       min-width: 0;
+    }
+
+    .feedback-card-title {
+      display: inline-flex;
+      align-items: center;
+      max-width: 100%;
+      gap: 6px;
+    }
+
+    .feedback-card-title svg {
+      width: 16px;
+      height: 16px;
+      flex: 0 0 16px;
     }
 
     .feedback-card-text h3 {
@@ -5876,6 +6105,7 @@
       adminFanSuppressUntil: 0,
       adminFanLastSwipeAt: 0,
       adminTaskCounts: {},
+      adminNfcFeedback: null,
     };
 
     const appEl = document.querySelector("#app");
@@ -6626,7 +6856,6 @@
       if (store.authUserId !== user.id || isSeedDemoProfile(store.profile)) resetAccountScopedStore(user.id);
       try {
         await loadRemoteStore();
-        await fetchRemoteVenues();
       } catch (error) {
         reportRemoteSyncError(error);
       }
@@ -6656,7 +6885,7 @@
       if (!authSession?.accessToken) return;
       await refreshAdminAccess();
 
-      const [equipmentRows, profileRows, loanRows, messageRows, contactRows, orderRows, batchRows, syncLogRows, operationLogRows] = await Promise.all([
+      const [equipmentRows, profileRows, loanRows, messageRows, contactRows, orderRows, batchRows, syncLogRows, operationLogRows, venueRows] = await Promise.all([
         supabaseRequest("equipment?select=*&order=name.asc"),
         supabaseRequest(`student_profiles?select=*&user_id=eq.${authSession.userId}`),
         supabaseRequest("loans?select=*&order=created_at.desc"),
@@ -6666,6 +6895,7 @@
         supabaseRequest("batch_borrow_requests?select=*&order=created_at.desc"),
         supabaseRequest("machine_sync_logs?select=*&order=created_at.desc&limit=40"),
         supabaseRequest("admin_operation_logs?select=*&order=created_at.desc&limit=60"),
+        supabaseRequest("venues?select=*&order=name.asc"),
       ]);
 
       store.equipment = equipmentRows.map(dbEquipmentToLocal);
@@ -6679,6 +6909,7 @@
       store.batchRequests = batchRows.map(dbBatchRequestToLocal);
       store.machineSyncLogs = syncLogRows.map(dbMachineSyncLogToLocal);
       store.adminOperationLogs = operationLogRows.map(dbAdminOperationLogToLocal);
+      store.venues = venueRows.map(dbVenueToLocal);
       saveStore();
     }
 
@@ -7406,6 +7637,19 @@
       return `<span class="tag ${statusClass(status)}">${status}</span>`;
     }
 
+    function borrowConfirmSteps(currentStep) {
+      const steps = ["申请", "NFC 验证", "上传借出前照片"];
+      return `
+        <div class="borrow-step-strip" aria-label="借用流程">
+          ${steps.map((label, index) => {
+            const step = index + 1;
+            const className = step < currentStep ? "is-done" : (step === currentStep ? "is-active" : "");
+            return `<span class="borrow-step ${className}"><b>${step}</b><span>${label}</span></span>`;
+          }).join("")}
+        </div>
+      `;
+    }
+
     function shell(title, body, options = {}) {
       const left = options.left === "none"
         ? `<span></span>`
@@ -7616,23 +7860,13 @@
               </div>
             </section>
 
-            <!-- 🔧 首页重磅加入：无缝联动报修系统的“反馈入口” -->
-            <section class="home-feedback-card" data-route="report" style="cursor: pointer; margin-bottom: 16px;">
-              <div class="feedback-card-content">
-                <div class="feedback-card-text">
-                  <h3>💬 反馈器材与场馆问题</h3>
-                  <p>球拍磨损、没气、场地受阻？点击一键快速反馈报损</p>
-                </div>
-              </div>
-            </section>
-
             ${currentLoan ? currentLoanCard(currentLoan) : flowCard()}
 
-            <section class="home-feedback-card" data-route="report" style="cursor: pointer; margin-bottom: 16px;">
+            <section class="home-feedback-card" data-route="report">
               <div class="feedback-card-content">
                 <div class="feedback-card-text">
-                  <h3>💬 反馈器材问题</h3>
-                  <p>球拍磨损、没气？点击快速反馈报损</p>
+                  <h3><span class="feedback-card-title">${icon("message")}<span>反馈器材与场馆问题</span></span></h3>
+                  <p>器材磨损、没气或场地受阻，点这里快速反馈</p>
                 </div>
                 <div class="feedback-arrow">${icon("chevron")}</div>
               </div>
@@ -7878,6 +8112,7 @@
                 <h1 style="margin:0;font-size:28px;">前往 NFC 机器验证</h1>
                 <p class="body-text" style="text-align:center;margin-top:10px;">请记下验证码，前往场馆的 NFC 识别机器完成验证。</p>
               </div>
+              ${borrowConfirmSteps(2)}
               <div style="text-align:center;padding:24px 0;">
                 <div style="font-size:56px;font-weight:900;letter-spacing:12px;color:var(--brand);font-family:'DIN Alternate','SF Pro Display',monospace;">${loan.verificationCode || "------"}</div>
                 <p style="margin:8px 0 0;color:var(--muted);font-size:13px;">6 位验证码 · ${expiresIn} 分钟内有效</p>
@@ -7902,7 +8137,7 @@
                 3. 将器材 NFC 标签贴到机器背面<br>
 	                4. 验证通过后回到此页面，上传借出前正反两面照片完成借用
               </p>
-              <button class="primary-button" style="margin-top:12px;width:100%;" data-route="borrow">${icon("bag")} 查看我的借用</button>
+              <button class="primary-button" style="margin-top:12px;width:100%;" data-route="borrow">${icon("bag")} 查看当前借用</button>
             </section>
           </main>
         `;
@@ -7915,6 +8150,7 @@
 	                <h1 style="margin:0;font-size:28px;">${needsBeforePhoto ? "上传借出前正反两面照片" : "借用成功"}</h1>
 	                <p class="body-text" style="text-align:center;margin-top:10px;">${needsBeforePhoto ? "NFC 验证已完成。请上传借出前正面和反面照片，保存后这次借用才正式生效。" : "借出前正反两面照片已保存，借用记录已经生效。"}</p>
               </div>
+              ${borrowConfirmSteps(needsBeforePhoto ? 3 : 4)}
               ${equipmentImage(item, "detail-img")}<!-- [IMAGE-FN→detail-img] 借用确认页 -->
               <div class="detail-title" style="margin-top:14px;">
                 <div>
@@ -7930,6 +8166,10 @@
                 <div><span>归还要求</span><strong>归还正反面照片检测正常后，机器才可扫码归还</strong></div>
               </div>
               ${needsBeforePhoto ? `
+	                <div class="photo-requirement-strip">
+	                  <span>必传</span>
+	                  <strong>借出前正面和反面都要上传，缺一面不能完成借用。</strong>
+	                </div>
 	                <div class="photo-pair-grid">
 	                  <div class="photo-pair-slot">
 	                    <label class="upload-real">
@@ -7951,7 +8191,7 @@
 	              ` : `
                 <div class="button-row" style="margin-top:18px;">
                   <button class="secondary-button" data-detail="${item.id}">查看器材</button>
-                  <button class="primary-button" data-route="borrow">我的借用</button>
+                  <button class="primary-button" data-route="borrow">当前借用</button>
                 </div>
                 <button class="primary-button" style="margin-top:10px;width:100%;" data-route="home">返回首页</button>
               `}
@@ -7985,7 +8225,7 @@
           <div class="timeline">${history.length ? history.map(historyRow).join("") : `<div class="empty">暂无历史记录。</div>`}</div>
         </main>
       `;
-      return shell("我的借用", body);
+      return shell("当前借用", body);
     }
 
     function pendingNfcCard(loan) {
@@ -8120,7 +8360,7 @@
     function batchStudentHint(status) {
       if (status === "待审核") return "申请已提交，等待管理员审批。";
       if (status === "已拒绝") return "管理员未通过这次申请，请调整后重新提交。";
-      if (status === "待补照片") return "机器批量扫码已同步，请到我的借用里逐件上传借出前正反面照片。";
+      if (status === "待补照片") return "机器批量扫码已同步，请到当前借用里逐件上传借出前正反面照片。";
       if (status === "已归还") return "这次批量借还已经完成。";
       return "管理员通过后才可以到机器批量借还。";
     }
@@ -8219,7 +8459,7 @@
       const primaryAction = pendingBeforePhoto
         ? `<button class="primary-button" data-borrow-confirm="${loan.id}">${icon("camera")} 上传借出前正反面</button>`
         : canReturn
-          ? `<button class="primary-button" data-sync-return="${loan.id}">${icon("bag")} 同步机器归还</button>`
+          ? `<button class="primary-button" data-sync-return="${loan.id}">${icon("scan")} 去机器扫码归还</button>`
           : loan.status === "异常待归还"
             ? `<button class="primary-button" data-result-loan="${loan.id}">${icon("alert")} 查看检测结果</button>`
             : `<button class="primary-button" data-loan-detect="${loan.id}">${icon("camera")} 归还检测</button>`;
@@ -8281,6 +8521,10 @@
             </div>
             <h1>归还前检测</h1>
 	            <p>上传归还正面和反面照片，系统会按正面对正面、反面对反面逐一对比。检测正常后，机器端才允许扫码归还。</p>
+	            <div class="photo-requirement-strip">
+	              <span>必传</span>
+	              <strong>归还正面和反面都要上传，两面都会检测是否有新增破损。</strong>
+	            </div>
 	            <div class="photo-pair-grid">
 	              <div class="photo-pair-slot">
 	                <label class="upload-real ${isDetecting ? "is-disabled" : ""}">
@@ -8341,7 +8585,7 @@
             ${result.issues.length ? `<ul class="issue-list">${result.issues.map((issue) => `<li>${escapeHtml(issue)}</li>`).join("")}</ul>` : ""}
             <p class="machine-hint">${canReturn ? "检测正常，系统已允许机器扫码归还。请到场馆机器完成归还后，再同步状态。" : "检测未通过，暂不允许机器扫码归还，请等待管理员复核。"}</p>
             ${canReturn
-              ? `<button class="primary-button" data-sync-return="${loan.id}">${icon("bag")} 同步机器归还</button>`
+              ? `<button class="primary-button" data-sync-return="${loan.id}">${icon("scan")} 去机器扫码归还</button>`
               : `<div class="button-row">
                   <button class="secondary-button" data-loan-detect="${loan.id}">${icon("camera")} 重新上传正反面</button>
                   <button class="primary-button" data-report-loan="${loan.id}">${icon("wrench")} 反馈给管理员</button>
@@ -8569,6 +8813,7 @@
       const current = details[key] || details.batch;
       const body = `
         <main class="scroll admin-module-scroll">
+          ${adminModuleContext(current.title, current.desc)}
           ${adminSection(key, current.title, current.desc, current.status, current.content)}
         </main>
       `;
@@ -8653,15 +8898,20 @@
       const options = listedEquipment().map((item) =>
         `<option value="${escapeAttr(item.id)}">${escapeHtml(item.name)}</option>`
       ).join("");
+      const feedback = state.adminNfcFeedback || { status: "就绪", text: "等待扫描。", tone: "" };
       return `
         <form class="admin-machine-sync-card" id="adminNfcScanForm">
           <div class="admin-machine-sync-head">
             <div>
               <h3>NFC 扫描录入器材</h3>
-              <p>选择器材种类，然后扫描 NFC 标签自动录入 UID 并增加库存。</p>
+              <p>真实读取 NFC UID，录入成功后该器材库存自动 +1。</p>
             </div>
-            <span class="admin-equipment-chip" id="adminNfcStatus">就绪</span>
+            <span class="admin-equipment-chip" id="adminNfcStatus">${escapeHtml(feedback.status || "就绪")}</span>
           </div>
+          <ul class="nfc-requirement-list">
+            <li><i>1</i><span>请用支持 NFC 的安卓 Chrome，并在 HTTPS 或 localhost 下打开。</span></li>
+            <li><i>2</i><span>同一个 NFC UID 只能绑定一次，重复会被拦截。</span></li>
+          </ul>
           <div style="display:grid;gap:12px;">
             <label class="field" style="margin:0;">
               <span>器材种类</span>
@@ -8669,7 +8919,7 @@
             </label>
             <button class="primary-button" type="submit" id="adminNfcScanBtn">${icon("scan")} 扫描 NFC 标签</button>
           </div>
-          <p style="margin:10px 0 0;color:var(--muted);font-size:12px;" id="adminNfcResult"></p>
+          <p class="admin-nfc-result ${feedback.tone ? `is-${escapeAttr(feedback.tone)}` : ""}" id="adminNfcResult">${escapeHtml(feedback.text || "等待扫描。")}</p>
         </form>
       `;
     }
@@ -8713,56 +8963,44 @@
 
 
     // ===== 场馆 Supabase CRUD =====
+    function dbVenueToLocal(row) {
+      return {
+        id: row.id,
+        name: row.name,
+        location: row.location || "",
+        openTime: row.open_time || "全天",
+        status: row.status === "closed" ? "closed" : "open",
+      };
+    }
+
     async function fetchRemoteVenues() {
       if (!authSession?.accessToken) return;
-      try {
-        const data = await supabaseRequest("venues?select=*&user_id=eq." + encodeURIComponent(authSession.userId));
-        if (Array.isArray(data)) {
-          store.venues = data.map((row) => ({
-            id: row.id,
-            name: row.name,
-            location: row.location || "",
-            openTime: row.open_time || "全天",
-            status: row.status || "open",
-          }));
-          saveStore();
-        }
-      } catch (error) {
-        reportRemoteSyncError(error);
-      }
+      const data = await supabaseRequest("venues?select=*&order=name.asc");
+      store.venues = Array.isArray(data) ? data.map(dbVenueToLocal) : [];
+      saveStore();
+      return store.venues;
     }
 
     async function saveRemoteVenue(venue) {
       if (!authSession?.accessToken) return;
-      try {
-        const payload = {
-          id: venue.id,
-          user_id: authSession.userId,
-          name: venue.name,
-          location: venue.location || "",
-          open_time: venue.openTime || "全天",
-          status: venue.status || "open",
-          updated_at: new Date().toISOString(),
-        };
-        const exists = await supabaseRequest("venues?id=eq." + encodeURIComponent(venue.id) + "&select=id");
-        if (Array.isArray(exists) && exists.length > 0) {
-          await supabaseRequest("venues?id=eq." + encodeURIComponent(venue.id), { method: "PATCH", body: payload });
-        } else {
-          payload.created_at = new Date().toISOString();
-          await supabaseRequest("venues", { method: "POST", body: payload });
-        }
-      } catch (error) {
-        reportRemoteSyncError(error);
-      }
+      const payload = {
+        id: venue.id,
+        user_id: authSession.userId,
+        name: venue.name,
+        location: venue.location || "",
+        open_time: venue.openTime || "全天",
+        status: venue.status || "open",
+      };
+      return supabaseRequest("venues?on_conflict=id", {
+        method: "POST",
+        headers: { Prefer: "resolution=merge-duplicates,return=representation" },
+        body: payload,
+      });
     }
 
     async function deleteRemoteVenue(venueId) {
       if (!authSession?.accessToken) return;
-      try {
-        await supabaseRequest("venues?id=eq." + encodeURIComponent(venueId), { method: "DELETE" });
-      } catch (error) {
-        reportRemoteSyncError(error);
-      }
+      return supabaseRequest("venues?id=eq." + encodeURIComponent(venueId), { method: "DELETE" });
     }
 
     // ===== 场馆管理 UI =====
@@ -8837,7 +9075,7 @@
     }
 
     // ===== 场馆操作 Handlers =====
-    function handleAdminVenueAdd(event) {
+    async function handleAdminVenueAdd(event) {
       event.preventDefault();
       const id = document.querySelector("#adminVenueId").value.trim();
       const name = document.querySelector("#adminVenueName").value.trim();
@@ -8846,17 +9084,24 @@
       const status = document.querySelector("#adminVenueStatus").value;
       if (!name) { state.notice = "请输入场馆名称"; render(); return; }
       if (!Array.isArray(store.venues)) store.venues = [];
+      if (store.venues.some((v) => v.id !== id && v.name === name)) { state.notice = "场馆已存在"; render(); return; }
       const venue = { id: id || "v" + makeUuid().slice(0, 8), name, location, openTime, status };
-      if (id) {
-        const idx = store.venues.findIndex((v) => v.id === id);
-        if (idx >= 0) { store.venues[idx] = venue; }
-      } else {
-        store.venues.push(venue);
+      try {
+        const savedRows = await saveRemoteVenue(venue);
+        const savedVenue = Array.isArray(savedRows) && savedRows[0] ? dbVenueToLocal(savedRows[0]) : venue;
+        const idx = store.venues.findIndex((v) => v.id === savedVenue.id);
+        if (idx >= 0) {
+          store.venues[idx] = savedVenue;
+        } else {
+          store.venues.push(savedVenue);
+        }
+        saveStore();
+        state.notice = id ? "已更新场馆：" + name : "已添加场馆：" + name;
+        document.querySelector("#adminVenueForm").style.display = "none";
+      } catch (error) {
+        reportRemoteSyncError(error);
+        state.notice = error.message || "场馆保存失败";
       }
-      saveStore();
-      saveRemoteVenue(venue);
-      state.notice = id ? "已更新场馆：" + name : "已添加场馆：" + name;
-      document.querySelector("#adminVenueForm").style.display = "none";
       render();
     }
 
@@ -8876,11 +9121,16 @@
     function handleAdminVenueDelete(venueId) {
       const venue = (store.venues || []).find((v) => v.id === venueId);
       if (!venue) return;
-      showConfirm("确定要删除场馆「" + venue.name + "」吗？此操作不可撤销。", () => {
-        store.venues = store.venues.filter((v) => v.id !== venueId);
-        saveStore();
-        deleteRemoteVenue(venueId);
-        state.notice = "已删除场馆：" + venue.name;
+      showConfirm("确定要删除场馆「" + venue.name + "」吗？此操作不可撤销。", async () => {
+        try {
+          await deleteRemoteVenue(venueId);
+          store.venues = store.venues.filter((v) => v.id !== venueId);
+          saveStore();
+          state.notice = "已删除场馆：" + venue.name;
+        } catch (error) {
+          reportRemoteSyncError(error);
+          state.notice = error.message || "场馆删除失败";
+        }
         render();
       }, "删除");
     }
@@ -9023,7 +9273,7 @@
                 const targetRoute = adminModuleRoutes[key] || "admin";
                 const view = adminFanCardView(index, activeIndex);
                 return `
-                <button class="admin-quick-button ${className} ${view.isActive ? "is-active" : ""} ${view.isHidden ? "is-hidden" : ""}" type="button" data-admin-route="${escapeAttr(targetRoute)}" data-admin-fan-index="${index}" style="${adminFanStyle(view)}">
+                <button class="admin-quick-button ${className} ${view.isActive ? "is-active" : ""} ${view.isHidden ? "is-hidden" : ""}" type="button" data-admin-route="${escapeAttr(targetRoute)}" data-admin-fan-index="${index}" aria-label="${escapeAttr(`${label}模块，${view.isActive ? "点击进入" : "左右滑动切换"}`)}" style="${adminFanStyle(view)}">
                   <i>${icon(iconName)}</i>
                   <span class="admin-quick-text">
                     <span>${escapeHtml(label)}</span>
@@ -9050,6 +9300,21 @@
             <span class="admin-status-pill">${escapeHtml(status)}</span>
           </div>
           <div class="admin-list">${content}</div>
+        </section>
+      `;
+    }
+
+    function adminModuleContext(title, desc) {
+      return `
+        <section class="admin-module-context">
+          <div class="admin-module-context-top">
+            <div>
+              <span>当前模块</span>
+              <h1>${escapeHtml(title)}</h1>
+            </div>
+            <button class="secondary-button" type="button" data-route="admin">${icon("back")} 返回工作台</button>
+          </div>
+          <p>${escapeHtml(desc)}</p>
         </section>
       `;
     }
@@ -9330,7 +9595,7 @@
             <div class="profile-file-card">
               <div class="profile-file-title">
                 <h2>我的借用档案</h2>
-                <button class="profile-round-link" data-route="borrow" aria-label="查看借用档案">${icon("chevron")}</button>
+                <button class="profile-round-link" data-route="borrow" aria-label="查看当前借用">${icon("chevron")}</button>
               </div>
               <div class="profile-file-panel">
                 <div class="profile-file-metrics">
@@ -9375,8 +9640,8 @@
           </section>
 
           <section class="profile-shortcuts">
-            <button class="profile-shortcut" data-route="borrow"><i>${icon("bag")}</i><strong>我的借用</strong><span>查看当前借用</span></button>
-            <button class="profile-shortcut" data-route="borrow"><i>${icon("clock")}</i><strong>历史记录</strong><span>借用与归还记录</span></button>
+            <button class="profile-shortcut" data-route="borrow"><i>${icon("bag")}</i><strong>当前借用</strong><span>正在借用</span></button>
+            <button class="profile-shortcut" data-route="borrow"><i>${icon("clock")}</i><strong>历史记录</strong><span>借还记录</span></button>
             <button class="profile-shortcut" data-route="report"><i>${icon("wrench")}</i><strong>报修/报损</strong><span>器材问题反馈</span></button>
             <button class="profile-shortcut" data-route="renew"><i>${icon("refresh")}</i><strong>续借申请</strong><span>选择器材续借</span></button>
           </section>
@@ -11263,27 +11528,35 @@
     }
 
 
+    function setAdminNfcFeedback(status, text, tone = "") {
+      state.adminNfcFeedback = { status, text, tone };
+      const statusEl = document.querySelector("#adminNfcStatus");
+      const resultEl = document.querySelector("#adminNfcResult");
+      if (statusEl) statusEl.textContent = status;
+      if (resultEl) {
+        resultEl.textContent = text;
+        resultEl.className = `admin-nfc-result${tone ? ` is-${tone}` : ""}`;
+      }
+    }
+
     async function handleAdminNfcScan(event) {
       event.preventDefault();
       const select = document.querySelector("#adminNfcEquipment");
-      const statusEl = document.querySelector("#adminNfcStatus");
-      const resultEl = document.querySelector("#adminNfcResult");
       const btn = document.querySelector("#adminNfcScanBtn");
       const equipmentId = select?.value;
       const item = byId(equipmentId);
       if (!item) {
-        if (resultEl) resultEl.textContent = "未找到对应器材";
+        setAdminNfcFeedback("失败", "未找到对应器材", "error");
         return;
       }
 
       if (!supportsNfc()) {
-        if (resultEl) resultEl.textContent = "此设备不支持 NFC，请用安卓手机 + Chrome 浏览器";
+        setAdminNfcFeedback("不可用", "此设备不支持 NFC，请用安卓手机 + Chrome 浏览器，并确认页面是 HTTPS 或 localhost。", "warn");
         return;
       }
 
       if (btn) btn.disabled = true;
-      if (statusEl) statusEl.textContent = "扫描中...";
-      if (resultEl) resultEl.textContent = "请将 NFC 标签贴到设备背面";
+      setAdminNfcFeedback("扫描中...", "请将 NFC 标签贴到手机背面，读到 UID 后会自动写入库存。");
 
       try {
         const { serialNumber } = await scanNfcTag(30000);
@@ -11301,8 +11574,7 @@
 
         if (existingIndex.has(tagId)) {
           const boundEq = byId(existingIndex.get(tagId));
-          if (resultEl) resultEl.textContent = `该标签已绑定到「${boundEq ? boundEq.name : "其他器材"}」，不能重复录入`;
-          if (statusEl) statusEl.textContent = "重复";
+          setAdminNfcFeedback("重复", `该标签已绑定到「${boundEq ? boundEq.name : "其他器材"}」，不能重复录入。`, "warn");
           return;
         }
 
@@ -11315,11 +11587,9 @@
         await updateRemoteEquipment(item);
         saveStore();
         createAdminOperationLog("NFC录入器材", "equipment", item.id, `${item.name} 新增 NFC 标签 ${tagId}，库存 +1`);
-        if (statusEl) statusEl.textContent = "成功";
-        if (resultEl) resultEl.textContent = `${item.name} 已录入 · UID: ${tagId} · 当前库存 ${item.available}/${item.total}`;
+        setAdminNfcFeedback("成功", `${item.name} 已录入 · UID: ${tagId} · 当前库存 ${item.available}/${item.total}`, "ok");
       } catch (err) {
-        if (statusEl) statusEl.textContent = "失败";
-        if (resultEl) resultEl.textContent = err.message || "NFC 扫描失败";
+        setAdminNfcFeedback("失败", err.message || "NFC 扫描失败", "error");
       } finally {
         if (btn) btn.disabled = false;
         render();

@@ -166,6 +166,96 @@ create table if not exists public.admin_operation_logs (
   created_at timestamptz not null default now()
 );
 
+create table if not exists public.venues (
+  id text primary key,
+  user_id uuid references auth.users(id) on delete set null,
+  name text not null,
+  location text not null default '',
+  open_time text not null default '全天',
+  status text not null default 'open' check (status in ('open', 'closed')),
+  created_at timestamptz not null default now(),
+  updated_at timestamptz not null default now()
+);
+
+do $$
+begin
+  if exists (
+    select 1
+    from information_schema.columns
+    where table_schema = 'public'
+      and table_name = 'venues'
+      and column_name = 'user_id'
+      and data_type <> 'uuid'
+  ) then
+    alter table public.venues alter column user_id drop not null;
+    alter table public.venues alter column user_id drop default;
+    alter table public.venues alter column user_id type uuid using nullif(user_id, '')::uuid;
+  end if;
+end;
+$$;
+
+do $$
+begin
+  if not exists (
+    select 1
+    from pg_constraint
+    where conrelid = 'public.venues'::regclass
+      and conname = 'venues_user_id_fkey'
+  ) then
+    alter table public.venues
+    add constraint venues_user_id_fkey
+    foreign key (user_id) references auth.users(id) on delete set null;
+  end if;
+end;
+$$;
+
+do $$
+begin
+  if exists (
+    select 1
+    from information_schema.columns
+    where table_schema = 'public'
+      and table_name = 'venues'
+      and column_name = 'created_at'
+      and data_type <> 'timestamp with time zone'
+  ) then
+    alter table public.venues alter column created_at drop default;
+    alter table public.venues alter column created_at type timestamptz using coalesce(nullif(created_at, '')::timestamptz, now());
+  end if;
+end;
+$$;
+
+do $$
+begin
+  if exists (
+    select 1
+    from information_schema.columns
+    where table_schema = 'public'
+      and table_name = 'venues'
+      and column_name = 'updated_at'
+      and data_type <> 'timestamp with time zone'
+  ) then
+    alter table public.venues alter column updated_at drop default;
+    alter table public.venues alter column updated_at type timestamptz using coalesce(nullif(updated_at, '')::timestamptz, now());
+  end if;
+end;
+$$;
+
+alter table public.venues
+alter column location set default '',
+alter column open_time set default '全天',
+alter column status set default 'open',
+alter column created_at set default now(),
+alter column updated_at set default now(),
+alter column created_at set not null,
+alter column updated_at set not null;
+
+alter table public.venues
+drop constraint if exists venues_status_check;
+
+alter table public.venues
+add constraint venues_status_check check (status in ('open', 'closed'));
+
 create index if not exists loans_user_id_idx on public.loans (user_id);
 create index if not exists loans_equipment_id_idx on public.loans (equipment_id);
 create index if not exists loans_batch_request_id_idx on public.loans (batch_request_id);
@@ -181,6 +271,9 @@ create index if not exists work_orders_loan_id_idx on public.work_orders (loan_i
 create index if not exists work_orders_status_idx on public.work_orders (status);
 create index if not exists machine_sync_logs_created_at_idx on public.machine_sync_logs (created_at desc);
 create index if not exists admin_operation_logs_created_at_idx on public.admin_operation_logs (created_at desc);
+create index if not exists venues_status_idx on public.venues (status);
+drop index if exists public.venues_name_idx;
+create unique index if not exists venues_name_unique_idx on public.venues (name);
 
 create or replace function public.set_updated_at()
 returns trigger
@@ -223,6 +316,11 @@ create trigger work_orders_set_updated_at
 before update on public.work_orders
 for each row execute function public.set_updated_at();
 
+drop trigger if exists venues_set_updated_at on public.venues;
+create trigger venues_set_updated_at
+before update on public.venues
+for each row execute function public.set_updated_at();
+
 create or replace function public.is_admin()
 returns boolean
 language sql
@@ -237,6 +335,8 @@ as $$
 $$;
 
 grant usage on schema public to authenticated;
+revoke execute on function public.is_admin() from public;
+revoke execute on function public.is_admin() from anon;
 grant execute on function public.is_admin() to authenticated;
 grant select on public.admin_users to authenticated;
 grant select, insert, update on public.student_profiles to authenticated;
@@ -248,6 +348,11 @@ grant select, insert, update on public.admin_contacts to authenticated;
 grant select, insert, update on public.work_orders to authenticated;
 grant select, insert on public.machine_sync_logs to authenticated;
 grant select, insert on public.admin_operation_logs to authenticated;
+revoke all on public.venues from public;
+revoke all on public.venues from anon;
+revoke all on public.venues from authenticated;
+grant select, insert, update, delete on public.venues to authenticated;
+grant select, insert, update, delete on public.venues to service_role;
 
 alter table public.admin_users enable row level security;
 alter table public.student_profiles enable row level security;
@@ -259,6 +364,7 @@ alter table public.admin_contacts enable row level security;
 alter table public.work_orders enable row level security;
 alter table public.machine_sync_logs enable row level security;
 alter table public.admin_operation_logs enable row level security;
+alter table public.venues enable row level security;
 
 drop policy if exists admin_users_select_self on public.admin_users;
 create policy admin_users_select_self on public.admin_users
@@ -397,19 +503,44 @@ create policy admin_operation_logs_admin_insert on public.admin_operation_logs
 for insert to authenticated
 with check ((select public.is_admin()));
 
--- 场馆管理
-create table if not exists public.venues (
-  id text primary key,
-  user_id text not null,
-  name text not null,
-  location text not null default '',
-  open_time text not null default '全天',
-  status text not null default 'open' check (status in ('open','closed')),
-  created_at text not null default '',
-  updated_at text not null default ''
-);
-
-alter table public.venues enable row level security;
-
 drop policy if exists "venues_full_access" on public.venues;
-create policy "venues_full_access" on public.venues for all using (true) with check (true);
+drop policy if exists venues_authenticated_select on public.venues;
+create policy venues_authenticated_select on public.venues
+for select to authenticated
+using ((select public.is_admin()));
+
+drop policy if exists venues_admin_insert on public.venues;
+create policy venues_admin_insert on public.venues
+for insert to authenticated
+with check ((select public.is_admin()) and user_id = (select auth.uid()));
+
+drop policy if exists venues_admin_update on public.venues;
+create policy venues_admin_update on public.venues
+for update to authenticated
+using ((select public.is_admin()))
+with check ((select public.is_admin()));
+
+drop policy if exists venues_admin_delete on public.venues;
+create policy venues_admin_delete on public.venues
+for delete to authenticated
+using ((select public.is_admin()));
+
+insert into public.venues (id, user_id, name, location, open_time, status)
+select
+  'venue_' || substr(md5(source.name), 1, 12),
+  (select user_id from public.admin_users order by created_at limit 1),
+  source.name,
+  '',
+  '全天',
+  'open'
+from (
+  select distinct venue as name
+  from public.equipment
+  where coalesce(venue, '') <> ''
+) source
+where not exists (
+  select 1
+  from public.venues existing
+  where existing.name = source.name
+)
+on conflict (id) do nothing;

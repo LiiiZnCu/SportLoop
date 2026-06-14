@@ -6856,7 +6856,6 @@
       if (store.authUserId !== user.id || isSeedDemoProfile(store.profile)) resetAccountScopedStore(user.id);
       try {
         await loadRemoteStore();
-        await fetchRemoteVenues();
       } catch (error) {
         reportRemoteSyncError(error);
       }
@@ -6886,7 +6885,7 @@
       if (!authSession?.accessToken) return;
       await refreshAdminAccess();
 
-      const [equipmentRows, profileRows, loanRows, messageRows, contactRows, orderRows, batchRows, syncLogRows, operationLogRows] = await Promise.all([
+      const [equipmentRows, profileRows, loanRows, messageRows, contactRows, orderRows, batchRows, syncLogRows, operationLogRows, venueRows] = await Promise.all([
         supabaseRequest("equipment?select=*&order=name.asc"),
         supabaseRequest(`student_profiles?select=*&user_id=eq.${authSession.userId}`),
         supabaseRequest("loans?select=*&order=created_at.desc"),
@@ -6896,6 +6895,7 @@
         supabaseRequest("batch_borrow_requests?select=*&order=created_at.desc"),
         supabaseRequest("machine_sync_logs?select=*&order=created_at.desc&limit=40"),
         supabaseRequest("admin_operation_logs?select=*&order=created_at.desc&limit=60"),
+        supabaseRequest("venues?select=*&order=name.asc"),
       ]);
 
       store.equipment = equipmentRows.map(dbEquipmentToLocal);
@@ -6909,6 +6909,7 @@
       store.batchRequests = batchRows.map(dbBatchRequestToLocal);
       store.machineSyncLogs = syncLogRows.map(dbMachineSyncLogToLocal);
       store.adminOperationLogs = operationLogRows.map(dbAdminOperationLogToLocal);
+      store.venues = venueRows.map(dbVenueToLocal);
       saveStore();
     }
 
@@ -8962,56 +8963,44 @@
 
 
     // ===== 场馆 Supabase CRUD =====
+    function dbVenueToLocal(row) {
+      return {
+        id: row.id,
+        name: row.name,
+        location: row.location || "",
+        openTime: row.open_time || "全天",
+        status: row.status === "closed" ? "closed" : "open",
+      };
+    }
+
     async function fetchRemoteVenues() {
       if (!authSession?.accessToken) return;
-      try {
-        const data = await supabaseRequest("venues?select=*&user_id=eq." + encodeURIComponent(authSession.userId));
-        if (Array.isArray(data)) {
-          store.venues = data.map((row) => ({
-            id: row.id,
-            name: row.name,
-            location: row.location || "",
-            openTime: row.open_time || "全天",
-            status: row.status || "open",
-          }));
-          saveStore();
-        }
-      } catch (error) {
-        reportRemoteSyncError(error);
-      }
+      const data = await supabaseRequest("venues?select=*&order=name.asc");
+      store.venues = Array.isArray(data) ? data.map(dbVenueToLocal) : [];
+      saveStore();
+      return store.venues;
     }
 
     async function saveRemoteVenue(venue) {
       if (!authSession?.accessToken) return;
-      try {
-        const payload = {
-          id: venue.id,
-          user_id: authSession.userId,
-          name: venue.name,
-          location: venue.location || "",
-          open_time: venue.openTime || "全天",
-          status: venue.status || "open",
-          updated_at: new Date().toISOString(),
-        };
-        const exists = await supabaseRequest("venues?id=eq." + encodeURIComponent(venue.id) + "&select=id");
-        if (Array.isArray(exists) && exists.length > 0) {
-          await supabaseRequest("venues?id=eq." + encodeURIComponent(venue.id), { method: "PATCH", body: payload });
-        } else {
-          payload.created_at = new Date().toISOString();
-          await supabaseRequest("venues", { method: "POST", body: payload });
-        }
-      } catch (error) {
-        reportRemoteSyncError(error);
-      }
+      const payload = {
+        id: venue.id,
+        user_id: authSession.userId,
+        name: venue.name,
+        location: venue.location || "",
+        open_time: venue.openTime || "全天",
+        status: venue.status || "open",
+      };
+      return supabaseRequest("venues?on_conflict=id", {
+        method: "POST",
+        headers: { Prefer: "resolution=merge-duplicates,return=representation" },
+        body: payload,
+      });
     }
 
     async function deleteRemoteVenue(venueId) {
       if (!authSession?.accessToken) return;
-      try {
-        await supabaseRequest("venues?id=eq." + encodeURIComponent(venueId), { method: "DELETE" });
-      } catch (error) {
-        reportRemoteSyncError(error);
-      }
+      return supabaseRequest("venues?id=eq." + encodeURIComponent(venueId), { method: "DELETE" });
     }
 
     // ===== 场馆管理 UI =====
@@ -9086,7 +9075,7 @@
     }
 
     // ===== 场馆操作 Handlers =====
-    function handleAdminVenueAdd(event) {
+    async function handleAdminVenueAdd(event) {
       event.preventDefault();
       const id = document.querySelector("#adminVenueId").value.trim();
       const name = document.querySelector("#adminVenueName").value.trim();
@@ -9095,17 +9084,24 @@
       const status = document.querySelector("#adminVenueStatus").value;
       if (!name) { state.notice = "请输入场馆名称"; render(); return; }
       if (!Array.isArray(store.venues)) store.venues = [];
+      if (store.venues.some((v) => v.id !== id && v.name === name)) { state.notice = "场馆已存在"; render(); return; }
       const venue = { id: id || "v" + makeUuid().slice(0, 8), name, location, openTime, status };
-      if (id) {
-        const idx = store.venues.findIndex((v) => v.id === id);
-        if (idx >= 0) { store.venues[idx] = venue; }
-      } else {
-        store.venues.push(venue);
+      try {
+        const savedRows = await saveRemoteVenue(venue);
+        const savedVenue = Array.isArray(savedRows) && savedRows[0] ? dbVenueToLocal(savedRows[0]) : venue;
+        const idx = store.venues.findIndex((v) => v.id === savedVenue.id);
+        if (idx >= 0) {
+          store.venues[idx] = savedVenue;
+        } else {
+          store.venues.push(savedVenue);
+        }
+        saveStore();
+        state.notice = id ? "已更新场馆：" + name : "已添加场馆：" + name;
+        document.querySelector("#adminVenueForm").style.display = "none";
+      } catch (error) {
+        reportRemoteSyncError(error);
+        state.notice = error.message || "场馆保存失败";
       }
-      saveStore();
-      saveRemoteVenue(venue);
-      state.notice = id ? "已更新场馆：" + name : "已添加场馆：" + name;
-      document.querySelector("#adminVenueForm").style.display = "none";
       render();
     }
 
@@ -9125,11 +9121,16 @@
     function handleAdminVenueDelete(venueId) {
       const venue = (store.venues || []).find((v) => v.id === venueId);
       if (!venue) return;
-      showConfirm("确定要删除场馆「" + venue.name + "」吗？此操作不可撤销。", () => {
-        store.venues = store.venues.filter((v) => v.id !== venueId);
-        saveStore();
-        deleteRemoteVenue(venueId);
-        state.notice = "已删除场馆：" + venue.name;
+      showConfirm("确定要删除场馆「" + venue.name + "」吗？此操作不可撤销。", async () => {
+        try {
+          await deleteRemoteVenue(venueId);
+          store.venues = store.venues.filter((v) => v.id !== venueId);
+          saveStore();
+          state.notice = "已删除场馆：" + venue.name;
+        } catch (error) {
+          reportRemoteSyncError(error);
+          state.notice = error.message || "场馆删除失败";
+        }
         render();
       }, "删除");
     }
