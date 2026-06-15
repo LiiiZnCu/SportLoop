@@ -8637,7 +8637,7 @@
       }
       const locked = !!loan;
       const equipField = locked
-        ? `<div class="field"><span>问题器材</span><div class="locked-equip">${item.name} · ${item.assetId}</div><input type="hidden" id="reportEquipment" value="${item.id}" /></div>`
+        ? `<div class="field"><span>问题器材</span><div class="locked-equip">${item.name} · ${item.assetId}</div><input type="hidden" id="reportEquipment" value="${item.id}" /><input type="hidden" id="reportLoan" value="${loan.id}" /></div>`
         : `<label class="field"><span>问题器材</span><select id="reportEquipment">${reportableEquipment.map((eq) => `<option value="${eq.id}" ${eq.id === item.id ? "selected" : ""}>${eq.name} · ${eq.assetId}</option>`).join("")}</select></label>`;
       const body = `
         <main class="scroll">
@@ -10309,6 +10309,19 @@
       createRemoteWorkOrder(order);
     }
 
+    function completeLinkedAbnormalLoan(order) {
+      if (!order.loanId) return null;
+      const loan = loanById(order.loanId);
+      if (!loan || loan.status !== "异常待归还") return null;
+      const returnedAtMs = loan.returnedAtMs || Date.now();
+      loan.status = "异常已归还";
+      loan.returnedAtMs = returnedAtMs;
+      loan.returnedAt = formatDateTime(returnedAtMs);
+      loan.returnedOnTime = Number.isFinite(Number(loan.dueAtMs)) ? returnedAtMs <= Number(loan.dueAtMs) : null;
+      loan.returnMachineAllowed = false;
+      return loan;
+    }
+
     function updateOrder(orderId, status) {
       const order = store.workOrders.find((item) => item.id === orderId);
       if (!order) return;
@@ -10319,6 +10332,7 @@
         return;
       }
       order.status = status;
+      let linkedLoan = null;
       if (status === "暂停借出") item.status = "异常待确认";
       if (status === "维修中") item.status = "维修中";
       if (status === "已完成") {
@@ -10327,14 +10341,17 @@
           item.available = Math.min(item.total, item.available + 1);
           order.restored = true;
         }
+        linkedLoan = completeLinkedAbnormalLoan(order);
         pushMessage("报修已完成", `${item.name} 已维修完成，恢复可借。`);
       }
       saveStore();
       saveRemoteWorkOrder(order);
       saveRemoteEquipment(item);
+      if (linkedLoan) saveRemoteLoan(linkedLoan);
       createAdminOperationLog("更新报修工单", "work_orders", order.id, `${item.name} 更新为 ${status}`, {
         equipmentId: item.id,
         assetId: item.assetId,
+        loanId: order.loanId || "",
       });
       state.notice = `工单已更新为：${status}`;
       render();
@@ -12135,7 +12152,8 @@
           const eqId = document.querySelector("#reportEquipment").value;
           const repType = document.querySelector("#reportType").value;
           const repDesc = document.querySelector("#reportDesc").value;
-          createOrder(eqId, "手机端自主报备", repType + " (" + repDesc + ")");
+          const loanId = document.querySelector("#reportLoan")?.value || "";
+          createOrder(eqId, "手机端自主报备", repType + " (" + repDesc + ")", loanId);
           state.notice = "故障工单已同步到管理员端！";
           finishWithButtonFeedback(e.submitter, "已提交", () => route("home"));
         });
