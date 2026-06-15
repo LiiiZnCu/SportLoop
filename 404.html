@@ -10291,8 +10291,8 @@
     }
 
     function createOrder(equipmentId, source, title, loanId = "") {
-      const exists = store.workOrders.some((order) => order.loanId === loanId && loanId);
-      if (exists) return;
+      const existingOpenOrder = store.workOrders.find((order) => order.loanId === loanId && loanId && order.status !== "已完成");
+      if (existingOpenOrder) return null;
       const order = {
         id: makeUuid(),
         userId: state.currentUserId,
@@ -10307,6 +10307,7 @@
       store.workOrders.unshift(order);
       saveStore();
       createRemoteWorkOrder(order);
+      return order;
     }
 
     function completeLinkedAbnormalLoan(order) {
@@ -12153,8 +12154,8 @@
           const repType = document.querySelector("#reportType").value;
           const repDesc = document.querySelector("#reportDesc").value;
           const loanId = document.querySelector("#reportLoan")?.value || "";
-          createOrder(eqId, "手机端自主报备", repType + " (" + repDesc + ")", loanId);
-          state.notice = "故障工单已同步到管理员端！";
+          const order = createOrder(eqId, "手机端自主报备", repType + " (" + repDesc + ")", loanId);
+          state.notice = order ? "故障工单已同步到管理员端！" : "这条问题已在管理员端待处理，请等待处理";
           finishWithButtonFeedback(e.submitter, "已提交", () => route("home"));
         });
       }
